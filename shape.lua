@@ -541,12 +541,13 @@ function dome(type, radius)
 end
 writeOut("Shape Maker 1.1. Created by Michiel using a bit of Vliekkie's code")
 writeOut("Fixed and made readable by Aeolun ;)")
+writeOut("Additional Fixes and moved to GitHub by Keridos/Git Hub Commits");
 writeOut("");
 writeOut("What should be built?")
 writeOut("+---------+-----------+-------+-------+")
 writeOut("| line    | rectangle | wall  | room  |")
 writeOut("| square  | platform  | stair | dome  |")
-writeOut("| pyramid | cylinder  | circle|       |")
+writeOut("| pyramid | cylinder  | circle| sphere|")
 writeOut("+---------+-----------+-------+-------+")
 writeOut("")
 
@@ -649,12 +650,14 @@ if choice == "room" then
 		turnLeftTrack()
 	end
 	turnAroundTrack()
+	
 	if ((ch % 2)==0) then
+		-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
 		turnLeftTrack()
 	end
 	for i = 1, hi-2 do
 		safeUp()
-		if ((ch % 2)==0) then
+		if ((ch % 2)==0) then -- this aswell
 		rectangle(cl, ch)
 		else
 		rectangle(ch, cl)
