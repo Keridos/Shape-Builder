@@ -9,6 +9,7 @@ facing = 0
 function writeOut(message)
   print(message)
 end
+
 function checkResources()
 	while turtle.getItemCount(activeslot) <= 0 do
 		if activeslot == 16 then
@@ -24,6 +25,7 @@ function checkResources()
 		os.sleep(0.2)
 	end
 end
+
 function checkFuel()
 	if (not(tonumber(turtle.getFuelLevel()) == nil)) then
 		while turtle.getFuelLevel() < 50 do
@@ -33,6 +35,7 @@ function checkFuel()
 		end
 	end
 end
+
 function placeBlock()
 	-- Cost calculation mode - don't move
 	blocks = blocks + 1
@@ -48,6 +51,7 @@ function placeBlock()
 
 	turtle.placeDown()
 end
+
 -- Navigation features
 -- allow the turtle to move while tracking its position
 -- this allows us to just give a destination point and have it go there
@@ -75,10 +79,12 @@ function turnLeftTrack()
 		facing = 3
 	end
 end
+
 function turnAroundTrack()
 	turnLeftTrack()
 	turnLeftTrack()
 end
+
 function safeForward()
 	fuel = fuel + 1
 	if cost_only then
@@ -238,6 +244,9 @@ function navigateTo(targetx, targety)
 		moveY(targety)
 	end
 end
+
+-- Shape Building Routines
+
 function line(length)
 	if length <= 0 then
 		error("Error, length can not be 0")
@@ -250,6 +259,7 @@ function line(length)
 		end
 	end
 end
+
 function rectangle(depth, width)
 	if depth <= 0 then
 		error("Error, depth can not be 0")
@@ -264,9 +274,11 @@ function rectangle(depth, width)
 		turnRightTrack()
 	end
 end
+
 function square(width)
 	rectangle(width, width)
 end
+
 function wall(length, height)
 	turnRightTrack()
 	local i
@@ -285,6 +297,7 @@ function wall(length, height)
 	end
 	turnLeftTrack()
 end
+
 function platform(x, y)
 	local forward = true
 	for cy = 0, y-1 do
@@ -303,6 +316,7 @@ function platform(x, y)
 		end
 	end
 end
+
 function stair(width, height)
 	turnRightTrack()
 	local cx=1
@@ -334,6 +348,7 @@ function stair(width, height)
 		end
 	end
 end
+
 function circle(radius)
 	radius = tonumber(radius)
 
@@ -431,6 +446,7 @@ function circle(radius)
 		turnLeftTrack()
 	end
 end
+
 function dome(type, radius)
 	type = type
 	radius = tonumber(radius)
@@ -446,9 +462,6 @@ function dome(type, radius)
 		zstart = radius
 	elseif type == "sphere" then
 		zstart = 0
-	else
-		print("Usage: sdbuild <shape> <radius> [-c]")
-		os.exit(1)
 	end
 	zend = width - 1
 
@@ -541,6 +554,7 @@ function dome(type, radius)
 	end
 
 end
+
 writeOut("Shape Maker 1.1. Created by Michiel using a bit of Vliekkie's code")
 writeOut("Fixed and made readable by Aeolun ;)")
 writeOut("Additional Fixes and moved to GitHub by Keridos/Git Hub Commits");
@@ -560,7 +574,6 @@ local yes = io.read()
 if yes == 'y' then
 	cost_only = true
 end
-
 if not cost_only then
 	turtle.select(1)
 	activeslot = 1
@@ -646,13 +659,11 @@ if choice == "room" then
 	if ch < 3 then
 		ch = 3
 	end
-
 	platform(cl, ch)
 	while (facing > 0) do
 		turnLeftTrack()
 	end
 	turnAroundTrack()
-	
 	if ((ch % 2)==0) then
 		-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
 		turnLeftTrack()
@@ -713,8 +724,6 @@ if choice == "pyramid" then
 	else
 		hollow = false
 	end
-
-
 	height = math.ceil(width / 2)
 	for i = 1, height do
 		if hollow then
