@@ -25,10 +25,12 @@ function checkResources()
 	end
 end
 function checkFuel()
-	while turtle.getFuelLevel() < 50 do
-		writeOut("Turtle almost out of fuel, pausing. Please drop fuel in inventory. And press enter.")
-		io.read()
-		turtle.refuel()
+	if (not(tonumber(turtle.getFuelLevel()) == nil)) then
+		while turtle.getFuelLevel() < 50 do
+			writeOut("Turtle almost out of fuel, pausing. Please drop fuel in inventory. And press enter.")
+			io.read()
+			turtle.refuel()
+		end
 	end
 end
 function placeBlock()
