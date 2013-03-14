@@ -351,24 +351,15 @@ end
 
 function circle(radius)
 	radius = tonumber(radius)
-
-	-- Main dome and sphere building routine
-
 	width = radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
 	boundary_radius = radius + 1.0
 	boundary2 = boundary_radius ^ 2
-
 	zstart = radius
-
-	-- This loop is for each vertical layer through the sphere or dome.
 	for z = zstart,zstart do
-		--writeOut("Layer " .. z)
 		cz2 = (radius - z) ^ 2
-
 		limit_offset_y = (boundary2 - cz2) ^ 0.5
 		max_offset_y = math.ceil(limit_offset_y)
-
 		-- We do first the +x side, then the -x side to make movement efficient
 		for side = 0,1 do
 			-- On the right we go from small y to large y, on the left reversed
@@ -385,10 +376,7 @@ function circle(radius)
 
 			for y = ystart,yend,ystep do
 				cy2 = (radius - y) ^ 2
-
 				remainder2 = (boundary2 - cz2 - cy2)
-
-
 				if remainder2 >= 0 then
 					-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
 					max_offset_x = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
@@ -438,7 +426,6 @@ function circle(radius)
 			end
 		end
 	end
-
 	-- Return to where we started in x,y place and turn to face original direction
 	-- Don't change vertical place though - should be solid under us!
 	navigateTo(0, 0)
@@ -450,21 +437,17 @@ end
 function dome(type, radius)
 	type = type
 	radius = tonumber(radius)
-
 	-- Main dome and sphere building routine
-
 	width = radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
 	boundary_radius = radius + 1.0
 	boundary2 = boundary_radius ^ 2
-
 	if type == "dome" then
 		zstart = radius
 	elseif type == "sphere" then
 		zstart = 0
 	end
 	zend = width - 1
-
 	-- This loop is for each vertical layer through the sphere or dome.
 	for z = zstart,zend do
 		if not cost_only and z ~= zstart then
@@ -472,10 +455,8 @@ function dome(type, radius)
 		end
 		--writeOut("Layer " .. z)
 		cz2 = (radius - z) ^ 2
-
 		limit_offset_y = (boundary2 - cz2) ^ 0.5
 		max_offset_y = math.ceil(limit_offset_y)
-
 		-- We do first the +x side, then the -x side to make movement efficient
 		for side = 0,1 do
 			-- On the right we go from small y to large y, on the left reversed
@@ -492,10 +473,7 @@ function dome(type, radius)
 
 			for y = ystart,yend,ystep do
 				cy2 = (radius - y) ^ 2
-
 				remainder2 = (boundary2 - cz2 - cy2)
-
-
 				if remainder2 >= 0 then
 					-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
 					max_offset_x = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
@@ -510,7 +488,6 @@ function dome(type, radius)
 						xstart = radius - max_offset_x
 						xend = radius - 1
 					end
-
 					-- Reverse direction we traverse xs when in -y side
 					if y > radius then
 						temp = xstart
@@ -545,7 +522,6 @@ function dome(type, radius)
 			end
 		end
 	end
-
 	-- Return to where we started in x,y place and turn to face original direction
 	-- Don't change vertical place though - should be solid under us!
 	navigateTo(0, 0)
@@ -555,196 +531,204 @@ function dome(type, radius)
 
 end
 
-writeOut("Shape Maker 1.1. Created by Michiel using a bit of Vliekkie's code")
-writeOut("Fixed and made readable by Aeolun ;)")
-writeOut("Additional Fixes and moved to GitHub by Keridos/Git Hub Commits");
-writeOut("");
-writeOut("What should be built?")
-writeOut("+---------+-----------+-------+-------+")
-writeOut("| line    | rectangle | wall  | room  |")
-writeOut("| square  | platform  | stair | dome  |")
-writeOut("| pyramid | cylinder  | circle| sphere|")
-writeOut("+---------+-----------+-------+-------+")
-writeOut("")
+function WriteMenu()
+	writeOut("Shape Maker 1.3 Created by Michiel using a bit of Vliekkie's code")
+	writeOut("Fixed and made readable by Aeolun/Keridos ;)")
+	writeOut("Moved to GitHub by Keridos");
+	writeOut("What should be built?")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("| line    | rectangle | wall  | room  |")
+	writeOut("| square  | platform  | stair | dome  |")
+	writeOut("| pyramid | cylinder  | circle| sphere|")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("")
+end
 
-local choice = io.read()
-writeOut("Building a "..choice)
-writeOut("Want to just calculate the cost? [y/n]")
-local yes = io.read()
-if yes == 'y' then
-	cost_only = true
-end
-if not cost_only then
-	turtle.select(1)
-	activeslot = 1
-	if turtle.getItemCount(activeslot) == 0 then
-		writeOut("Please put building blocks in the first slot (and more if you need them)")
-		while turtle.getItemCount(activeslot) == 0 do
-			os.sleep(2)
-		end
+function Choicefunct()
+	local choice = io.read()
+	writeOut("Building a "..choice)
+	writeOut("Want to just calculate the cost? [y/n]")
+	local yes = io.read()
+	if yes == 'y' then
+		cost_only = true
 	end
-end
-if choice == "rectangle" then -- fixed
-	writeOut("How deep do you want it to be?")
-	h = io.read()
-	h = tonumber(h)
-	writeOut("How wide do you want it to be?")
-	v = io.read()
-	v = tonumber(v)
-	rectangle(h, v)
-end
-if choice == "square" then --fixed
-	writeOut("How long does it need to be?")
-	local s = io.read()
-	s = tonumber(s)
-	square(s)
-end
-if choice == "line" then --fixed
-	writeOut("How long does the line need to be?")
-	local ll = io.read()
-	ll = tonumber(ll)
-	line(ll)
-end
-if choice == "wall" then --fixed
-	writeOut("How long does it need to be?")
-	local wl = io.read()
-	wl = tonumber(wl)
-	writeOut("How high does it need to be?")
-	local wh = io.read()
-	wh = tonumber(wh)
-	if  wh <= 0 then
-		error("Error, the height can not be zero")
-	end
-	if wl <= 0 then
-		error("Error, the length can not be 0")
-	end
-	wall(wl, wh)
-end
-if choice == "platform" then
-	writeOut("How wide do you want it to be?")
-	x = io.read()
-	x = tonumber(x)
-	writeOut("How long do you want it to be?")
-	y = io.read()
-	y = tonumber(y)
-	platform(x, y)
-	writeOut("Done")
-end
-if choice == "stair" then --fixed
-	writeOut("How wide do you want it to be?")
-	x = io.read()
-	x = tonumber(x)
-	writeOut("How high do you want it to be?")
-	y = io.read()
-	y = tonumber(y)
-	stair(x, y)
-	writeOut("Done")
-end
-if choice == "room" then
-	writeOut("How deep does it need to be?")
-	local cl = io.read()
-	cl = tonumber(cl)
-	writeOut("How wide does it need to be?")
-	local ch = io.read()
-	ch = tonumber(ch)
-	writeOut("How high does it need to be?")
-	local hi = io.read()
-	hi = tonumber(hi)
-	if hi < 3 then
-		hi = 3
-	end
-	if cl < 3 then
-		cl = 3
-	end
-	if ch < 3 then
-		ch = 3
-	end
-	platform(cl, ch)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
-	turnAroundTrack()
-	if ((ch % 2)==0) then
-		-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
-		turnLeftTrack()
-	end
-	for i = 1, hi-2 do
-		safeUp()
-		if ((ch % 2)==0) then -- this aswell
-		rectangle(cl, ch)
-		else
-		rectangle(ch, cl)
-		end
-	end
-	safeUp()
-	platform(cl, ch)
-end
-if choice == "dome" then
-	writeOut("What radius do you need it to be?")
-	local rad = io.read()
-	rad = tonumber(rad)
-	dome("dome", rad)
-end
-if choice == "sphere" then
-	writeOut("What radius do you need it to be?")
-	local rad = io.read()
-	rad = tonumber(rad)
-	dome("sphere", rad)
-end
-if choice == "circle" then
-	writeOut("What radius do you need it to be?")
-	local rad = io.read()
-	rad = tonumber(rad)
-	circle(rad)
-end
-if choice == "cylinder" then
-	writeOut("What radius do you need it to be?")
-	local rad = io.read()
-	rad = tonumber(rad)
-	writeOut("What height do you need it to be?")
-	local height = io.read()
-	height = tonumber(height)
-
-	for i = 1, height do
-		circle(rad)
-		safeUp()
-	end
-	for i = 1, height do
-		safeDown()
-	end
-end
-if choice == "pyramid" then
-	writeOut("What width/depth do you need it to be?")
-	local width = io.read()
-	width = tonumber(width)
-	writeOut("Do you want it to be hollow [y/n]?")
-	local hollow = io.read()
-	if hollow == 'y' then
-		hollow = true
-	else
-		hollow = false
-	end
-	height = math.ceil(width / 2)
-	for i = 1, height do
-		if hollow then
-			rectangle(width, width)
-		else
-			platform(width, width)
-			navigateTo(0,0)
-			while facing ~= 0 do
-				turnRightTrack()
+	if not cost_only then
+		turtle.select(1)
+		activeslot = 1
+		if turtle.getItemCount(activeslot) == 0 then
+			writeOut("Please put building blocks in the first slot (and more if you need them)")
+			while turtle.getItemCount(activeslot) == 0 do
+				os.sleep(2)
 			end
 		end
-		if i ~= height then
-			safeUp()
-			safeForward()
-			turnRightTrack()
-			safeForward()
+	end
+	if choice == "rectangle" then -- fixed
+		writeOut("How deep do you want it to be?")
+		h = io.read()
+		h = tonumber(h)
+		writeOut("How wide do you want it to be?")
+		v = io.read()
+		v = tonumber(v)
+		rectangle(h, v)
+	end
+	if choice == "square" then --fixed
+		writeOut("How long does it need to be?")
+		local s = io.read()
+		s = tonumber(s)
+		square(s)
+	end
+	if choice == "line" then --fixed
+		writeOut("How long does the line need to be?")
+		local ll = io.read()
+		ll = tonumber(ll)
+		line(ll)
+	end
+	if choice == "wall" then --fixed
+		writeOut("How long does it need to be?")
+		local wl = io.read()
+		wl = tonumber(wl)
+		writeOut("How high does it need to be?")
+		local wh = io.read()
+		wh = tonumber(wh)
+		if  wh <= 0 then
+			error("Error, the height can not be zero")
+		end
+		if wl <= 0 then
+			error("Error, the length can not be 0")
+		end
+		wall(wl, wh)
+	end
+	if choice == "platform" then
+		writeOut("How wide do you want it to be?")
+		x = io.read()
+		x = tonumber(x)
+		writeOut("How long do you want it to be?")
+		y = io.read()
+		y = tonumber(y)
+		platform(x, y)
+		writeOut("Done")
+	end
+	if choice == "stair" then --fixed
+		writeOut("How wide do you want it to be?")
+		x = io.read()
+		x = tonumber(x)
+		writeOut("How high do you want it to be?")
+		y = io.read()
+		y = tonumber(y)
+		stair(x, y)
+		writeOut("Done")
+	end
+	if choice == "room" then
+		writeOut("How deep does it need to be?")
+		local cl = io.read()
+		cl = tonumber(cl)
+		writeOut("How wide does it need to be?")
+		local ch = io.read()
+		ch = tonumber(ch)
+		writeOut("How high does it need to be?")
+		local hi = io.read()
+		hi = tonumber(hi)
+		if hi < 3 then
+			hi = 3
+		end
+		if cl < 3 then
+			cl = 3
+		end
+		if ch < 3 then
+			ch = 3
+		end
+		platform(cl, ch)
+		while (facing > 0) do
 			turnLeftTrack()
-			width = width - 2
+		end
+		turnAroundTrack()
+		if ((ch % 2)==0) then
+			-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
+			turnLeftTrack()
+		end
+		for i = 1, hi-2 do
+			safeUp()
+			if ((ch % 2)==0) then -- this aswell
+			rectangle(cl, ch)
+			else
+			rectangle(ch, cl)
+			end
+		end
+		safeUp()
+		platform(cl, ch)
+	end
+	if choice == "dome" then
+		writeOut("What radius do you need it to be?")
+		local rad = io.read()
+		rad = tonumber(rad)
+		dome("dome", rad)
+	end
+	if choice == "sphere" then
+		writeOut("What radius do you need it to be?")
+		local rad = io.read()
+		rad = tonumber(rad)
+		dome("sphere", rad)
+	end
+	if choice == "circle" then
+		writeOut("What radius do you need it to be?")
+		local rad = io.read()
+		rad = tonumber(rad)
+		circle(rad)
+	end
+	if choice == "cylinder" then
+		writeOut("What radius do you need it to be?")
+		local rad = io.read()
+		rad = tonumber(rad)
+		writeOut("What height do you need it to be?")
+		local height = io.read()
+		height = tonumber(height)
+		for i = 1, height do
+			circle(rad)
+			safeUp()
+		end
+		for i = 1, height do
+			safeDown()
+		end
+	end
+	if choice == "pyramid" then
+		writeOut("What width/depth do you need it to be?")
+		local width = io.read()
+		width = tonumber(width)
+		writeOut("Do you want it to be hollow [y/n]?")
+		local hollow = io.read()
+		if hollow == 'y' then
+			hollow = true
+		else
+			hollow = false
+		end
+		height = math.ceil(width / 2)
+		for i = 1, height do
+			if hollow then
+				rectangle(width, width)
+			else
+				platform(width, width)
+				navigateTo(0,0)
+				while facing ~= 0 do
+					turnRightTrack()
+				end
+			end
+			if i ~= height then
+				safeUp()
+				safeForward()
+				turnRightTrack()
+				safeForward()
+				turnLeftTrack()
+				width = width - 2
+			end
 		end
 	end
 end
 
-print("Blocks used: " .. blocks)
-print("Fuel used: " .. fuel)
+function main()
+	WriteMenu()
+	Choicefunct()
+	print("Blocks used: " .. blocks)
+	print("Fuel used: " .. fuel)
+end
+
+main()
