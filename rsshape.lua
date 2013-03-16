@@ -18,7 +18,7 @@ function wraprsmodule()
 	else
 		writeOut("Please use a Resupply Turtle for this Program. Enter to leave.")
 		io.read()
-		exit()
+		error()
 	end
 	rs=peripheral.wrap(side)
 end
