@@ -524,19 +524,6 @@ function dome(type, radius)
 
 end
 
-function WriteMenu()
-	writeOut("Shape Maker 1.3 Created by Michiel using a bit of Vliekkie's code")
-	writeOut("Fixed and made readable by Aeolun/Keridos ;)")
-	writeOut("Moved to GitHub by Keridos");
-	writeOut("What should be built?")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| line    | rectangle | wall  | room  |")
-	writeOut("| square  | platform  | stair | dome  |")
-	writeOut("| pyramid | cylinder  | circle| sphere|")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("")
-end
-
 function Choicefunct()
 	local choice = io.read()
 	writeOut("Building a "..choice)
@@ -715,6 +702,19 @@ function Choicefunct()
 			end
 		end
 	end
+end
+
+function WriteMenu()
+	writeOut("Shape Maker 1.3 Created by Michiel using a bit of Vliekkie's code")
+	writeOut("Fixed and made readable by Aeolun/Keridos ;)")
+	writeOut("Moved to GitHub by Keridos");
+	writeOut("What should be built?")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("| line    | rectangle | wall  | room  |")
+	writeOut("| square  | platform  | stair | dome  |")
+	writeOut("| pyramid | cylinder  | circle| sphere|")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("")
 end
 
 function main()
