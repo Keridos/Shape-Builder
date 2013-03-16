@@ -355,70 +355,64 @@ function circle(radius)
 	sqrt3 = 3 ^ 0.5
 	boundary_radius = radius + 1.0
 	boundary2 = boundary_radius ^ 2
-	zstart = radius
-	for z = zstart,zstart do
-		cz2 = (radius - z) ^ 2
-		limit_offset_y = (boundary2 - cz2) ^ 0.5
-		max_offset_y = math.ceil(limit_offset_y)
-		-- We do first the +x side, then the -x side to make movement efficient
-		for side = 0,1 do
-			-- On the right we go from small y to large y, on the left reversed
-			-- This makes us travel clockwise around each layer
-			if (side == 0) then
-				ystart = radius - max_offset_y
-				yend = radius + max_offset_y
-				ystep = 1
-			else
-				ystart = radius + max_offset_y
-				yend = radius - max_offset_y
-				ystep = -1
-			end
-
-			for y = ystart,yend,ystep do
-				cy2 = (radius - y) ^ 2
-				remainder2 = (boundary2 - cz2 - cy2)
-				if remainder2 >= 0 then
-					-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
-					max_offset_x = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
-
+	z = radius
+	cz2 = (radius - z) ^ 2
+	limit_offset_y = (boundary2 - cz2) ^ 0.5
+	max_offset_y = math.ceil(limit_offset_y)
+	-- We do first the +x side, then the -x side to make movement efficient
+	for side = 0,1 do
+		-- On the right we go from small y to large y, on the left reversed
+		-- This makes us travel clockwise around each layer
+		if (side == 0) then
+			ystart = radius - max_offset_y
+			yend = radius + max_offset_y
+			ystep = 1
+		else
+			ystart = radius + max_offset_y
+			yend = radius - max_offset_y
+			ystep = -1
+		end
+		for y = ystart,yend,ystep do
+			cy2 = (radius - y) ^ 2
+			remainder2 = (boundary2 - cz2 - cy2)
+			if remainder2 >= 0 then
+				-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
+				max_offset_x = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
 					-- Only do either the +x or -x side
-					if (side == 0) then
-						-- +x side
-						xstart = radius
-						xend = radius + max_offset_x
-					else
-						-- -x side
-						xstart = radius - max_offset_x
-						xend = radius - 1
-					end
-
-					-- Reverse direction we traverse xs when in -y side
-					if y > radius then
-						temp = xstart
-						xstart = xend
-						xend = temp
-						xstep = -1
-					else
-						xstep = 1
-					end
-
+				if (side == 0) then
+					-- +x side
+					xstart = radius
+					xend = radius + max_offset_x
+				else
+					-- -x side
+					xstart = radius - max_offset_x
+					xend = radius - 1
+				end
+				-- Reverse direction we traverse xs when in -y side
+				if y > radius then
+					temp = xstart
+					xstart = xend
+					xend = temp
+					xstep = -1
+				else
+					xstep = 1
+				end
 					for x = xstart,xend,xstep do
-						cx2 = (radius - x) ^ 2
-						distance_to_centre = (cx2 + cy2 + cz2) ^ 0.5
-						-- Only blocks within the radius but still within 1 3d-diagonal block of the edge are eligible
-						if distance_to_centre < boundary_radius and distance_to_centre + sqrt3 >= boundary_radius then
-							offsets = {{0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}}
-							for i=1,6 do
-								offset = offsets[i]
-								dx = offset[1]
-								dy = offset[2]
-								dz = offset[3]
-								if ((radius - (x + dx)) ^ 2 + (radius - (y + dy)) ^ 2 + (radius - (z + dz)) ^ 2) ^ 0.5 >= boundary_radius then
-									-- This is a point to use
-									navigateTo(x, y)
-									placeBlock()
-									break
-								end
+					cx2 = (radius - x) ^ 2
+					distance_to_centre = (cx2 + cy2 + cz2) ^ 0.5
+					-- Only blocks within the radius but still within 1 3d-diagonal block of the edge are eligible
+					if distance_to_centre < boundary_radius and distance_to_centre + sqrt3 >= boundary_radius then
+						offsets = {{0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}}
+						for i=1,6 do
+							offset = offsets[i]
+							dx = offset[1]
+							dy = offset[2]
+							dz = offset[3]
+							if ((radius - (x + dx)) ^ 2 + (radius - (y + dy)) ^ 2 + (radius - (z + dz)) ^ 2) ^ 0.5 >= boundary_radius then
+								-- This is a point to use
+								navigateTo(x, y)
+								placeBlock()
+								break
 							end
 						end
 					end
@@ -477,7 +471,6 @@ function dome(type, radius)
 				if remainder2 >= 0 then
 					-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
 					max_offset_x = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
-
 					-- Only do either the +x or -x side
 					if (side == 0) then
 						-- +x side
