@@ -24,9 +24,8 @@ function wraprsmodule()
 end
 
 function checkResources()
-	while turtle.getItemCount(activeslot) <= 1 do
+	if turtle.getItemCount(activeslot) <= 1 then
 		rs.resupply(1)
-		os.sleep(0.2)
 	end
 end
 
@@ -451,7 +450,6 @@ function dome(type, radius)
 		if not cost_only and z ~= zstart then
 			safeUp()
 		end
-		--writeOut("Layer " .. z)
 		cz2 = (radius - z) ^ 2
 		limit_offset_y = (boundary2 - cz2) ^ 0.5
 		max_offset_y = math.ceil(limit_offset_y)
@@ -526,19 +524,6 @@ function dome(type, radius)
 		turnLeftTrack()
 	end
 
-end
-
-function WriteMenu()
-	writeOut("Shape Maker 1.3 Created by Michiel using a bit of Vliekkie's code")
-	writeOut("Fixed and made readable by Aeolun/Keridos ;)")
-	writeOut("Moved to GitHub by Keridos");
-	writeOut("What should be built?")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| line    | rectangle | wall  | room  |")
-	writeOut("| square  | platform  | stair | dome  |")
-	writeOut("| pyramid | cylinder  | circle| sphere|")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("")
 end
 
 function Choicefunct()
@@ -721,6 +706,19 @@ function Choicefunct()
 	end
 end
 
+function WriteMenu()
+	writeOut("Shape Maker 1.3 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	writeOut("Resupply Version, put construction blocks in RS Station")
+	writeOut("");
+	writeOut("What should be built?")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("| line    | rectangle | wall  | room  |")
+	writeOut("| square  | platform  | stair | dome  |")
+	writeOut("| pyramid | cylinder  | circle| sphere|")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("")
+end
+
 function linktostation()
 	if rs.link() then
 		return true
@@ -730,7 +728,6 @@ function linktostation()
 		linktostation()
 	end
 end
-	
 
 function main()
 	wraprsmodule()
