@@ -1,15 +1,26 @@
 cost_only = false
 blocks = 0
 fuel = 0
-
 positionx = 0
 positiony = 0
 facing = 0
 
-rs=peripheral.wrap("left")
-
 function writeOut(message)
   print(message)
+end
+
+function wraprsmodule()
+	local side
+	if peripheral.getType("left")=="resupply" then 
+		side="left"
+	elseif peripheral.getType("right")=="resupply" then
+		side="right"
+	else
+		writeOut("Please use a Resupply Turtle for this Program. Enter to leave.")
+		io.read()
+		exit()
+	end
+	rs=peripheral.wrap(side)
 end
 
 function checkResources()
@@ -542,7 +553,7 @@ function Choicefunct()
 		turtle.select(1)
 		activeslot = 1
 		if turtle.getItemCount(activeslot) == 0 then
-			writeOut("Please put building blocks in the first slot (and more if you need them)")
+			writeOut("Please put building blocks in the first slot.")
 			while turtle.getItemCount(activeslot) == 0 do
 				os.sleep(2)
 			end
@@ -714,7 +725,7 @@ function linktostation()
 	if rs.link() then
 		return true
 	else
-		writeOut("Please put Resupply Station next to Turtle and press Enter to continue")
+		writeOut("Please put Resupply Station to the left of the turtle and press Enter to continue")
 		io.read()
 		linktostation()
 	end
@@ -722,6 +733,7 @@ end
 	
 
 function main()
+	wraprsmodule()
 	linktostation()
 	WriteMenu()
 	Choicefunct()
