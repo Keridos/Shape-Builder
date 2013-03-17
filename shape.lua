@@ -1,28 +1,50 @@
 cost_only = false
 blocks = 0
 fuel = 0
-
 positionx = 0
 positiony = 0
 facing = 0
+resupply = 0
 
 function writeOut(message)
   print(message)
 end
 
+function wraprsmodule()
+	local side
+	if peripheral.getType("left")=="resupply" then 
+		rs=peripheral.wrap("left")
+		resupply = 1
+		return true
+	elseif peripheral.getType("right")=="resupply" then
+		rs=peripheral.wrap("right")
+		resupply = 1
+		return true
+	else
+		resupply = 0
+		return false
+	end
+end
+
 function checkResources()
-	while turtle.getItemCount(activeslot) <= 0 do
-		if activeslot == 16 then
-			writeOut("Turtle is empty, please put building block in slots and press enter to continue")
-			io.read()
-			activeslot = 1
-			turtle.select(activeslot)
-		else
-			activeslot = activeslot+1
-			writeOut("Turtle slot empty, trying slot "..activeslot)
-			turtle.select(activeslot)
+	if resupply == 1 then
+		if turtle.getItemCount(activeslot) <= 1 then
+			rs.resupply(1)
 		end
-		os.sleep(0.2)
+	else
+		while turtle.getItemCount(activeslot) <= 0 do
+			if activeslot == 16 then
+				writeOut("Turtle is empty, please put building block in slots and press enter to continue")
+				io.read()
+				activeslot = 1
+				turtle.select(activeslot)
+			else
+				activeslot = activeslot+1
+				writeOut("Turtle slot empty, trying slot "..activeslot)
+				turtle.select(activeslot)
+			end
+			os.sleep(0.2)
+		end
 	end
 end
 
@@ -536,7 +558,11 @@ function Choicefunct()
 		turtle.select(1)
 		activeslot = 1
 		if turtle.getItemCount(activeslot) == 0 then
-			writeOut("Please put building blocks in the first slot (and more if you need them)")
+			if resupply then
+				writeOut("Please put building blocks in the first slot.")
+			else
+				writeOut("Please put building blocks in the first slot (and more if you need them)")
+			end
 			while turtle.getItemCount(activeslot) == 0 do
 				os.sleep(2)
 			end
@@ -705,9 +731,13 @@ function Choicefunct()
 end
 
 function WriteMenu()
-	writeOut("Shape Maker 1.3 Created by Michiel using a bit of Vliekkie's code")
-	writeOut("Fixed and made readable by Aeolun/Keridos ;)")
-	writeOut("Moved to GitHub by Keridos");
+	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	if resupply then
+		writeOut("Resupply Mode Active")
+	else
+		writeOut("")
+	end
+	writeOut("");
 	writeOut("What should be built?")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("| line    | rectangle | wall  | room  |")
@@ -717,7 +747,20 @@ function WriteMenu()
 	writeOut("")
 end
 
+function linktorsstation()
+	if rs.link() then
+		return true
+	else
+		writeOut("Please put Resupply Station to the left of the turtle and press Enter to continue")
+		io.read()
+		linktostation()
+	end
+end
+
 function main()
+	if wraprsmodule() then
+		linktorsstation()
+	end
 	WriteMenu()
 	Choicefunct()
 	print("Blocks used: " .. blocks)
