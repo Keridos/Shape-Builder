@@ -29,7 +29,9 @@ end
 function checkResources()
 	if resupply == 1 then
 		if turtle.getItemCount(activeslot) <= 1 then
-			rs.resupply(1)
+			while not(rs.resupply(1)) do
+				os.sleep(0.5)
+			end
 		end
 	else
 		while turtle.getItemCount(activeslot) <= 0 do
