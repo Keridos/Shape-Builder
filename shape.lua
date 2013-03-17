@@ -753,7 +753,7 @@ function linktorsstation()
 	else
 		writeOut("Please put Resupply Station to the left of the turtle and press Enter to continue")
 		io.read()
-		linktostation()
+		linktorsstation()
 	end
 end
 
