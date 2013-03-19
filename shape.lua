@@ -1,3 +1,4 @@
+-- Variable Setup
 cost_only = false
 blocks = 0
 fuel = 0
@@ -6,11 +7,13 @@ positiony = 0
 facing = 0
 resupply = 0
 
+-- Utility functions
+
 function writeOut(message)
   print(message)
 end
 
-function wraprsmodule()
+function wraprsmodule() --checks for and wraps rs module
 	local side
 	if peripheral.getType("left")=="resupply" then 
 		rs=peripheral.wrap("left")
@@ -23,6 +26,16 @@ function wraprsmodule()
 	else
 		resupply = 0
 		return false
+	end
+end
+
+function linktorsstation() --links to rs station
+	if rs.link() then
+		return true
+	else
+		writeOut("Please put Resupply Station to the left of the turtle and press Enter to continue")
+		io.read()
+		linktorsstation()
 	end
 end
 
@@ -66,13 +79,10 @@ function placeBlock()
 	if cost_only then
 		return
 	end
-
 	if turtle.detectDown() and not turtle.compareDown() then
 		turtle.digDown()
 	end
-
 	checkResources()
-
 	turtle.placeDown()
 end
 
@@ -84,7 +94,6 @@ function turnRightTrack()
 	if cost_only then
 		return
 	end
-
 	turtle.turnRight()
 	facing = facing + 1
 	if facing >= 4 then
@@ -96,7 +105,6 @@ function turnLeftTrack()
 	if cost_only then
 		return
 	end
-
 	turtle.turnLeft()
 	facing = facing - 1
 	if facing < 0 then
@@ -114,7 +122,6 @@ function safeForward()
 	if cost_only then
 		return
 	end
-
 	checkFuel()
 	success = false
 	while not success do
@@ -136,7 +143,6 @@ function safeBack()
 	if cost_only then
 		return
 	end
-
 	checkFuel()
 	success = false
 	while not success do
@@ -164,7 +170,6 @@ function safeUp()
 	if cost_only then
 		return
 	end
-
 	checkFuel()
 	success = false
 	while not success do
@@ -186,7 +191,6 @@ function safeDown()
 	if cost_only then
 		return
 	end
-
 	checkFuel()
 	success = false
 	while not success do
@@ -207,11 +211,9 @@ function moveY(targety)
 	if targety == positiony then
 		return
 	end
-
 	if (facing ~= 0 and facing ~= 2) then -- check axis
 		turnRightTrack()
 	end
-
 	while targety > positiony do
 		if facing == 0 then
 			safeForward()
@@ -220,7 +222,6 @@ function moveY(targety)
 		end
 		positiony = positiony + 1
 	end
-
 	while targety < positiony do
 		if facing == 2 then
 			safeForward()
@@ -235,11 +236,9 @@ function moveX(targetx)
 	if targetx == positionx then
 		return
 	end
-
 	if (facing ~= 1 and facing ~= 3) then -- check axis
 		turnRightTrack()
 	end
-
 	while targetx > positionx do
 		if facing == 1 then
 			safeForward()
@@ -248,7 +247,6 @@ function moveX(targetx)
 		end
 		positionx = positionx + 1
 	end
-
 	while targetx < positionx do
 		if facing == 3 then
 			safeForward()
@@ -548,6 +546,8 @@ function dome(type, radius)
 
 end
 
+-- Menu and Mainfunctions
+
 function Choicefunct()
 	local choice = io.read()
 	writeOut("Building a "..choice)
@@ -747,16 +747,6 @@ function WriteMenu()
 	writeOut("| pyramid | cylinder  | circle| sphere|")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
-end
-
-function linktorsstation()
-	if rs.link() then
-		return true
-	else
-		writeOut("Please put Resupply Station to the left of the turtle and press Enter to continue")
-		io.read()
-		linktorsstation()
-	end
 end
 
 function main()
