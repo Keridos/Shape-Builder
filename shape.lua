@@ -492,7 +492,6 @@ function dome(type, radius)
 				yend = radius - max_offset_y
 				ystep = -1
 			end
-
 			for y = ystart,yend,ystep do
 				cy2 = (radius - y) ^ 2
 				remainder2 = (boundary2 - cz2 - cy2)
@@ -674,7 +673,7 @@ function Choicefunct()
 	if choice == "dome" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
-		writeOut("What half of the sphere do you want to build?")
+		writeOut("What half of the sphere do you want to build?(bottom/top)")
 		local half = io.read()
 		rad = tonumber(rad)
 		if half == "bottom" then
