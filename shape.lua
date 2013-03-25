@@ -674,7 +674,7 @@ function Choicefunct()
 	if choice == "dome" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
-		writeut("What half of the sphere do you want to build?")
+		writeOut("What half of the sphere do you want to build?")
 		local half = io.read()
 		rad = tonumber(rad)
 		if half == "bottom" then
