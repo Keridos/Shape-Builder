@@ -461,8 +461,15 @@ function dome(type, radius)
 		zstart = radius
 	elseif type == "sphere" then
 		zstart = 0
+	elseif type == "bowl" then
+		zstart = 0
 	end
-	zend = width - 1
+	if type == "bowl" then
+		zend = radius
+	else
+		zend = width - 1
+	end
+	
 	-- This loop is for each vertical layer through the sphere or dome.
 	for z = zstart,zend do
 		if not cost_only and z ~= zstart then
@@ -667,8 +674,14 @@ function Choicefunct()
 	if choice == "dome" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
+		writeOut("What half of the sphere do you want to build?")
+		local half = io.read()
 		rad = tonumber(rad)
-		dome("dome", rad)
+		if half == "bottom" then
+			dome("bowl", rad)
+		else
+			dome("dome", rad)
+		end
 	end
 	if choice == "sphere" then
 		writeOut("What radius do you need it to be?")
