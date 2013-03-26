@@ -87,7 +87,8 @@ function placeBlock()
 	if cost_only then
 		return
 	end
-	if turtle.detectDown() and not turtle.compareDown() then
+	if turtle.detectDown() and not turtle.
+	Down() then
 		turtle.digDown()
 	end
 	checkResources()
@@ -648,18 +649,19 @@ end
 -- reads progress from file (shape, x, y, z, facing, blocks, param1, param2, param3)
 function ReadProgress()
 	prog_file = fs.open(prog_file_name, "r")
-	local temp_prog_table = textutiles.unserialize(prog_file.readAll())
+	local temp_prog_table = textutils.unserialize(prog_file.readAll())
 	prog_file.close()
 	return temp_prog_table
 end
 
 -- compares the progress read from the file to the current sim progress.  needs all four params 
 function CompareProgress(prog_table_in) -- return boolean
-	-- TODO
-	if prog_table_in == ReadProgress() then  -- does this work like this?  I didn't know if I needed to do per-element for the comparison to work
-		return true
+	local temp_prog_table = ReadProgress()
+	if prog_table_in.shape == temp_prog_table.shape and prog_table_in.x == temp_prog_table.x and prog_table_in.y == temp_prog_table.y and prog_table_in.blocks == temp_prog_table.blocks and prog_table_in.facing == temp_prog_table.facing then
+		writeOut("All caught up!")
+		return true -- we're caught up!
 	else
-		return false
+		return false -- not there yet...
 	end
 end
 
@@ -683,7 +685,7 @@ function ContinueQuery()
 end
 
 function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
-	prog_table = {x = positionx, y = positiony, z = positionz, facing = facing, blocks = blocks}
+	prog_table = {x = positionx, y = positiony, facing = facing, blocks = blocks}
 end
 
 -- will resume the previous job
@@ -692,7 +694,7 @@ function ResumePrevious() -- PLAN:  basically take out io.read()'s, replace "cho
 	-- will then enter the corresponding build subroutine
 	sim_mode = true
 	cost_only = true
-	resume_prog_table = ReadProgress()
+	local resume_prog_table = ReadProgress()
 	local choice = resume_prog_table.shape
 	if choice == "rectangle" then -- fixed
 		--writeOut("How deep do you want it to be?")
