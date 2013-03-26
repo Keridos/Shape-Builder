@@ -81,9 +81,9 @@ end
 
 function placeBlock()
 	-- Cost calculation mode - don't move
+	ProgressUpdate()
+	SimulationCheck()
 	blocks = blocks + 1
-	--ProgressUpdate()
-	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -92,8 +92,8 @@ function placeBlock()
 	end
 	checkResources()
 	turtle.placeDown()
-	--ProgressUpdate()
-	--WriteProgress()
+	ProgressUpdate()
+	WriteProgress()
 end
 
 -- Navigation features
@@ -101,33 +101,33 @@ end
 -- this allows us to just give a destination point and have it go there
 
 function turnRightTrack()
+	ProgressUpdate()
+	SimulationCheck()
 	facing = facing + 1
 	if facing >= 4 then
 		facing = 0
 	end
-	--ProgressUpdate()
-	--SimulationCheck()
 	if cost_only then
 		return
 	end
 	turtle.turnRight()
-	--ProgressUpdate()
-	--WriteProgress()
+	ProgressUpdate()
+	WriteProgress()
 end
 
 function turnLeftTrack()
+	ProgressUpdate()
+	SimulationCheck()
 	facing = facing - 1
 	if facing < 0 then
 		facing = 3
 	end
-	--ProgressUpdate()
-	--SimulationCheck()
 	if cost_only then
 		return
 	end
 	turtle.turnLeft()
-	--ProgressUpdate()
-	--WriteProgress()
+	ProgressUpdate()
+	WriteProgress()
 end
 
 function turnAroundTrack()
@@ -136,6 +136,8 @@ function turnAroundTrack()
 end
 
 function safeForward()
+	ProgressUpdate()
+	SimulationCheck()
 	fuel = fuel + 1
 	if cost_only then
 		return
@@ -157,9 +159,9 @@ function safeForward()
 end
 
 function safeBack()
+	ProgressUpdate()
+	SimulationCheck()
 	fuel = fuel + 1
-	--ProgressUpdate()
-	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -186,9 +188,9 @@ function safeBack()
 end
 
 function safeUp()
-	fuel = fuel + 1
-	--ProgressUpdate()
-	--SimulationCheck()
+	ProgressUpdate()
+	SimulationCheck()
+	fuel = fuel + 1	
 	if cost_only then
 		return
 	end
@@ -209,9 +211,9 @@ function safeUp()
 end
 
 function safeDown()
+	ProgressUpdate()
+	SimulationCheck()
 	fuel = fuel + 1
-	--ProgressUpdate()
-	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -245,8 +247,8 @@ function moveY(targety)
 			safeBack()
 		end
 		positiony = positiony + 1
-		--ProgressUpdate()
-		--WriteProgress()
+		ProgressUpdate()
+		WriteProgress()
 	end
 	while targety < positiony do
 		if facing == 2 then
@@ -255,8 +257,8 @@ function moveY(targety)
 			safeBack()
 		end
 		positiony = positiony - 1
-		--ProgressUpdate()
-		--WriteProgress()
+		ProgressUpdate()
+		WriteProgress()
 	end
 end
 
@@ -274,8 +276,8 @@ function moveX(targetx)
 			safeBack()
 		end
 		positionx = positionx + 1
-		--ProgressUpdate()
-		--WriteProgress()
+		ProgressUpdate()
+		WriteProgress()
 	end
 	while targetx < positionx do
 		if facing == 3 then
@@ -284,11 +286,12 @@ function moveX(targetx)
 			safeBack()
 		end
 		positionx = positionx - 1
-		--ProgressUpdate()
-		--WriteProgress()
+		ProgressUpdate()
+		WriteProgress()
 	end
 end
 
+--this is unused right now.  Ignore.
 function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
 	if targetz == positionz then
 		return
@@ -297,26 +300,24 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 		if targetz>positionz then
 			safeUp()
 			positionz = positionz + 1
-			--ProgressUpdate()
-			--WriteProgress()
+			ProgressUpdate()
+			WriteProgress()
 		else
 			safeDown()
 			positionz = positionz - 1
-			--ProgressUpdate()
-			--WriteProgress()
+			ProgressUpdate()
+			WriteProgress()
 	end
 end
 
 -- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
-function navigateTo(targetx, targety, targetz)  --add z-axis in order to record the z-coords.  It SHOULD NOT do anything, though if it does, can just insert function that does nothing but update the z-coords, into the navigateTo().
+function navigateTo(targetx, targety)  
 	if facing == 0 or facing == 2 then -- Y axis
 		moveY(targety)
 		moveX(targetx)
-		moveZ(targetz)
 	else
 		moveX(targetx)
 		moveY(targety)
-		moveZ(targetz)
 	end
 end
 
@@ -579,15 +580,8 @@ function dome(type, radius)
 								dz = offset[3]
 								if ((radius - (x + dx)) ^ 2 + (radius - (y + dy)) ^ 2 + (radius - (z + dz)) ^ 2) ^ 0.5 >= boundary_radius then
 									-- This is a point to use
-									navigateTo(x, y, z)
+									navigateTo(x, y)
 									placeBlock()
-									-- if not sim_mode then
-										-- WriteProgress(x,y,z,facing)
-									-- end
-									-- if CompareProgress(x,y,z,facing) then
-										-- sim_mode = false
-										-- cost_only = false
-									-- end
 									break
 								end
 							end
@@ -1084,7 +1078,7 @@ function main()
 		linktorsstation()
 	end
 	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
-		if not ContinueQuery() then  -- TODO write ContinueQuery() DONE
+		if not ContinueQuery() then
 			WriteMenu()
 			Choicefunct()
 		else
