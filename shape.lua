@@ -659,9 +659,9 @@ function CompareProgress(prog_table_in) -- return boolean
 	end
 end
 
-function Simulation()
+function Simulation(prog_table_in)
 	if sim_mode then
-		if CompareProgress(positionx,positiony,z,facing,blocks) then
+		if CompareProgress(prog_table_in) then
 			sim_mode = false
 			cost_only = false
 		end
