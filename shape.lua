@@ -20,7 +20,6 @@ function writeOut(message)
 end
 
 function wraprsmodule() --checks for and wraps rs module
-	local side
 	if peripheral.getType("left")=="resupply" then 
 		rs=peripheral.wrap("left")
 		resupply = 1
@@ -357,7 +356,6 @@ function square(width)
 end
 
 function wall(length, height)
-	turnRightTrack()
 	local i
 	local j
 	for i = 1, length do
@@ -517,8 +515,15 @@ function dome(type, radius)
 		zstart = radius
 	elseif type == "sphere" then
 		zstart = 0
+	elseif type == "bowl" then
+		zstart = 0
 	end
-	zend = width - 1
+	if type == "bowl" then
+		zend = radius
+	else
+		zend = width - 1
+	end
+	
 	-- This loop is for each vertical layer through the sphere or dome.
 	for z = zstart,zend do
 		if not cost_only and z ~= zstart then
@@ -541,7 +546,6 @@ function dome(type, radius)
 				yend = radius - max_offset_y
 				ystep = -1
 			end
-
 			for y = ystart,yend,ystep do
 				cy2 = (radius - y) ^ 2
 				remainder2 = (boundary2 - cz2 - cy2)
@@ -884,7 +888,7 @@ function Choicefunct()
 			end
 		end
 	end
-	if choice == "rectangle" then -- fixed
+	if choice == "rectangle" then
 		writeOut("How deep do you want it to be?")
 		h = io.read()
 		h = tonumber(h)
@@ -894,21 +898,21 @@ function Choicefunct()
 		--prog_table = {param1 = h, param2 = v}
 		rectangle(h, v)
 	end
-	if choice == "square" then --fixed
+	if choice == "square" then
 		writeOut("How long does it need to be?")
 		local s = io.read()
 		s = tonumber(s)
 		--prog_table = {param1 = s}
 		square(s)
 	end
-	if choice == "line" then --fixed
+	if choice == "line" then
 		writeOut("How long does the line need to be?")
 		local ll = io.read()
 		ll = tonumber(ll)
 		--prog_table = {param1 = ll}
 		line(ll)
 	end
-	if choice == "wall" then --fixed
+	if choice == "wall" then
 		writeOut("How long does it need to be?")
 		local wl = io.read()
 		wl = tonumber(wl)
@@ -935,7 +939,7 @@ function Choicefunct()
 		platform(x, y)
 		writeOut("Done")
 	end
-	if choice == "stair" then --fixed
+	if choice == "stair" then
 		writeOut("How wide do you want it to be?")
 		x = io.read()
 		x = tonumber(x)
@@ -989,9 +993,19 @@ function Choicefunct()
 	if choice == "dome" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
+		writeOut("What half of the sphere do you want to build?(bottom/top)")
+		local half = io.read()
 		rad = tonumber(rad)
+<<<<<<< HEAD
 		dome("dome", rad)
 		--prog_table = {param1 = rad}
+=======
+		if half == "bottom" then
+			dome("bowl", rad)
+		else
+			dome("dome", rad)
+		end
+>>>>>>> upstream/master
 	end
 	if choice == "sphere" then
 		writeOut("What radius do you need it to be?")
@@ -1060,7 +1074,7 @@ end
 
 function WriteMenu()
 	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
-	if resupply then
+	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
 		writeOut("")
