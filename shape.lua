@@ -301,7 +301,6 @@ function square(width)
 end
 
 function wall(length, height)
-	turnRightTrack()
 	local i
 	local j
 	for i = 1, length do
