@@ -1,11 +1,17 @@
 -- Variable Setup
-cost_only = false
-blocks = 0
-fuel = 0
-positionx = 0
-positiony = 0
-facing = 0
-resupply = 0
+local cost_only = false
+local sim_mode = false
+local blocks = 0
+local fuel = 0
+local positionx = 0
+local positiony = 0
+local positionz = 0
+local facing = 0
+local resupply = 0
+
+local prog_table = {}
+local prog_file_name = "ShapesProgressFile"
+
 
 -- Utility functions
 
@@ -76,6 +82,7 @@ end
 function placeBlock()
 	-- Cost calculation mode - don't move
 	blocks = blocks + 1
+	--Simulation()
 	if cost_only then
 		return
 	end
@@ -84,6 +91,7 @@ function placeBlock()
 	end
 	checkResources()
 	turtle.placeDown()
+	--ProgressUpdate()
 end
 
 -- Navigation features
@@ -91,25 +99,29 @@ end
 -- this allows us to just give a destination point and have it go there
 
 function turnRightTrack()
-	if cost_only then
-		return
-	end
-	turtle.turnRight()
 	facing = facing + 1
 	if facing >= 4 then
 		facing = 0
 	end
-end
-
-function turnLeftTrack()
+	--Simulation()
 	if cost_only then
 		return
 	end
-	turtle.turnLeft()
+	turtle.turnRight()
+	--ProgressUpdate()
+end
+
+function turnLeftTrack()
 	facing = facing - 1
 	if facing < 0 then
 		facing = 3
 	end
+	--Simulation()
+	if cost_only then
+		return
+	end
+	turtle.turnLeft()
+	--ProgressUpdate()
 end
 
 function turnAroundTrack()
@@ -140,6 +152,7 @@ end
 
 function safeBack()
 	fuel = fuel + 1
+	--Simulate()
 	if cost_only then
 		return
 	end
@@ -167,6 +180,7 @@ end
 
 function safeUp()
 	fuel = fuel + 1
+	--Simulate()
 	if cost_only then
 		return
 	end
@@ -188,6 +202,7 @@ end
 
 function safeDown()
 	fuel = fuel + 1
+	--Simulate()
 	if cost_only then
 		return
 	end
@@ -221,6 +236,7 @@ function moveY(targety)
 			safeBack()
 		end
 		positiony = positiony + 1
+		--ProgressUpdate()
 	end
 	while targety < positiony do
 		if facing == 2 then
@@ -229,6 +245,7 @@ function moveY(targety)
 			safeBack()
 		end
 		positiony = positiony - 1
+		--ProgressUpdate()
 	end
 end
 
@@ -246,6 +263,7 @@ function moveX(targetx)
 			safeBack()
 		end
 		positionx = positionx + 1
+		--ProgressUpdate()
 	end
 	while targetx < positionx do
 		if facing == 3 then
@@ -254,16 +272,35 @@ function moveX(targetx)
 			safeBack()
 		end
 		positionx = positionx - 1
+		--ProgressUpdate()
 	end
 end
 
-function navigateTo(targetx, targety)
+function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
+	if targetz == positionz then
+		return
+	end
+	for z = positionz,targetz do
+		if targetz>positionz then
+			safeUp()
+			positionz = positionz + 1
+			--ProgressUpdate()
+		else
+			safeDown()
+			positionz = positionz - 1
+			--ProgressUpdate()
+	end
+end
+
+function navigateTo(targetx, targety, targetz)
 	if facing == 0 or facing == 2 then -- Y axis
 		moveY(targety)
 		moveX(targetx)
+		moveZ(targetz)
 	else
 		moveX(targetx)
 		moveY(targety)
+		moveZ(targetz)
 	end
 end
 
@@ -526,8 +563,15 @@ function dome(type, radius)
 								dz = offset[3]
 								if ((radius - (x + dx)) ^ 2 + (radius - (y + dy)) ^ 2 + (radius - (z + dz)) ^ 2) ^ 0.5 >= boundary_radius then
 									-- This is a point to use
-									navigateTo(x, y)
+									navigateTo(x, y, z)
 									placeBlock()
+									-- if not sim_mode then
+										-- WriteProgress(x,y,z,facing)
+									-- end
+									-- if CompareProgress(x,y,z,facing) then
+										-- sim_mode = false
+										-- cost_only = false
+									-- end
 									break
 								end
 							end
@@ -546,57 +590,113 @@ function dome(type, radius)
 
 end
 
--- Menu and Mainfunctions
+-- Previous Progress Resuming, Sim Functions, and File Backend
 
-function Choicefunct()
-	local choice = io.read()
-	writeOut("Building a "..choice)
-	writeOut("Want to just calculate the cost? [y/n]")
-	local yes = io.read()
-	if yes == 'y' then
-		cost_only = true
+-- will check for a "progress" file.
+function CheckForPrevious() 
+	-- TODO
+end
+
+-- creates a progress file, containing a serialized table consisting of the shape type, shape input params, and the last known x, y, and z coords of the turtle (beginning of build project)
+function ProgressFileCreate() 
+	if not fs.exists(prog_file_name) then
+		fs.makeDir(prog_file_name)
+		return true
+	else
+		return false
 	end
-	if not cost_only then
-		turtle.select(1)
-		activeslot = 1
-		if turtle.getItemCount(activeslot) == 0 then
-			if resupply then
-				writeOut("Please put building blocks in the first slot.")
-			else
-				writeOut("Please put building blocks in the first slot (and more if you need them)")
-			end
-			while turtle.getItemCount(activeslot) == 0 do
-				os.sleep(2)
-			end
+end
+
+-- deletes the progress file (at the end of the project, also at beginning if user chooses to delete old progress)
+function ProgressFileDelete() 
+	if fs.exists(prog_file_name) then
+		fs.delete(prog_file_name)
+		return true
+	else 
+		return false
+	end
+end
+
+-- to read the shape params from the file.  Shape type, and input params (e.g. "dome" and radius)
+function ReadShapeParams()
+	-- TODO
+end
+
+-- function to write the progress to the file (x, y, z)
+function WriteProgress(positionx,positiony,positionz,facing,blocks) 
+	ProgressFileCreate()
+	local prog_file = fs.open(prog_file_name,"w")
+	local prog_string = textutils.serialize(prog_table)
+	prog_file.write(prog_string)
+	prog_file.close()
+end
+
+-- reads progress from file (shape, x, y, z, facing, blocks, param1, param2, param3)
+function ReadProgress()
+		prog_file = fs.open(prog_file_name, "r")
+		local temp_prog_table = textutiles.unserialize(prog_file.readAll())
+		prog_file.close()
+		return temp_prog_table
+end
+
+-- compares the progress read from the file to the current sim progress.  needs all four params 
+function CompareProgress(prog_table_in) -- return boolean
+	-- TODO
+	if prog_table_in == ReadProgress() then
+		return true
+	else
+		return false
+	end
+end
+
+function Simulation()
+	if sim_mode then
+		if CompareProgress(positionx,positiony,z,facing,blocks) then
+			sim_mode = false
+			cost_only = false
 		end
 	end
+end
+
+function ProgressUpdate()
+	prog_table = {x = positionx, y = positiony, z = positionz, facing = facing, blocks = blocks}
+end
+
+-- will resume the previous job
+function ResumePrevious() -- PLAN:  basically take out io.read()'s, replace "choice = shape" with 
+	-- will read the file and extract shape type, params.
+	-- will then enter the corresponding build subroutine
+	sim_mode = true
+	cost_only = true
+	resume_prog_table = ReadProgress()
+	local choice = resume_prog_table.shape
 	if choice == "rectangle" then -- fixed
-		writeOut("How deep do you want it to be?")
-		h = io.read()
+		--writeOut("How deep do you want it to be?")
+		h = resume_prog_table.param1
 		h = tonumber(h)
-		writeOut("How wide do you want it to be?")
-		v = io.read()
+		--writeOut("How wide do you want it to be?")
+		v = resume_prog_table.param2
 		v = tonumber(v)
-		rectangle(h, v)
+		rectangle(h,v)
 	end
-	if choice == "square" then --fixed
+	if choice == "square" then 
 		writeOut("How long does it need to be?")
-		local s = io.read()
+		local s = resume_prog_table.param1
 		s = tonumber(s)
 		square(s)
 	end
-	if choice == "line" then --fixed
+	if choice == "line" then 
 		writeOut("How long does the line need to be?")
-		local ll = io.read()
+		local ll = resume_prog_table.param1
 		ll = tonumber(ll)
 		line(ll)
 	end
-	if choice == "wall" then --fixed
+	if choice == "wall" then 
 		writeOut("How long does it need to be?")
-		local wl = io.read()
+		local wl = resume_prog_table.param1
 		wl = tonumber(wl)
 		writeOut("How high does it need to be?")
-		local wh = io.read()
+		local wh = resume_prog_table.param2
 		wh = tonumber(wh)
 		if  wh <= 0 then
 			error("Error, the height can not be zero")
@@ -608,33 +708,33 @@ function Choicefunct()
 	end
 	if choice == "platform" then
 		writeOut("How wide do you want it to be?")
-		x = io.read()
+		x = resume_prog_table.param1
 		x = tonumber(x)
 		writeOut("How long do you want it to be?")
-		y = io.read()
+		y = resume_prog_table.param2
 		y = tonumber(y)
 		platform(x, y)
 		writeOut("Done")
 	end
-	if choice == "stair" then --fixed
+	if choice == "stair" then 
 		writeOut("How wide do you want it to be?")
-		x = io.read()
+		x = resume_prog_table.param1
 		x = tonumber(x)
 		writeOut("How high do you want it to be?")
-		y = io.read()
+		y = resume_prog_table.param2
 		y = tonumber(y)
 		stair(x, y)
 		writeOut("Done")
 	end
 	if choice == "room" then
 		writeOut("How deep does it need to be?")
-		local cl = io.read()
+		local cl = resume_prog_table.param1
 		cl = tonumber(cl)
 		writeOut("How wide does it need to be?")
-		local ch = io.read()
+		local ch = resume_prog_table.param2
 		ch = tonumber(ch)
 		writeOut("How high does it need to be?")
-		local hi = io.read()
+		local hi = resume_prog_table.param3
 		hi = tonumber(hi)
 		if hi < 3 then
 			hi = 3
@@ -665,23 +765,221 @@ function Choicefunct()
 		safeUp()
 		platform(cl, ch)
 	end
+	if choice == "dome" then --fixed
+		--writeOut("What radius do you need it to be?")
+		local rad = resume_prog_table.param1
+		rad = tonumber(rad)
+		dome("dome", rad)
+	end
+	if choice == "sphere" then
+		--writeOut("What radius do you need it to be?")
+		local rad = resume_prog_table.param1
+		rad = tonumber(rad)
+		dome("sphere", rad)
+	end
+	if choice == "circle" then
+		--writeOut("What radius do you need it to be?")
+		local rad = resume_prog_table.param1
+		rad = tonumber(rad)
+		circle(rad)
+	end
+	if choice == "cylinder" then
+		--writeOut("What radius do you need it to be?")
+		local rad = resume_prog_table.param1
+		rad = tonumber(rad)
+		--writeOut("What height do you need it to be?")
+		local height = resume_prog_table.param2
+		height = tonumber(height)
+		for i = 1, height do
+			circle(rad)
+			safeUp()
+		end
+		for i = 1, height do
+			safeDown()
+		end
+	end
+	if choice == "pyramid" then
+		writeOut("What width/depth do you need it to be?")
+		local width = resume_prog_table.param1
+		width = tonumber(width)
+		writeOut("Do you want it to be hollow [y/n]?")
+		local hollow = resume_prog_table.param2
+		if hollow == 'y' then
+			hollow = true
+		else
+			hollow = false
+		end
+		height = math.ceil(width / 2)
+		for i = 1, height do
+			if hollow then
+				rectangle(width, width)
+			else
+				platform(width, width)
+				navigateTo(0,0)
+				while facing ~= 0 do
+					turnRightTrack()
+				end
+			end
+			if i ~= height then
+				safeUp()
+				safeForward()
+				turnRightTrack()
+				safeForward()
+				turnLeftTrack()
+				width = width - 2
+			end
+		end
+	end
+end
+
+
+-- Menu and Mainfunctions
+
+function Choicefunct()
+	local choice = io.read()
+	--prog_table = {shape = choice}
+	writeOut("Building a "..choice)
+	writeOut("Want to just calculate the cost? [y/n]")
+	local yes = io.read()
+	if yes == 'y' then
+		cost_only = true
+	end
+	if not cost_only then
+		turtle.select(1)
+		activeslot = 1
+		if turtle.getItemCount(activeslot) == 0 then
+			if resupply then
+				writeOut("Please put building blocks in the first slot.")
+			else
+				writeOut("Please put building blocks in the first slot (and more if you need them)")
+			end
+			while turtle.getItemCount(activeslot) == 0 do
+				os.sleep(2)
+			end
+		end
+	end
+	if choice == "rectangle" then -- fixed
+		writeOut("How deep do you want it to be?")
+		h = io.read()
+		h = tonumber(h)
+		writeOut("How wide do you want it to be?")
+		v = io.read()
+		v = tonumber(v)
+		rectangle(h, v)
+		--prog_table = {param1 = h, param2 = v}
+	end
+	if choice == "square" then --fixed
+		writeOut("How long does it need to be?")
+		local s = io.read()
+		s = tonumber(s)
+		square(s)
+		--prog_table = {param1 = s}
+	end
+	if choice == "line" then --fixed
+		writeOut("How long does the line need to be?")
+		local ll = io.read()
+		ll = tonumber(ll)
+		line(ll)
+		--prog_table = {param1 = ll}
+	end
+	if choice == "wall" then --fixed
+		writeOut("How long does it need to be?")
+		local wl = io.read()
+		wl = tonumber(wl)
+		writeOut("How high does it need to be?")
+		local wh = io.read()
+		wh = tonumber(wh)
+		if  wh <= 0 then
+			error("Error, the height can not be zero")
+		end
+		if wl <= 0 then
+			error("Error, the length can not be 0")
+		end
+		wall(wl, wh)
+		--prog_table {param1 = wl, param2 = wh}
+	end
+	if choice == "platform" then
+		writeOut("How wide do you want it to be?")
+		x = io.read()
+		x = tonumber(x)
+		writeOut("How long do you want it to be?")
+		y = io.read()
+		y = tonumber(y)
+		platform(x, y)
+		writeOut("Done")
+		--prog_table {param1 = x, param2 = y}
+	end
+	if choice == "stair" then --fixed
+		writeOut("How wide do you want it to be?")
+		x = io.read()
+		x = tonumber(x)
+		writeOut("How high do you want it to be?")
+		y = io.read()
+		y = tonumber(y)
+		stair(x, y)
+		writeOut("Done")
+		--prog_table {param1 = x, param2 = y}
+	end
+	if choice == "room" then
+		writeOut("How deep does it need to be?")
+		local cl = io.read()
+		cl = tonumber(cl)
+		writeOut("How wide does it need to be?")
+		local ch = io.read()
+		ch = tonumber(ch)
+		writeOut("How high does it need to be?")
+		local hi = io.read()
+		hi = tonumber(hi)
+		if hi < 3 then
+			hi = 3
+		end
+		if cl < 3 then
+			cl = 3
+		end
+		if ch < 3 then
+			ch = 3
+		end
+		--prog_table = {param1 = cl, param2 = ch, param3 = hi}
+		platform(cl, ch)
+		while (facing > 0) do
+			turnLeftTrack()
+		end
+		turnAroundTrack()
+		if ((ch % 2)==0) then
+			-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
+			turnLeftTrack()
+		end
+		for i = 1, hi-2 do
+			safeUp()
+			if ((ch % 2)==0) then -- this aswell
+			rectangle(cl, ch)
+			else
+			rectangle(ch, cl)
+			end
+		end
+		safeUp()
+		platform(cl, ch)
+	end
 	if choice == "dome" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
 		rad = tonumber(rad)
 		dome("dome", rad)
+		--prog_table = {param1 = rad}
 	end
 	if choice == "sphere" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
 		rad = tonumber(rad)
 		dome("sphere", rad)
+		--prog_table {param1 = rad}
 	end
 	if choice == "circle" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
 		rad = tonumber(rad)
 		circle(rad)
+		--prog_table {param1 = rad}
 	end
 	if choice == "cylinder" then
 		writeOut("What radius do you need it to be?")
@@ -690,6 +988,7 @@ function Choicefunct()
 		writeOut("What height do you need it to be?")
 		local height = io.read()
 		height = tonumber(height)
+		--prog_table {param1 = rad, param2 = height}
 		for i = 1, height do
 			circle(rad)
 			safeUp()
@@ -704,6 +1003,7 @@ function Choicefunct()
 		width = tonumber(width)
 		writeOut("Do you want it to be hollow [y/n]?")
 		local hollow = io.read()
+		--prog_table = {param1 = width, param2 = hollow}
 		if hollow == 'y' then
 			hollow = true
 		else
@@ -750,11 +1050,16 @@ function WriteMenu()
 end
 
 function main()
-	if wraprsmodule() then
+	if wraprsmodule() then  -- TODO find a way to make this carry over as well... odds are it's not possible.
 		linktorsstation()
 	end
-	WriteMenu()
-	Choicefunct()
+	if CheckForPrevious() then	-- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
+	if not ContinueQuery() then
+		WriteMenu()
+		Choicefunct()
+	else
+		ResumePrevious()
+	end
 	print("Blocks used: " .. blocks)
 	print("Fuel used: " .. fuel)
 end
