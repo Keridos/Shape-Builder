@@ -678,6 +678,16 @@ function SimulationCheck(prog_table_in)  -- DID rename SimulationCheck() for cla
 	end
 end
 
+function ContinueQuery()
+	writeOut("Do you want to continue the last job?")
+	local yes = io.read()
+	if yes = "y" then
+		return true
+	else
+		return false
+	end
+end
+
 function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
 	prog_table = {x = positionx, y = positiony, z = positionz, facing = facing, blocks = blocks}
 end
@@ -700,22 +710,22 @@ function ResumePrevious() -- PLAN:  basically take out io.read()'s, replace "cho
 		rectangle(h,v)
 	end
 	if choice == "square" then 
-		writeOut("How long does it need to be?")
+		--writeOut("How long does it need to be?")
 		local s = resume_prog_table.param1
 		s = tonumber(s)
 		square(s)
 	end
 	if choice == "line" then 
-		writeOut("How long does the line need to be?")
+		--writeOut("How long does the line need to be?")
 		local ll = resume_prog_table.param1
 		ll = tonumber(ll)
 		line(ll)
 	end
 	if choice == "wall" then 
-		writeOut("How long does it need to be?")
+		--writeOut("How long does it need to be?")
 		local wl = resume_prog_table.param1
 		wl = tonumber(wl)
-		writeOut("How high does it need to be?")
+		--writeOut("How high does it need to be?")
 		local wh = resume_prog_table.param2
 		wh = tonumber(wh)
 		if  wh <= 0 then
@@ -727,33 +737,33 @@ function ResumePrevious() -- PLAN:  basically take out io.read()'s, replace "cho
 		wall(wl, wh)
 	end
 	if choice == "platform" then
-		writeOut("How wide do you want it to be?")
+		--writeOut("How wide do you want it to be?")
 		x = resume_prog_table.param1
 		x = tonumber(x)
-		writeOut("How long do you want it to be?")
+		--writeOut("How long do you want it to be?")
 		y = resume_prog_table.param2
 		y = tonumber(y)
 		platform(x, y)
 		writeOut("Done")
 	end
 	if choice == "stair" then 
-		writeOut("How wide do you want it to be?")
+		--writeOut("How wide do you want it to be?")
 		x = resume_prog_table.param1
 		x = tonumber(x)
-		writeOut("How high do you want it to be?")
+		--writeOut("How high do you want it to be?")
 		y = resume_prog_table.param2
 		y = tonumber(y)
 		stair(x, y)
-		writeOut("Done")
+		--writeOut("Done")
 	end
 	if choice == "room" then
-		writeOut("How deep does it need to be?")
+		--writeOut("How deep does it need to be?")
 		local cl = resume_prog_table.param1
 		cl = tonumber(cl)
-		writeOut("How wide does it need to be?")
+		--writeOut("How wide does it need to be?")
 		local ch = resume_prog_table.param2
 		ch = tonumber(ch)
-		writeOut("How high does it need to be?")
+		--writeOut("How high does it need to be?")
 		local hi = resume_prog_table.param3
 		hi = tonumber(hi)
 		if hi < 3 then
@@ -819,10 +829,10 @@ function ResumePrevious() -- PLAN:  basically take out io.read()'s, replace "cho
 		end
 	end
 	if choice == "pyramid" then
-		writeOut("What width/depth do you need it to be?")
+		--writeOut("What width/depth do you need it to be?")
 		local width = resume_prog_table.param1
 		width = tonumber(width)
-		writeOut("Do you want it to be hollow [y/n]?")
+		--writeOut("Do you want it to be hollow [y/n]?")
 		local hollow = resume_prog_table.param2
 		if hollow == 'y' then
 			hollow = true
@@ -885,22 +895,22 @@ function Choicefunct()
 		writeOut("How wide do you want it to be?")
 		v = io.read()
 		v = tonumber(v)
-		rectangle(h, v)
 		--prog_table = {param1 = h, param2 = v}
+		rectangle(h, v)
 	end
 	if choice == "square" then --fixed
 		writeOut("How long does it need to be?")
 		local s = io.read()
 		s = tonumber(s)
-		square(s)
 		--prog_table = {param1 = s}
+		square(s)
 	end
 	if choice == "line" then --fixed
 		writeOut("How long does the line need to be?")
 		local ll = io.read()
 		ll = tonumber(ll)
-		line(ll)
 		--prog_table = {param1 = ll}
+		line(ll)
 	end
 	if choice == "wall" then --fixed
 		writeOut("How long does it need to be?")
@@ -915,8 +925,8 @@ function Choicefunct()
 		if wl <= 0 then
 			error("Error, the length can not be 0")
 		end
-		wall(wl, wh)
 		--prog_table {param1 = wl, param2 = wh}
+		wall(wl, wh)
 	end
 	if choice == "platform" then
 		writeOut("How wide do you want it to be?")
@@ -925,9 +935,9 @@ function Choicefunct()
 		writeOut("How long do you want it to be?")
 		y = io.read()
 		y = tonumber(y)
+		--prog_table {param1 = x, param2 = y}
 		platform(x, y)
 		writeOut("Done")
-		--prog_table {param1 = x, param2 = y}
 	end
 	if choice == "stair" then --fixed
 		writeOut("How wide do you want it to be?")
@@ -936,9 +946,9 @@ function Choicefunct()
 		writeOut("How high do you want it to be?")
 		y = io.read()
 		y = tonumber(y)
+		--prog_table {param1 = x, param2 = y}
 		stair(x, y)
 		writeOut("Done")
-		--prog_table {param1 = x, param2 = y}
 	end
 	if choice == "room" then
 		writeOut("How deep does it need to be?")
@@ -991,15 +1001,15 @@ function Choicefunct()
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
 		rad = tonumber(rad)
-		dome("sphere", rad)
 		--prog_table {param1 = rad}
+		dome("sphere", rad)
 	end
 	if choice == "circle" then
 		writeOut("What radius do you need it to be?")
 		local rad = io.read()
 		rad = tonumber(rad)
-		circle(rad)
 		--prog_table {param1 = rad}
+		circle(rad)
 	end
 	if choice == "cylinder" then
 		writeOut("What radius do you need it to be?")
@@ -1070,18 +1080,23 @@ function WriteMenu()
 end
 
 function main()
-	if wraprsmodule() then  -- TODO find a way to make this carry over as well... odds are it's not possible.
+	if wraprsmodule() then
 		linktorsstation()
 	end
-	if CheckForPrevious() then	-- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
-	if not ContinueQuery() then
+	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
+		if not ContinueQuery() then  -- TODO write ContinueQuery() DONE
+			WriteMenu()
+			Choicefunct()
+		else
+			ResumePrevious()
+		end
+	else
 		WriteMenu()
 		Choicefunct()
-	else
-		ResumePrevious()
 	end
 	print("Blocks used: " .. blocks)
 	print("Fuel used: " .. fuel)
+	ProgressFileDelete() -- removes file upon successful completion of a job, or completion of a previous job.
 end
 
 main()
