@@ -82,7 +82,8 @@ end
 function placeBlock()
 	-- Cost calculation mode - don't move
 	blocks = blocks + 1
-	--Simulation()
+	--ProgressUpdate()
+	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -104,7 +105,8 @@ function turnRightTrack()
 	if facing >= 4 then
 		facing = 0
 	end
-	--Simulation()
+	--ProgressUpdate()
+	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -118,7 +120,8 @@ function turnLeftTrack()
 	if facing < 0 then
 		facing = 3
 	end
-	--Simulation()
+	--ProgressUpdate()
+	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -155,7 +158,8 @@ end
 
 function safeBack()
 	fuel = fuel + 1
-	--Simulate()
+	--ProgressUpdate()
+	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -183,7 +187,8 @@ end
 
 function safeUp()
 	fuel = fuel + 1
-	--Simulate()
+	--ProgressUpdate()
+	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -205,7 +210,8 @@ end
 
 function safeDown()
 	fuel = fuel + 1
-	--Simulate()
+	--ProgressUpdate()
+	--SimulationCheck()
 	if cost_only then
 		return
 	end
@@ -604,12 +610,16 @@ end
 
 -- will check for a "progress" file.
 function CheckForPrevious() 
-	-- TODO
+	if fs.exists(prog_file_name) then
+		return true
+	else
+		return false
+	end
 end
 
 -- creates a progress file, containing a serialized table consisting of the shape type, shape input params, and the last known x, y, and z coords of the turtle (beginning of build project)
 function ProgressFileCreate() 
-	if not fs.exists(prog_file_name) then
+	if CheckForPrevious() then
 		fs.makeDir(prog_file_name)
 		return true
 	else
@@ -629,7 +639,7 @@ end
 
 -- to read the shape params from the file.  Shape type, and input params (e.g. "dome" and radius)
 function ReadShapeParams()
-	-- TODO
+	-- TODO unneeded for now, can just use the table elements directly
 end
 
 -- function to write the progress to the file (x, y, z)
@@ -643,23 +653,23 @@ end
 
 -- reads progress from file (shape, x, y, z, facing, blocks, param1, param2, param3)
 function ReadProgress()
-		prog_file = fs.open(prog_file_name, "r")
-		local temp_prog_table = textutiles.unserialize(prog_file.readAll())
-		prog_file.close()
-		return temp_prog_table
+	prog_file = fs.open(prog_file_name, "r")
+	local temp_prog_table = textutiles.unserialize(prog_file.readAll())
+	prog_file.close()
+	return temp_prog_table
 end
 
 -- compares the progress read from the file to the current sim progress.  needs all four params 
 function CompareProgress(prog_table_in) -- return boolean
 	-- TODO
-	if prog_table_in == ReadProgress() then
+	if prog_table_in == ReadProgress() then  -- does this work like this?  I didn't know if I needed to do per-element for the comparison to work
 		return true
 	else
 		return false
 	end
 end
 
-function Simulation(prog_table_in)
+function SimulationCheck(prog_table_in)  -- DID rename SimulationCheck() for clarity DONE
 	if sim_mode then
 		if CompareProgress(prog_table_in) then
 			sim_mode = false
@@ -668,7 +678,7 @@ function Simulation(prog_table_in)
 	end
 end
 
-function ProgressUpdate()
+function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
 	prog_table = {x = positionx, y = positiony, z = positionz, facing = facing, blocks = blocks}
 end
 
