@@ -92,6 +92,7 @@ function placeBlock()
 	checkResources()
 	turtle.placeDown()
 	--ProgressUpdate()
+	--WriteProgress()
 end
 
 -- Navigation features
@@ -109,6 +110,7 @@ function turnRightTrack()
 	end
 	turtle.turnRight()
 	--ProgressUpdate()
+	--WriteProgress()
 end
 
 function turnLeftTrack()
@@ -122,6 +124,7 @@ function turnLeftTrack()
 	end
 	turtle.turnLeft()
 	--ProgressUpdate()
+	--WriteProgress()
 end
 
 function turnAroundTrack()
@@ -237,6 +240,7 @@ function moveY(targety)
 		end
 		positiony = positiony + 1
 		--ProgressUpdate()
+		--WriteProgress()
 	end
 	while targety < positiony do
 		if facing == 2 then
@@ -246,6 +250,7 @@ function moveY(targety)
 		end
 		positiony = positiony - 1
 		--ProgressUpdate()
+		--WriteProgress()
 	end
 end
 
@@ -264,6 +269,7 @@ function moveX(targetx)
 		end
 		positionx = positionx + 1
 		--ProgressUpdate()
+		--WriteProgress()
 	end
 	while targetx < positionx do
 		if facing == 3 then
@@ -273,6 +279,7 @@ function moveX(targetx)
 		end
 		positionx = positionx - 1
 		--ProgressUpdate()
+		--WriteProgress()
 	end
 end
 
@@ -285,14 +292,17 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 			safeUp()
 			positionz = positionz + 1
 			--ProgressUpdate()
+			--WriteProgress()
 		else
 			safeDown()
 			positionz = positionz - 1
 			--ProgressUpdate()
+			--WriteProgress()
 	end
 end
 
-function navigateTo(targetx, targety, targetz)
+-- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
+function navigateTo(targetx, targety, targetz)  --add z-axis in order to record the z-coords.  It SHOULD NOT do anything, though if it does, can just insert function that does nothing but update the z-coords, into the navigateTo().
 	if facing == 0 or facing == 2 then -- Y axis
 		moveY(targety)
 		moveX(targetx)
