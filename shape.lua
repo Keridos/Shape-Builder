@@ -702,7 +702,9 @@ function ContinueQuery()
 end
 
 function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
-	prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
+	if sim_mode == false then
+		prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
+	end
 end
 
 -- Menu and Mainfunctions
