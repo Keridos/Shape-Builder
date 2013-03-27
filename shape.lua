@@ -738,6 +738,8 @@ function Choicefunct()
 				os.sleep(2)
 			end
 		end
+	else
+		activeslot = 1
 	end
 	
 	if choice == "rectangle" then
@@ -768,6 +770,7 @@ function Choicefunct()
 			s = temp_prog_table.param1
 		end
 		s = tonumber(s)
+		temp_prog_table.param1 = s
 		prog_table = {param1 = s}
 		square(s)
 	end
@@ -912,11 +915,11 @@ function Choicefunct()
 		elseif sim_mode == true then
 			rad = temp_prog_table.param1
 			half = temp_prog_table.param2
-		end			
-		prog_table = {param1 = rad, param2 = half}
+		end	
 		rad = tonumber(rad)
 		temp_prog_table.param1 = rad
 		temp_prog_table.param2 = half
+		prog_table = {param1 = rad, param2 = half}
 		if half == "bottom" then
 			dome("bowl", rad)
 		else
