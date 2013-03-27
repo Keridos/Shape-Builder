@@ -675,9 +675,9 @@ function CompareProgress(prog_table_in) -- return boolean
 	end
 end
 
-function SetSimFlags(boolean)
-	sim_mode = boolean
-	cost_only = boolean
+function SetSimFlags(b)
+	sim_mode = b
+	cost_only = b
 end
 
 function SimulationCheck(prog_table_in)  -- DID rename SimulationCheck() for clarity DONE
@@ -720,7 +720,6 @@ function Choicefunct()
 		local resume_prog_table = ReadProgress()
 		local choice = resume_prog_table.shape
 	end	
-	
 	if not cost_only then
 		turtle.select(1)
 		activeslot = 1
