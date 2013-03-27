@@ -642,7 +642,7 @@ end
 
 function WriteShapeParams()
 	--TODO
-	-- actually can't do anything right now, because all the param-gathering in Choicefunct() uses different variables
+	-- actually can't do anything right now, because all the param-gathering in ChoiceFunct() uses different variables
 end
 
 -- function to write the progress to the file (x, y, z)
@@ -704,7 +704,7 @@ end
 
 -- Menu and Mainfunctions
 
-function Choicefunct()
+function ChoiceFunct()
 	local choice
 	if sim_mode == false then -- if we are NOT resuming progress
 		choice = io.read()
@@ -1022,7 +1022,7 @@ function main()
 		end
 	else
 		WriteMenu()
-		Choicefunct()
+		ChoiceFunct()
 	end
 	print("Blocks used: " .. blocks)
 	print("Fuel used: " .. fuel)
