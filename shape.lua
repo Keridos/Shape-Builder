@@ -1071,18 +1071,27 @@ function Choicefunct()
 		dome("sphere", rad)
 	end
 	if choice == "circle" then
-		writeOut("What radius do you need it to be?")
-		local rad = io.read()
+		if sim_mode = false then
+			writeOut("What radius do you need it to be?")
+			local rad = io.read()
+		elseif sim_mode = false then
+			local rad = resume_prog_table.param1
+		end
 		rad = tonumber(rad)
 		prog_table {param1 = rad}
 		circle(rad)
 	end
 	if choice == "cylinder" then
-		writeOut("What radius do you need it to be?")
-		local rad = io.read()
+		if sim_mode = false then
+			writeOut("What radius do you need it to be?")
+			local rad = io.read()
+			writeOut("What height do you need it to be?")
+			local height = io.read()
+		elseif sim_mode = true then
+			local rad = resume_prog_table.param1
+			local height = resume_prog_table.param2
+		end
 		rad = tonumber(rad)
-		writeOut("What height do you need it to be?")
-		local height = io.read()
 		height = tonumber(height)
 		prog_table {param1 = rad, param2 = height}
 		for i = 1, height do
