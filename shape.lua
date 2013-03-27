@@ -427,7 +427,6 @@ function stair(width, height)
 end
 
 function circle(radius)
-	radius = tonumber(radius)
 	width = radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
 	boundary_radius = radius + 1.0
@@ -506,8 +505,6 @@ function circle(radius)
 end
 
 function dome(type, radius)
-	type = type
-	radius = tonumber(radius)
 	-- Main dome and sphere building routine
 	width = radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
@@ -650,11 +647,11 @@ end
 
 -- function to write the progress to the file (x, y, z)
 function WriteProgress() 
-	writeOut(textutils.serialize(prog_table))
+	--writeOut(textutils.serialize(prog_table))
 	--ProgressFileCreate()
 	local prog_file = fs.open(prog_file_name,"w")
 	local prog_string = textutils.serialize(prog_table)
-	writeOut(prog_string)
+	--writeOut(prog_string)
 	prog_file.write(prog_string)
 	prog_file.close()
 end
@@ -852,7 +849,7 @@ function Choicefunct()
 		stair(x, y)
 		writeOut("Done")
 	end
-	if choice == "room" then
+	if choice == "cuboid" then
 		local cl = 0
 		local ch = 0
 		local hi = 0
@@ -903,8 +900,9 @@ function Choicefunct()
 		end
 		safeUp()
 		platform(cl, ch)
+		writeOut("Done")
 	end
-	if choice == "dome" then
+	if choice == "1/2 sphere" then
 		local rad = 0
 		local half = ""
 		if sim_mode == false then
@@ -925,6 +923,7 @@ function Choicefunct()
 		else
 			dome("dome", rad)
 		end
+		writeOut("Done")
 	end
 	if choice == "sphere" then
 		local rad = 0
@@ -951,6 +950,7 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		circle(rad)
+		writeOut("Done")
 	end
 	if choice == "cylinder" then
 		local rad = 0
@@ -976,6 +976,7 @@ function Choicefunct()
 		for i = 1, height do
 			safeDown()
 		end
+		writeOut("Done")
 	end
 	if choice == "pyramid" then
 		local width = 0
@@ -1018,6 +1019,7 @@ function Choicefunct()
 				width = width - 2
 			end
 		end
+		writeOut("Done")
 	end
 end
 

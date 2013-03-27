@@ -1,7 +1,9 @@
 Shape-Builder
 =============
 
-Minecraft Computercraft Turtle Versatile Shape Builder
+Minecraft Computercraft Turtle Versatile Shape Builder  
+CC-Forum Thread here: http://www.computercraft.info/forums2/index.php?/topic/11520-the-versatile-shape-builder-updatedactive/  
+Pastebin to the stable version: http://pastebin.com/RAHj4r2K  
 
 Thanks to pruby for the sphere and dome builder code.  
 Thanks for the original program by Michiel and Vliekkie and Aeolun for fixing and making the program readable.
