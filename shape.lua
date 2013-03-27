@@ -620,7 +620,8 @@ end
 -- creates a progress file, containing a serialized table consisting of the shape type, shape input params, and the last known x, y, and z coords of the turtle (beginning of build project)
 function ProgressFileCreate() 
 	if CheckForPrevious() then
-		fs.makeDir(prog_file_name)
+		local prog_file = fs.open(prog_file_name."w")
+		prog_file.close()
 		return true
 	else
 		return false
