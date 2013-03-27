@@ -307,6 +307,7 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 			positionz = positionz - 1
 			ProgressUpdate()
 			WriteProgress()
+		end
 	end
 end
 
@@ -692,7 +693,7 @@ end
 function ContinueQuery()
 	writeOut("Do you want to continue the last job?")
 	local yes = io.read()
-	if yes = "y" then
+	if yes == "y" then
 		return true
 	else
 		return false
@@ -706,7 +707,7 @@ end
 -- Menu and Mainfunctions
 
 function Choicefunct()
-	if sim_mode = false then -- if we are NOT resuming progress
+	if sim_mode == false then -- if we are NOT resuming progress
 		local choice = io.read()
 		prog_table = {shape = choice}
 		writeOut("Building a "..choice)
@@ -715,7 +716,7 @@ function Choicefunct()
 		if yes == 'y' then
 			cost_only = true
 		end
-	elseif sim_mode = true then -- if we ARE resuming progress
+	elseif sim_mode == true then -- if we ARE resuming progress
 		local resume_prog_table = ReadProgress()
 		local choice = resume_prog_table.shape
 	end	
@@ -736,12 +737,12 @@ function Choicefunct()
 	end
 	
 	if choice == "rectangle" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("How deep do you want it to be?")
 			local h = io.read()
 			writeOut("How wide do you want it to be?")
 			local v = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local h = resume_prog_table.param1
 			local v = resume_prog_table.param2
 		end
@@ -751,20 +752,21 @@ function Choicefunct()
 		rectangle(h, v)
 	end
 	if choice == "square" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("How long does it need to be?")
 			s = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			s = resume_prog_table.param1
+		end
 		s = tonumber(s)
 		prog_table = {param1 = s}
 		square(s)
 	end
 	if choice == "line" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("How long does the line need to be?")
 			local ll = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local ll = resume_prog_table.param1
 		end
 		ll = tonumber(ll)
@@ -772,7 +774,7 @@ function Choicefunct()
 		line(ll)
 	end
 	if choice == "wall" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("How long does it need to be?")
 			local wl = io.read()
 			writeOut("How high does it need to be?")
@@ -783,7 +785,7 @@ function Choicefunct()
 			if wl <= 0 then
 				error("Error, the length can not be 0")
 			end
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local wl = resume_prog_table.param1
 			local wh = resume_prog_table.param2
 		end			
@@ -793,12 +795,12 @@ function Choicefunct()
 		wall(wl, wh)
 	end
 	if choice == "platform" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("How wide do you want it to be?")
 			local x = io.read()
 			writeOut("How long do you want it to be?")
 			local y = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local x = resume_prog_table.param1	
 			local y = resume_prog_table.param2		
 		end		
@@ -809,12 +811,12 @@ function Choicefunct()
 		writeOut("Done")
 	end
 	if choice == "stair" then
-		if sim_mode = true then
+		if sim_mode == true then
 			writeOut("How wide do you want it to be?")
 			local x = io.read()
 			writeOut("How high do you want it to be?")
 			local y = io.read()
-		elseif sim_mode = false then
+		elseif sim_mode == false then
 			local x = resume_prog_table.param1
 			local y = resume_prog_table.param2
 		end
@@ -825,7 +827,7 @@ function Choicefunct()
 		writeOut("Done")
 	end
 	if choice == "room" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("How deep does it need to be?")
 			local cl = io.read()
 			writeOut("How wide does it need to be?")
@@ -841,7 +843,7 @@ function Choicefunct()
 			if ch < 3 then
 				ch = 3
 			end
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local cl = resume_prog_table.param1
 			local ch = resume_prog_table.param2
 			local hi = resume_prog_table.param3
@@ -871,12 +873,12 @@ function Choicefunct()
 		platform(cl, ch)
 	end
 	if choice == "dome" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
 			local rad = io.read()
 			writeOut("What half of the sphere do you want to build?(bottom/top)")
 			local half = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local rad = resume_prog_table.param1
 			local half = resume_prog_table.param2
 		end			
@@ -889,10 +891,10 @@ function Choicefunct()
 		end
 	end
 	if choice == "sphere" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
 			local rad = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local rad = resume_prog_table.param1
 		end
 		rad = tonumber(rad)
@@ -900,10 +902,10 @@ function Choicefunct()
 		dome("sphere", rad)
 	end
 	if choice == "circle" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
 			local rad = io.read()
-		elseif sim_mode = false then
+		elseif sim_mode == false then
 			local rad = resume_prog_table.param1
 		end
 		rad = tonumber(rad)
@@ -911,12 +913,12 @@ function Choicefunct()
 		circle(rad)
 	end
 	if choice == "cylinder" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
 			local rad = io.read()
 			writeOut("What height do you need it to be?")
 			local height = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local rad = resume_prog_table.param1
 			local height = resume_prog_table.param2
 		end
@@ -932,12 +934,12 @@ function Choicefunct()
 		end
 	end
 	if choice == "pyramid" then
-		if sim_mode = false then
+		if sim_mode == false then
 			writeOut("What width/depth do you need it to be?")
 			local width = io.read()
 			writeOut("Do you want it to be hollow [y/n]?")
 			local hollow = io.read()
-		elseif sim_mode = true then
+		elseif sim_mode == true then
 			local width = resume_prog_table.param1
 		end
 		width = tonumber(width)
