@@ -703,177 +703,6 @@ function ProgressUpdate()  -- this ONLY updates the local table variable.  Writi
 	prog_table = {x = positionx, y = positiony, facing = facing, blocks = blocks}
 end
 
--- will resume the previous job
-function ResumePrevious() -- PLAN:  basically take out io.read()'s, replace "choice = shape" with 
-	-- will read the file and extract shape type, params.
-	-- will then enter the corresponding build subroutine
-	sim_mode = true
-	cost_only = true
-	local resume_prog_table = ReadProgress()
-	local choice = resume_prog_table.shape
-	if choice == "rectangle" then -- fixed
-		--writeOut("How deep do you want it to be?")
-		h = resume_prog_table.param1
-		h = tonumber(h)
-		--writeOut("How wide do you want it to be?")
-		v = resume_prog_table.param2
-		v = tonumber(v)
-		rectangle(h,v)
-	end
-	if choice == "square" then 
-		--writeOut("How long does it need to be?")
-		local s = resume_prog_table.param1
-		s = tonumber(s)
-		square(s)
-	end
-	if choice == "line" then 
-		--writeOut("How long does the line need to be?")
-		local ll = resume_prog_table.param1
-		ll = tonumber(ll)
-		line(ll)
-	end
-	if choice == "wall" then 
-		--writeOut("How long does it need to be?")
-		local wl = resume_prog_table.param1
-		wl = tonumber(wl)
-		--writeOut("How high does it need to be?")
-		local wh = resume_prog_table.param2
-		wh = tonumber(wh)
-		if  wh <= 0 then
-			error("Error, the height can not be zero")
-		end
-		if wl <= 0 then
-			error("Error, the length can not be 0")
-		end
-		wall(wl, wh)
-	end
-	if choice == "platform" then
-		--writeOut("How wide do you want it to be?")
-		x = resume_prog_table.param1
-		x = tonumber(x)
-		--writeOut("How long do you want it to be?")
-		y = resume_prog_table.param2
-		y = tonumber(y)
-		platform(x, y)
-		writeOut("Done")
-	end
-	if choice == "stair" then 
-		--writeOut("How wide do you want it to be?")
-		x = resume_prog_table.param1
-		x = tonumber(x)
-		--writeOut("How high do you want it to be?")
-		y = resume_prog_table.param2
-		y = tonumber(y)
-		stair(x, y)
-		--writeOut("Done")
-	end
-	if choice == "room" then
-		--writeOut("How deep does it need to be?")
-		local cl = resume_prog_table.param1
-		cl = tonumber(cl)
-		--writeOut("How wide does it need to be?")
-		local ch = resume_prog_table.param2
-		ch = tonumber(ch)
-		--writeOut("How high does it need to be?")
-		local hi = resume_prog_table.param3
-		hi = tonumber(hi)
-		if hi < 3 then
-			hi = 3
-		end
-		if cl < 3 then
-			cl = 3
-		end
-		if ch < 3 then
-			ch = 3
-		end
-		platform(cl, ch)
-		while (facing > 0) do
-			turnLeftTrack()
-		end
-		turnAroundTrack()
-		if ((ch % 2)==0) then
-			-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
-			turnLeftTrack()
-		end
-		for i = 1, hi-2 do
-			safeUp()
-			if ((ch % 2)==0) then -- this aswell
-			rectangle(cl, ch)
-			else
-			rectangle(ch, cl)
-			end
-		end
-		safeUp()
-		platform(cl, ch)
-	end
-	if choice == "dome" then --fixed
-		--writeOut("What radius do you need it to be?")
-		local rad = resume_prog_table.param1
-		rad = tonumber(rad)
-		dome("dome", rad)
-	end
-	if choice == "sphere" then
-		--writeOut("What radius do you need it to be?")
-		local rad = resume_prog_table.param1
-		rad = tonumber(rad)
-		dome("sphere", rad)
-	end
-	if choice == "circle" then
-		--writeOut("What radius do you need it to be?")
-		local rad = resume_prog_table.param1
-		rad = tonumber(rad)
-		circle(rad)
-	end
-	if choice == "cylinder" then
-		--writeOut("What radius do you need it to be?")
-		local rad = resume_prog_table.param1
-		rad = tonumber(rad)
-		--writeOut("What height do you need it to be?")
-		local height = resume_prog_table.param2
-		height = tonumber(height)
-		for i = 1, height do
-			circle(rad)
-			safeUp()
-		end
-		for i = 1, height do
-			safeDown()
-		end
-	end
-	if choice == "pyramid" then
-		--writeOut("What width/depth do you need it to be?")
-		local width = resume_prog_table.param1
-		width = tonumber(width)
-		--writeOut("Do you want it to be hollow [y/n]?")
-		local hollow = resume_prog_table.param2
-		if hollow == 'y' then
-			hollow = true
-		else
-			hollow = false
-		end
-		height = math.ceil(width / 2)
-		for i = 1, height do
-			if hollow then
-				rectangle(width, width)
-			else
-				platform(width, width)
-				navigateTo(0,0)
-				while facing ~= 0 do
-					turnRightTrack()
-				end
-			end
-			if i ~= height then
-				safeUp()
-				safeForward()
-				turnRightTrack()
-				safeForward()
-				turnLeftTrack()
-				width = width - 2
-			end
-		end
-	end
-end
-
-
 -- Menu and Mainfunctions
 
 function Choicefunct()
@@ -1103,11 +932,15 @@ function Choicefunct()
 		end
 	end
 	if choice == "pyramid" then
-		writeOut("What width/depth do you need it to be?")
-		local width = io.read()
+		if sim_mode = false then
+			writeOut("What width/depth do you need it to be?")
+			local width = io.read()
+			writeOut("Do you want it to be hollow [y/n]?")
+			local hollow = io.read()
+		elseif sim_mode = true then
+			local width = resume_prog_table.param1
+		end
 		width = tonumber(width)
-		writeOut("Do you want it to be hollow [y/n]?")
-		local hollow = io.read()
 		prog_table = {param1 = width, param2 = hollow}
 		if hollow == 'y' then
 			hollow = true
