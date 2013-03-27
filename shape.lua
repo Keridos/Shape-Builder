@@ -793,7 +793,7 @@ function Choicefunct()
 		end			
 		wl = tonumber(wl)
 		wh = tonumber(wh)
-		prog_table {param1 = wl, param2 = wh}
+		prog_table = {param1 = wl, param2 = wh}
 		wall(wl, wh)
 	end
 	if choice == "platform" then
@@ -808,7 +808,7 @@ function Choicefunct()
 		end		
 		x = tonumber(x)
 		y = tonumber(y)
-		prog_table {param1 = x, param2 = y}
+		prog_table = {param1 = x, param2 = y}
 		platform(x, y)
 		writeOut("Done")
 	end
@@ -824,7 +824,7 @@ function Choicefunct()
 		end
 		x = tonumber(x)
 		y = tonumber(y)
-		prog_table {param1 = x, param2 = y}
+		prog_table = {param1 = x, param2 = y}
 		stair(x, y)
 		writeOut("Done")
 	end
@@ -900,7 +900,7 @@ function Choicefunct()
 			local rad = resume_prog_table.param1
 		end
 		rad = tonumber(rad)
-		prog_table {param1 = rad}
+		prog_table = {param1 = rad}
 		dome("sphere", rad)
 	end
 	if choice == "circle" then
@@ -911,7 +911,7 @@ function Choicefunct()
 			local rad = resume_prog_table.param1
 		end
 		rad = tonumber(rad)
-		prog_table {param1 = rad}
+		prog_table = {param1 = rad}
 		circle(rad)
 	end
 	if choice == "cylinder" then
@@ -926,7 +926,7 @@ function Choicefunct()
 		end
 		rad = tonumber(rad)
 		height = tonumber(height)
-		prog_table {param1 = rad, param2 = height}
+		prog_table = {param1 = rad, param2 = height}
 		for i = 1, height do
 			circle(rad)
 			safeUp()
