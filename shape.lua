@@ -1021,6 +1021,8 @@ function main()
 		if not ContinueQuery() then -- if I don't want to continue
 			ProgressFileDelete()
 			SetSimFlags(false) -- just to be safe
+			WriteMenu()
+			Choicefunct()
 		else	-- if I want to continue
 			SetSimFlags(true)
 			ChoiceFunct()
