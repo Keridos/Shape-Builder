@@ -10,6 +10,7 @@ local facing = 0
 local resupply = 0
 local choice = ""
 
+local temp_prog_table = {}
 local prog_table = {} --this is the LOCAL table!  used for local stuff only, and is ONLY EVER WRITTEN when sim_mode is FALSE
 local prog_file_name = "ShapesProgressFile"
 
@@ -87,8 +88,7 @@ function placeBlock()
 	if cost_only then
 		return
 	end
-	if turtle.detectDown() and not turtle.
-	Down() then
+	if turtle.detectDown() and not turtle.compareDown() then
 		turtle.digDown()
 	end
 	checkResources()
@@ -650,9 +650,11 @@ end
 
 -- function to write the progress to the file (x, y, z)
 function WriteProgress() 
-	ProgressFileCreate()
+	writeOut(textutils.serialize(prog_table))
+	--ProgressFileCreate()
 	local prog_file = fs.open(prog_file_name,"w")
 	local prog_string = textutils.serialize(prog_table)
+	writeOut(prog_string)
 	prog_file.write(prog_string)
 	prog_file.close()
 end
@@ -682,7 +684,7 @@ function SetSimFlags(b)
 	cost_only = b
 end
 
-function SimulationCheck()  -- DID rename SimulationCheck() for clarity DONE
+function SimulationCheck()  
 	if sim_mode then
 		if CompareProgress() then
 			SetSimFlags(false) -- if we're caught up, un-set flags
@@ -703,15 +705,15 @@ function ContinueQuery()
 end
 
 function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
-	prog_table = {x = positionx, y = positiony, facing = facing, blocks = blocks}
+	prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
 end
 
 -- Menu and Mainfunctions
 
 function Choicefunct()
-	local resume_prog_table = {}
 	if sim_mode == false then -- if we are NOT resuming progress
 		choice = io.read()
+		temp_prog_table = {shape = choice}
 		prog_table = {shape = choice}
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
@@ -720,8 +722,8 @@ function Choicefunct()
 			cost_only = true
 		end
 	elseif sim_mode == true then -- if we ARE resuming progress
-		resume_prog_table = ReadProgress()
-		choice = resume_prog_table.shape
+		temp_prog_table = ReadProgress()
+		choice = temp_prog_table.shape
 	end	
 	if not cost_only then
 		turtle.select(1)
@@ -747,12 +749,14 @@ function Choicefunct()
 			writeOut("How wide do you want it to be?")
 			v = io.read()
 		elseif sim_mode == true then
-			h = resume_prog_table.param1
-			v = resume_prog_table.param2
+			h = temp_prog_table.param1
+			v = temp_prog_table.param2
 		end
 		h = tonumber(h)
 		v = tonumber(v)
-		prog_table = {param1 = h, param2 = v}  -- THIS is here because we NEED to update the local table!
+		temp_prog_table.param1 = h
+		temp_prog_table.param2 = v
+		prog_table = {param1 = h, param2 = v} -- THIS is here because we NEED to update the local table!
 		rectangle(h, v)
 	end
 	if choice == "square" then
@@ -761,7 +765,7 @@ function Choicefunct()
 			writeOut("How long does it need to be?")
 			s = io.read()
 		elseif sim_mode == true then
-			s = resume_prog_table.param1
+			s = temp_prog_table.param1
 		end
 		s = tonumber(s)
 		prog_table = {param1 = s}
@@ -773,9 +777,10 @@ function Choicefunct()
 			writeOut("How long does the line need to be?")
 			ll = io.read()
 		elseif sim_mode == true then
-			ll = resume_prog_table.param1
+			ll = temp_prog_table.param1
 		end
 		ll = tonumber(ll)
+		temp_prog_table.param1 = ll
 		prog_table = {param1 = ll}
 		line(ll)
 	end
@@ -788,11 +793,13 @@ function Choicefunct()
 			writeOut("How high does it need to be?")
 			wh = io.read()
 		elseif sim_mode == true then
-			wl = resume_prog_table.param1
-			wh = resume_prog_table.param2
+			wl = temp_prog_table.param1
+			wh = temp_prog_table.param2
 		end			
 		wl = tonumber(wl)
 		wh = tonumber(wh)
+		temp_prog_table.param1 = wl
+		temp_prog_table.param2 = wh
 		if  wh <= 0 then
 			error("Error, the height can not be zero")
 		end
@@ -811,11 +818,13 @@ function Choicefunct()
 			writeOut("How long do you want it to be?")
 			y = io.read()
 		elseif sim_mode == true then
-			x = resume_prog_table.param1	
-			y = resume_prog_table.param2		
+			x = temp_prog_table.param1	
+			y = temp_prog_table.param2		
 		end		
 		x = tonumber(x)
 		y = tonumber(y)
+		temp_prog_table.param1 = x
+		temp_prog_table.param2 = y
 		prog_table {param1 = x, param2 = y}
 		platform(x, y)
 		writeOut("Done")
@@ -829,11 +838,13 @@ function Choicefunct()
 			writeOut("How high do you want it to be?")
 			y = io.read()
 		elseif sim_mode == false then
-			x = resume_prog_table.param1
-			y = resume_prog_table.param2
+			x = temp_prog_table.param1
+			y = temp_prog_table.param2
 		end
 		x = tonumber(x)
 		y = tonumber(y)
+		temp_prog_table.param1 = x
+		temp_prog_table.param2 = y
 		prog_table {param1 = x, param2 = y}
 		stair(x, y)
 		writeOut("Done")
@@ -850,13 +861,16 @@ function Choicefunct()
 			writeOut("How high does it need to be?")
 			hi = io.read()
 		elseif sim_mode == true then
-			local cl = resume_prog_table.param1
-			local ch = resume_prog_table.param2
-			local hi = resume_prog_table.param3
+			local cl = temp_prog_table.param1
+			local ch = temp_prog_table.param2
+			local hi = temp_prog_table.param3
 		end
 		cl = tonumber(cl)
 		ch = tonumber(ch)
 		hi = tonumber(hi)
+		temp_prog_table.param1 = cl
+		temp_prog_table.param2 = ch
+		temp_prog_table.param3 = hi
 		if hi < 3 then
 			hi = 3
 		end
@@ -896,11 +910,13 @@ function Choicefunct()
 			writeOut("What half of the sphere do you want to build?(bottom/top)")
 			half = io.read()
 		elseif sim_mode == true then
-			rad = resume_prog_table.param1
-			half = resume_prog_table.param2
+			rad = temp_prog_table.param1
+			half = temp_prog_table.param2
 		end			
-		rad = tonumber(rad)
 		prog_table = {param1 = rad, param2 = half}
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		temp_prog_table.param2 = half
 		if half == "bottom" then
 			dome("bowl", rad)
 		else
@@ -913,9 +929,10 @@ function Choicefunct()
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
 		elseif sim_mode == true then
-			rad = resume_prog_table.param1
+			rad = temp_prog_table.param1
 		end
 		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
 		prog_table {param1 = rad}
 		dome("sphere", rad)
 	end
@@ -925,9 +942,10 @@ function Choicefunct()
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
 		elseif sim_mode == false then
-			rad = resume_prog_table.param1
+			rad = temp_prog_table.param1
 		end
 		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
 		prog_table {param1 = rad}
 		circle(rad)
 	end
@@ -940,11 +958,13 @@ function Choicefunct()
 			writeOut("What height do you need it to be?")
 			height = io.read()
 		elseif sim_mode == true then
-			rad = resume_prog_table.param1
-			height = resume_prog_table.param2
+			rad = temp_prog_table.param1
+			height = temp_prog_table.param2
 		end
 		rad = tonumber(rad)
 		height = tonumber(height)
+		temp_prog_table.param1 = rad
+		temp_prog_table.param2 = height
 		prog_table {param1 = rad, param2 = height}
 		for i = 1, height do
 			circle(rad)
@@ -963,10 +983,12 @@ function Choicefunct()
 			writeOut("Do you want it to be hollow [y/n]?")
 			hollow = io.read()
 		elseif sim_mode == true then
-			width = resume_prog_table.param1
-			hollow = resume_prog_table.param2
+			width = temp_prog_table.param1
+			hollow = temp_prog_table.param2
 		end
 		width = tonumber(width)
+		temp_prog_table.param1 = width
+		temp_prog_table.param2 = hollow
 		prog_table = {param1 = width, param2 = hollow}
 		if hollow == 'y' then
 			hollow = true
@@ -1025,7 +1047,7 @@ function main()
 			Choicefunct()
 		else	-- if I want to continue
 			SetSimFlags(true)
-			ChoiceFunct()
+			Choicefunct()
 		end
 	else
 		SetSimFlags(false)
@@ -1035,6 +1057,8 @@ function main()
 	print("Blocks used: " .. blocks)
 	print("Fuel used: " .. fuel)
 	ProgressFileDelete() -- removes file upon successful completion of a job, or completion of a previous job.
+	prog_table = {}
+	temp_prog_table = {}
 end
 
 main()
