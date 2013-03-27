@@ -993,9 +993,7 @@ function main()
 	end
 	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
 		if not ContinueQuery() then -- if I don't want to continue
-			WriteMenu()
 			SetSimFlags(false) -- just to be safe
-			Choicefunct()
 		else	-- if I want to continue
 			SetSimFlags(true)
 			ChoiceFunct()
