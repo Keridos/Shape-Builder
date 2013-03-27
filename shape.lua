@@ -8,6 +8,7 @@ local positiony = 0
 local positionz = 0
 local facing = 0
 local resupply = 0
+local choice = ""
 
 local prog_table = {} --this is the LOCAL table!  used for local stuff only, and is ONLY EVER WRITTEN when sim_mode is FALSE
 local prog_file_name = "ShapesProgressFile"
@@ -707,8 +708,9 @@ end
 -- Menu and Mainfunctions
 
 function Choicefunct()
+	local resume_prog_table = {}
 	if sim_mode == false then -- if we are NOT resuming progress
-		local choice = io.read()
+		choice = io.read()
 		prog_table = {shape = choice}
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
@@ -717,8 +719,8 @@ function Choicefunct()
 			cost_only = true
 		end
 	elseif sim_mode == true then -- if we ARE resuming progress
-		local resume_prog_table = ReadProgress()
-		local choice = resume_prog_table.shape
+		resume_prog_table = ReadProgress()
+		choice = resume_prog_table.shape
 	end	
 	if not cost_only then
 		turtle.select(1)
@@ -736,14 +738,16 @@ function Choicefunct()
 	end
 	
 	if choice == "rectangle" then
+		local h = 0
+		local v = 0
 		if sim_mode == false then
 			writeOut("How deep do you want it to be?")
-			local h = io.read()
+			h = io.read()
 			writeOut("How wide do you want it to be?")
-			local v = io.read()
+			v = io.read()
 		elseif sim_mode == true then
-			local h = resume_prog_table.param1
-			local v = resume_prog_table.param2
+			h = resume_prog_table.param1
+			v = resume_prog_table.param2
 		end
 		h = tonumber(h)
 		v = tonumber(v)
@@ -751,6 +755,7 @@ function Choicefunct()
 		rectangle(h, v)
 	end
 	if choice == "square" then
+		local s
 		if sim_mode == false then
 			writeOut("How long does it need to be?")
 			s = io.read()
@@ -762,22 +767,25 @@ function Choicefunct()
 		square(s)
 	end
 	if choice == "line" then
+		local ll = 0
 		if sim_mode == false then
 			writeOut("How long does the line need to be?")
-			local ll = io.read()
+			ll = io.read()
 		elseif sim_mode == true then
-			local ll = resume_prog_table.param1
+			ll = resume_prog_table.param1
 		end
 		ll = tonumber(ll)
 		prog_table = {param1 = ll}
 		line(ll)
 	end
 	if choice == "wall" then
+	local wl = 0
+	local wh = 0
 		if sim_mode == false then
 			writeOut("How long does it need to be?")
-			local wl = io.read()
+			wl = io.read()
 			writeOut("How high does it need to be?")
-			local wh = io.read()
+			wh = io.read()
 			if  wh <= 0 then
 				error("Error, the height can not be zero")
 			end
@@ -785,8 +793,8 @@ function Choicefunct()
 				error("Error, the length can not be 0")
 			end
 		elseif sim_mode == true then
-			local wl = resume_prog_table.param1
-			local wh = resume_prog_table.param2
+			wl = resume_prog_table.param1
+			wh = resume_prog_table.param2
 		end			
 		wl = tonumber(wl)
 		wh = tonumber(wh)
@@ -794,14 +802,16 @@ function Choicefunct()
 		wall(wl, wh)
 	end
 	if choice == "platform" then
+		local x = 0
+		local y = 0
 		if sim_mode == false then
 			writeOut("How wide do you want it to be?")
-			local x = io.read()
+			x = io.read()
 			writeOut("How long do you want it to be?")
-			local y = io.read()
+			y = io.read()
 		elseif sim_mode == true then
-			local x = resume_prog_table.param1	
-			local y = resume_prog_table.param2		
+			x = resume_prog_table.param1	
+			y = resume_prog_table.param2		
 		end		
 		x = tonumber(x)
 		y = tonumber(y)
@@ -810,14 +820,16 @@ function Choicefunct()
 		writeOut("Done")
 	end
 	if choice == "stair" then
+		local x = 0
+		local y = 0
 		if sim_mode == true then
 			writeOut("How wide do you want it to be?")
-			local x = io.read()
+			x = io.read()
 			writeOut("How high do you want it to be?")
-			local y = io.read()
+			y = io.read()
 		elseif sim_mode == false then
-			local x = resume_prog_table.param1
-			local y = resume_prog_table.param2
+			x = resume_prog_table.param1
+			y = resume_prog_table.param2
 		end
 		x = tonumber(x)
 		y = tonumber(y)
@@ -826,22 +838,16 @@ function Choicefunct()
 		writeOut("Done")
 	end
 	if choice == "room" then
+		local cl = 0
+		local ch = 0
+		local hi = 0
 		if sim_mode == false then
 			writeOut("How deep does it need to be?")
-			local cl = io.read()
+			cl = io.read()
 			writeOut("How wide does it need to be?")
-			local ch = io.read()
+			ch = io.read()
 			writeOut("How high does it need to be?")
-			local hi = io.read()
-			if hi < 3 then
-				hi = 3
-			end
-			if cl < 3 then
-				cl = 3
-			end
-			if ch < 3 then
-				ch = 3
-			end
+			hi = io.read()
 		elseif sim_mode == true then
 			local cl = resume_prog_table.param1
 			local ch = resume_prog_table.param2
@@ -849,7 +855,16 @@ function Choicefunct()
 		end
 		cl = tonumber(cl)
 		ch = tonumber(ch)
-		hi = tonumber(hi)		
+		hi = tonumber(hi)
+		if hi < 3 then
+			hi = 3
+		end
+		if cl < 3 then
+			cl = 3
+		end
+		if ch < 3 then
+			ch = 3
+		end	
 		prog_table = {param1 = cl, param2 = ch, param3 = hi}
 		platform(cl, ch)		
 		while (facing > 0) do
@@ -872,14 +887,16 @@ function Choicefunct()
 		platform(cl, ch)
 	end
 	if choice == "dome" then
+		local rad = 0
+		local half = ""
 		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
-			local rad = io.read()
+			rad = io.read()
 			writeOut("What half of the sphere do you want to build?(bottom/top)")
-			local half = io.read()
+			half = io.read()
 		elseif sim_mode == true then
-			local rad = resume_prog_table.param1
-			local half = resume_prog_table.param2
+			rad = resume_prog_table.param1
+			half = resume_prog_table.param2
 		end			
 		rad = tonumber(rad)
 		prog_table = {param1 = rad, param2 = half}
@@ -890,36 +907,40 @@ function Choicefunct()
 		end
 	end
 	if choice == "sphere" then
+		local rad = 0
 		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
-			local rad = io.read()
+			rad = io.read()
 		elseif sim_mode == true then
-			local rad = resume_prog_table.param1
+			rad = resume_prog_table.param1
 		end
 		rad = tonumber(rad)
 		prog_table {param1 = rad}
 		dome("sphere", rad)
 	end
 	if choice == "circle" then
+		local rad = 0
 		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
-			local rad = io.read()
+			rad = io.read()
 		elseif sim_mode == false then
-			local rad = resume_prog_table.param1
+			rad = resume_prog_table.param1
 		end
 		rad = tonumber(rad)
 		prog_table {param1 = rad}
 		circle(rad)
 	end
 	if choice == "cylinder" then
+		local rad = 0
+		local height = 0
 		if sim_mode == false then
 			writeOut("What radius do you need it to be?")
-			local rad = io.read()
+			rad = io.read()
 			writeOut("What height do you need it to be?")
-			local height = io.read()
+			height = io.read()
 		elseif sim_mode == true then
-			local rad = resume_prog_table.param1
-			local height = resume_prog_table.param2
+			rad = resume_prog_table.param1
+			height = resume_prog_table.param2
 		end
 		rad = tonumber(rad)
 		height = tonumber(height)
@@ -933,13 +954,16 @@ function Choicefunct()
 		end
 	end
 	if choice == "pyramid" then
+		local width = 0
+		local hollow = ""
 		if sim_mode == false then
 			writeOut("What width/depth do you need it to be?")
-			local width = io.read()
+			width = io.read()
 			writeOut("Do you want it to be hollow [y/n]?")
-			local hollow = io.read()
+			hollow = io.read()
 		elseif sim_mode == true then
-			local width = resume_prog_table.param1
+			width = resume_prog_table.param1
+			hollow = resume_prog_table.param2
 		end
 		width = tonumber(width)
 		prog_table = {param1 = width, param2 = hollow}
