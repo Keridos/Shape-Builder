@@ -787,18 +787,18 @@ function Choicefunct()
 			wl = io.read()
 			writeOut("How high does it need to be?")
 			wh = io.read()
-			if  wh <= 0 then
-				error("Error, the height can not be zero")
-			end
-			if wl <= 0 then
-				error("Error, the length can not be 0")
-			end
 		elseif sim_mode == true then
 			wl = resume_prog_table.param1
 			wh = resume_prog_table.param2
 		end			
 		wl = tonumber(wl)
 		wh = tonumber(wh)
+		if  wh <= 0 then
+			error("Error, the height can not be zero")
+		end
+		if wl <= 0 then
+			error("Error, the length can not be 0")
+		end
 		prog_table {param1 = wl, param2 = wh}
 		wall(wl, wh)
 	end
