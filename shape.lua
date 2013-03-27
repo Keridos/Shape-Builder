@@ -708,8 +708,9 @@ end
 -- Menu and Mainfunctions
 
 function Choicefunct()
+	local choice
 	if sim_mode == false then -- if we are NOT resuming progress
-		local choice = io.read()
+		choice = io.read()
 		prog_table = {shape = choice}
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
