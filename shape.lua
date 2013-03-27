@@ -809,7 +809,7 @@ function Choicefunct()
 		if wl <= 0 then
 			error("Error, the length can not be 0")
 		end
-		prog_table {param1 = wl, param2 = wh}
+		prog_table = {param1 = wl, param2 = wh}
 		wall(wl, wh)
 	end
 	if choice == "platform" then
@@ -828,7 +828,7 @@ function Choicefunct()
 		y = tonumber(y)
 		temp_prog_table.param1 = x
 		temp_prog_table.param2 = y
-		prog_table {param1 = x, param2 = y}
+		prog_table = {param1 = x, param2 = y}
 		platform(x, y)
 		writeOut("Done")
 	end
@@ -848,7 +848,7 @@ function Choicefunct()
 		y = tonumber(y)
 		temp_prog_table.param1 = x
 		temp_prog_table.param2 = y
-		prog_table {param1 = x, param2 = y}
+		prog_table = {param1 = x, param2 = y}
 		stair(x, y)
 		writeOut("Done")
 	end
@@ -936,7 +936,7 @@ function Choicefunct()
 		end
 		rad = tonumber(rad)
 		temp_prog_table.param1 = rad
-		prog_table {param1 = rad}
+		prog_table = {param1 = rad}
 		dome("sphere", rad)
 	end
 	if choice == "circle" then
@@ -949,7 +949,7 @@ function Choicefunct()
 		end
 		rad = tonumber(rad)
 		temp_prog_table.param1 = rad
-		prog_table {param1 = rad}
+		prog_table = {param1 = rad}
 		circle(rad)
 	end
 	if choice == "cylinder" then
@@ -968,7 +968,7 @@ function Choicefunct()
 		height = tonumber(height)
 		temp_prog_table.param1 = rad
 		temp_prog_table.param2 = height
-		prog_table {param1 = rad, param2 = height}
+		prog_table = {param1 = rad, param2 = height}
 		for i = 1, height do
 			circle(rad)
 			safeUp()
