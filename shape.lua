@@ -995,12 +995,14 @@ function main()
 	end
 	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
 		if not ContinueQuery() then -- if I don't want to continue
+			ProgressFileDelete()
 			SetSimFlags(false) -- just to be safe
 		else	-- if I want to continue
 			SetSimFlags(true)
 			ChoiceFunct()
 		end
 	else
+		SetSimFlags(false)
 		WriteMenu()
 		Choicefunct()
 	end
