@@ -171,10 +171,10 @@ function safeBack()
 	while not success do
 		success = turtle.back()
 		if not success then
-			turnAroundTrack();
+			turnAroundTrack()
 			while turtle.detect() do
 				if not turtle.dig() then
-					break;
+					break
 				end
 			end
 			turnAroundTrack()
@@ -504,20 +504,20 @@ function circle(radius)
 	end
 end
 
-function dome(type, radius)
+function dome(typus, radius)
 	-- Main dome and sphere building routine
 	width = radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
 	boundary_radius = radius + 1.0
 	boundary2 = boundary_radius ^ 2
-	if type == "dome" then
+	if typus == "dome" then
 		zstart = radius
-	elseif type == "sphere" then
+	elseif typus == "sphere" then
 		zstart = 0
-	elseif type == "bowl" then
+	elseif typus == "bowl" then
 		zstart = 0
 	end
-	if type == "bowl" then
+	if typus == "bowl" then
 		zend = radius
 	else
 		zend = width - 1
@@ -646,29 +646,33 @@ function WriteShapeParams()
 end
 
 -- function to write the progress to the file (x, y, z)
-function WriteProgress() 
+function WriteProgress()
+	local prog_file
+	local prog_string = textutils.serialize(prog_table) 
 	--writeOut(textutils.serialize(prog_table))
 	--ProgressFileCreate()
-	local prog_file = fs.open(prog_file_name,"w")
-	local prog_string = textutils.serialize(prog_table)
 	--writeOut(prog_string)
-	prog_file.write(prog_string)
-	prog_file.close()
+	if sim_mode == false then
+		prog_file = fs.open(prog_file_name,"w")
+		prog_file.write(prog_string)
+		prog_file.close()
+	end
+	
 end
 
 -- reads progress from file (shape, x, y, z, facing, blocks, param1, param2, param3)
 function ReadProgress()
-	prog_file = fs.open(prog_file_name, "r")
-	local temp_prog_table = textutils.unserialize(prog_file.readAll())
+	local prog_file = fs.open(prog_file_name, "r")
+	local read_prog_table = textutils.unserialize(prog_file.readAll())
 	prog_file.close()
-	return temp_prog_table
+	return read_prog_table
 end
 
 -- compares the progress read from the file to the current sim progress.  needs all four params 
 function CompareProgress() -- return boolean
 	local prog_table_in = prog_table
-	local temp_prog_table = ReadProgress()
-	if prog_table_in.shape == temp_prog_table.shape and prog_table_in.x == temp_prog_table.x and prog_table_in.y == temp_prog_table.y and prog_table_in.blocks == temp_prog_table.blocks and prog_table_in.facing == temp_prog_table.facing then
+	local read_prog_table = ReadProgress()
+	if (prog_table_in.shape == read_prog_table.shape and prog_table_in.x == read_prog_table.x and prog_table_in.y == read_prog_table.y and prog_table_in.blocks == read_prog_table.blocks and prog_table_in.facing == read_prog_table.facing) then
 		writeOut("All caught up!")
 		return true -- we're caught up!
 	else
