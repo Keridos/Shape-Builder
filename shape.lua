@@ -725,7 +725,7 @@ function Choicefunct()
 		turtle.select(1)
 		activeslot = 1
 		if turtle.getItemCount(activeslot) == 0 then
-			if resupply then
+			if resupply==1 then
 				writeOut("Please put building blocks in the first slot.")
 			else
 				writeOut("Please put building blocks in the first slot (and more if you need them)")
