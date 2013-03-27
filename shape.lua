@@ -620,7 +620,7 @@ end
 
 -- creates a progress file, containing a serialized table consisting of the shape type, shape input params, and the last known x, y, and z coords of the turtle (beginning of build project)
 function ProgressFileCreate() 
-	if CheckForPrevious() then
+	if not CheckForPrevious() then
 		fs.makeDir(prog_file_name)
 		return true
 	else
@@ -666,7 +666,8 @@ function ReadProgress()
 end
 
 -- compares the progress read from the file to the current sim progress.  needs all four params 
-function CompareProgress(prog_table_in) -- return boolean
+function CompareProgress() -- return boolean
+	local prog_table_in = prog_table
 	local temp_prog_table = ReadProgress()
 	if prog_table_in.shape == temp_prog_table.shape and prog_table_in.x == temp_prog_table.x and prog_table_in.y == temp_prog_table.y and prog_table_in.blocks == temp_prog_table.blocks and prog_table_in.facing == temp_prog_table.facing then
 		writeOut("All caught up!")
@@ -681,9 +682,9 @@ function SetSimFlags(b)
 	cost_only = b
 end
 
-function SimulationCheck(prog_table_in)  -- DID rename SimulationCheck() for clarity DONE
+function SimulationCheck()  -- DID rename SimulationCheck() for clarity DONE
 	if sim_mode then
-		if CompareProgress(prog_table_in) then
+		if CompareProgress() then
 			SetSimFlags(false) -- if we're caught up, un-set flags
 		else
 			SetSimFlags(true)  -- if not caught up, just re-affirm that the flags are set
