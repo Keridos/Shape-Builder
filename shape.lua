@@ -323,6 +323,11 @@ function navigateTo(targetx, targety)
 	end
 end
 
+function round(toBeRounded, decimalPlace) --needed for hexagon and octagon
+  local multiplier = 10^(decimalPlace or 0)
+  return math.floor(toBeRounded * multiplier + 0.5) / multiplier
+end
+
 -- Shape Building Routines
 
 function line(length)
@@ -602,6 +607,156 @@ function dome(typus, radius)
 		turnLeftTrack()
 	end
 
+end
+
+function hexagon(sideLength)
+	local changex = sideLength / 2
+	local changey = round(math.sqrt(3) * changex, 0)
+	changex = round(changex, 0)
+	local counter = 0
+	
+	navigateTo(changex, 0)
+	
+	for currentSide = 1, 6 do
+		counter = 0
+		
+		if currentSide == 1 then
+			for placed = 1, sideLength do
+				navigateTo(positionx + 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 2 then
+			navigateTo(positionx, positiony + 1)
+			while positiony <= changey do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx + 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony + 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		elseif currentSide == 3 then
+			while positiony <= (2 * changey) do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx - 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony + 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		elseif currentSide == 4 then
+			for placed = 1, sideLength do
+				navigateTo(positionx - 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 5 then
+		navigateTo(positionx, positiony - 1)
+			while positiony >= changey do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx - 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony - 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		elseif currentSide == 6 then
+			while positiony >= 0 do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx + 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony - 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		end
+	end
+	
+	navigateTo(0, 0)
+	while facing ~= 0 do
+		turnLeftTrack()
+	end
+end
+
+function octagon(sideLength)
+	local sideLength2 = sideLength - 1
+	local change = round(sideLength2 / math.sqrt(2), 0)
+	
+	navigateTo(change, 0)
+	
+	for currentSide = 1, 8 do
+		if currentSide == 1 then
+			for placed = 1, sideLength2 do
+				navigateTo(positionx + 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 2 then
+			for placed = 1, change do
+				navigateTo(positionx + 1, positiony + 1)
+				placeBlock()
+			end
+		elseif currentSide == 3 then
+			for placed = 1, sideLength2 do
+				navigateTo(positionx, positiony + 1)
+				placeBlock()
+			end
+		elseif currentSide == 4 then
+			for placed = 1, change do
+				navigateTo(positionx - 1, positiony + 1)
+				placeBlock()
+			end
+		elseif currentSide == 5 then
+			for placed = 1, sideLength2 do
+				navigateTo(positionx - 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 6 then
+			for placed = 1, change do
+				navigateTo(positionx - 1, positiony - 1)
+				placeBlock()
+			end
+		elseif currentSide == 7 then
+		for placed = 1, sideLength2 do
+				navigateTo(positionx, positiony - 1)
+				placeBlock()
+			end
+		elseif currentSide == 8 then
+			for placed = 1, change do
+				navigateTo(positionx + 1, positiony - 1)
+				placeBlock()
+			end
+		end
+	end
+	
+	navigateTo(0, 0)
+	while facing ~= 0 do
+	turnLeftTrack()
+	end	
+end
+
+function hexPrism(sideLength, height)
+	for z = 1, height do
+		hexagon(sideLength)
+		safeUp()
+	end
+end
+
+function octPrism(sideLength, height)
+	for z = 1, height do
+		octagon(sideLength)
+		safeUp()
+	end
 end
 
 -- Previous Progress Resuming, Sim Functions, and File Backend
