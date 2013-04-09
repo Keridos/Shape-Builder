@@ -745,20 +745,6 @@ function octagon(sideLength)
 	end	
 end
 
-function hexPrism(sideLength, height)
-	for z = 1, height do
-		hexagon(sideLength)
-		safeUp()
-	end
-end
-
-function octPrism(sideLength, height)
-	for z = 1, height do
-		octagon(sideLength)
-		safeUp()
-	end
-end
-
 -- Previous Progress Resuming, Sim Functions, and File Backend
 
 -- will check for a "progress" file.
