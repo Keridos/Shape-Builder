@@ -1070,19 +1070,6 @@ function Choicefunct()
 		end
 		writeOut("Done")
 	end
-	if choice == "sphere" then
-		local rad = 0
-		if sim_mode == false then
-			writeOut("What radius do you need it to be?")
-			rad = io.read()
-		elseif sim_mode == true then
-			rad = temp_prog_table.param1
-		end
-		rad = tonumber(rad)
-		temp_prog_table.param1 = rad
-		prog_table = {param1 = rad}
-		dome("sphere", rad)
-	end
 	if choice == "circle" then
 		local rad = 0
 		if sim_mode == false then
@@ -1166,9 +1153,108 @@ function Choicefunct()
 		end
 		writeOut("Done")
 	end
+	if choice == "next" then
+		WriteMenu2()
+		choice = io.read()
+	end
+	if choice == "sphere" then
+		local rad = 0
+		if sim_mode == false then
+			writeOut("What radius do you need it to be?")
+			rad = io.read()
+		elseif sim_mode == true then
+			rad = temp_prog_table.param1
+		end
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		prog_table = {param1 = rad}
+		dome("sphere", rad)
+	end
+	if choice == "hexagon" then
+		local length = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+		end
+		length = tonumber(length)
+		temp_prog_table.param1 = length
+		prog_table = {param1 = length}
+		hexagon(length)
+		writeOut("Done")
+	end
+	if choice == "octagon" then
+		local length = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+		end
+		length = tonumber(length)
+		temp_prog_table.param1 = length
+		prog_table = {param1 = length}
+		octagon(length)
+		writeOut("Done")
+	end
+	if choice == "6 prism" then
+		local length = 0
+		local height = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+			writeOut("What height do you need it to be?")
+			height = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+			height = temp_prog_table.param2
+		end
+		length = tonumber(length)
+		height = tonumber(height)
+		temp_prog_table.param1 = length
+		temp_prog_table.param2 = height
+		prog_table = {param1 = length, param2 = height}
+		for i = 1, height do
+			hexagon(length)
+			safeUp()
+		end
+		for i = 1, height do
+			safeDown()
+		end
+		writeOut("Done")
+	end
+	if choice == "8 prism" then
+		local length = 0
+		local height = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+			writeOut("What height do you need it to be?")
+			height = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+			height = temp_prog_table.param2
+		end
+		length = tonumber(length)
+		height = tonumber(height)
+		temp_prog_table.param1 = length
+		temp_prog_table.param2 = height
+		prog_table = {param1 = length, param2 = height}
+		for i = 1, height do
+			octagon(length)
+			safeUp()
+		end
+		for i = 1, height do
+			safeDown()
+		end
+		writeOut("Done")
+	end
 end
 
 function WriteMenu()
+	term.clear()
+	term.setCursorPos(1, 1)
 	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
@@ -1176,11 +1262,30 @@ function WriteMenu()
 		writeOut("")
 	end
 	writeOut("");
-	writeOut("What should be built?")
+	writeOut("What should be built? [page 1/2]")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("| square  | rectangle | wall  | line  |")
 	writeOut("| cylinder| platform  | stair | cuboid|")
-	writeOut("| pyramid | 1/2 sphere| circle| sphere|")
+	writeOut("| pyramid | 1/2 sphere| circle| next  |")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("")
+end
+
+function WriteMenu2()
+	term.clear()
+	term.setCursorPos(1, 1)
+	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	if resupply==1 then
+		writeOut("Resupply Mode Active")
+	else
+		writeOut("")
+	end
+	writeOut("");
+	writeOut("What should be built [page 2/2]?")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("| hexagon | octagon   | sphere|       |")
+	writeOut("| 6 prism | 8 prism   |       |       |")
+	writeOut("|         |           |       |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
