@@ -338,8 +338,14 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 end
 
 -- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
-function navigateTo(targetx, targety, targetz)
+function navigateTo(targetx, targety, targetz, moveZFirst)
 	targetz = targetz or positionz -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
+	moveZFirst = moveZFirst or false -- default to moving z last
+	
+	if moveZFirst then
+		moveZ(targetZ)
+	end
+	
 	if facing == 0 or facing == 2 then -- Y axis
 		moveY(targety)
 		moveX(targetx)
@@ -347,7 +353,10 @@ function navigateTo(targetx, targety, targetz)
 		moveX(targetx)
 		moveY(targety)
 	end
-	moveZ(targetz)
+	
+	if not moveZFirst then
+		moveZ(targetz)
+	end
 end
 
 function goHome()
