@@ -1147,9 +1147,6 @@ function Choicefunct()
 			safeUp()
 		end
 		goHome()
-		for i = 1, height do
-			safeDown()
-		end
 		writeOut("Done")
 	end
 	if choice == "pyramid" then
@@ -1261,9 +1258,6 @@ function Choicefunct()
 			safeUp()
 		end
 		goHome()
-		for i = 1, height do
-			safeDown()
-		end
 		writeOut("Done")
 	end
 	if choice == "8 prism" then
@@ -1288,9 +1282,6 @@ function Choicefunct()
 			safeUp()
 		end
 		goHome()
-		for i = 1, height do
-			safeDown()
-		end
 		writeOut("Done")
 	end
 end
