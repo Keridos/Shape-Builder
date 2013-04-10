@@ -136,6 +136,16 @@ function turnAroundTrack()
 	turnLeftTrack()
 end
 
+function turnToFace(direction)
+	if direction >= 4 or direction < 0 then
+		return false
+	end
+	while facing > direction do
+		turnLeftTrack()
+	end
+	return true
+end
+
 function safeForward()
 	ProgressUpdate()
 	SimulationCheck()
@@ -294,12 +304,12 @@ function moveX(targetx)
 	end
 end
 
---this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happy
+--this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happydude11209
 function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
 	if targetz == positionz then
 		return
 	end
-	-- for z = positionz,targetz do -- This is the original code in moveZ() incase you want to revert it - Happy
+	-- for z = positionz,targetz do -- This is the original code in moveZ() incase you want to revert it - Happydude11209
 		-- if targetz>positionz then
 			-- safeUp()
 			-- positionz = positionz + 1
@@ -317,13 +327,11 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 	end
 	while targetz < positionz do
 		safeDown()
-		-- positionz = positionz - 1
 		ProgressUpdate()
 		WriteProgress()
 	end
 	while targetz > positionz do
 		safeUp()
-		-- positionz = positionz + 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -343,10 +351,8 @@ function navigateTo(targetx, targety, targetz)
 end
 
 function goHome()
-	navigateTo(0, 0)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
+	navigateTo(0, 0, 0)
+	turnToFace(0)
 end
 
 function round(toBeRounded, decimalPlace) --needed for hexagon and octagon
@@ -533,7 +539,7 @@ function circle(radius)
 	-- while (facing > 0) do
 		-- turnLeftTrack()
 	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function dome(typus, radius)
@@ -633,7 +639,7 @@ function dome(typus, radius)
 	-- while (facing > 0) do
 		-- turnLeftTrack()
 	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function hexagon(sideLength)
@@ -714,7 +720,7 @@ function hexagon(sideLength)
 	-- while facing ~= 0 do
 		-- turnLeftTrack()
 	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function octagon(sideLength)
@@ -771,7 +777,7 @@ function octagon(sideLength)
 	-- while facing ~= 0 do
 	-- turnLeftTrack()
 	-- end	
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 -- Previous Progress Resuming, Sim Functions, and File Backend
