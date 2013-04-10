@@ -340,7 +340,7 @@ end
 -- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
 function navigateTo(targetx, targety, targetz, moveZFirst)
 	targetz = targetz or positionz -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
-	moveZFirst = moveZFirst or false -- default to moving z last
+	moveZFirst = moveZFirst or false -- default to moving z last, if true is passed as last argument, it moves vertically first
 	
 	if moveZFirst then
 		moveZ(targetz)
