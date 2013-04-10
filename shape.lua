@@ -192,6 +192,7 @@ function safeUp()
 	ProgressUpdate()
 	SimulationCheck()
 	fuel = fuel + 1	
+	positionz = positionz + 1
 	if cost_only then
 		return
 	end
@@ -215,6 +216,7 @@ function safeDown()
 	ProgressUpdate()
 	SimulationCheck()
 	fuel = fuel + 1
+	positionz = positionz - 1
 	if cost_only then
 		return
 	end
@@ -292,28 +294,44 @@ function moveX(targetx)
 	end
 end
 
---this is unused right now.  Ignore.
+--this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happy
 function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
 	if targetz == positionz then
 		return
 	end
-	for z = positionz,targetz do
-		if targetz>positionz then
-			safeUp()
-			positionz = positionz + 1
-			ProgressUpdate()
-			WriteProgress()
-		else
-			safeDown()
-			positionz = positionz - 1
-			ProgressUpdate()
-			WriteProgress()
-		end
+	-- for z = positionz,targetz do -- This is the original code in moveZ() incase you want to revert it - Happy
+		-- if targetz>positionz then
+			-- safeUp()
+			-- positionz = positionz + 1
+			-- ProgressUpdate()
+			-- WriteProgress()
+		-- else
+			-- safeDown()
+			-- positionz = positionz - 1
+			-- ProgressUpdate()
+			-- WriteProgress()
+		-- end
+	-- end
+	if targetz == positionz then
+		return
+	end
+	while targetz < positionz do
+		safeDown()
+		-- positionz = positionz - 1
+		ProgressUpdate()
+		WriteProgress()
+	end
+	while targetz > positionz do
+		safeUp()
+		-- positionz = positionz + 1
+		ProgressUpdate()
+		WriteProgress()
 	end
 end
 
 -- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
-function navigateTo(targetx, targety)  
+function navigateTo(targetx, targety, targetz)
+	targetz = targetz or positionz -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
 	if facing == 0 or facing == 2 then -- Y axis
 		moveY(targety)
 		moveX(targetx)
@@ -321,6 +339,7 @@ function navigateTo(targetx, targety)
 		moveX(targetx)
 		moveY(targety)
 	end
+	moveZ(targetz)
 end
 
 function goHome()
@@ -514,7 +533,7 @@ function circle(radius)
 	-- while (facing > 0) do
 		-- turnLeftTrack()
 	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
 end
 
 function dome(typus, radius)
@@ -614,7 +633,7 @@ function dome(typus, radius)
 	-- while (facing > 0) do
 		-- turnLeftTrack()
 	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
 end
 
 function hexagon(sideLength)
@@ -695,7 +714,7 @@ function hexagon(sideLength)
 	-- while facing ~= 0 do
 		-- turnLeftTrack()
 	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
 end
 
 function octagon(sideLength)
@@ -752,7 +771,7 @@ function octagon(sideLength)
 	-- while facing ~= 0 do
 	-- turnLeftTrack()
 	-- end	
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happy
 end
 
 -- Previous Progress Resuming, Sim Functions, and File Backend
