@@ -343,7 +343,7 @@ function navigateTo(targetx, targety, targetz, moveZFirst)
 	moveZFirst = moveZFirst or false -- default to moving z last
 	
 	if moveZFirst then
-		moveZ(targetZ)
+		moveZ(targetz)
 	end
 	
 	if facing == 0 or facing == 2 then -- Y axis
