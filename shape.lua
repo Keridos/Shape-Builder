@@ -857,6 +857,10 @@ function Choicefunct()
 		choice = io.read()
 		temp_prog_table = {shape = choice}
 		prog_table = {shape = choice}
+		if choice == "next" then
+			WriteMenu2()
+			choice = io.read()
+		end
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
 		local yes = io.read()
@@ -1152,10 +1156,6 @@ function Choicefunct()
 			end
 		end
 		writeOut("Done")
-	end
-	if choice == "next" then
-		WriteMenu2()
-		choice = io.read()
 	end
 	if choice == "sphere" then
 		local rad = 0
