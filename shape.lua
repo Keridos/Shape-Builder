@@ -323,6 +323,13 @@ function navigateTo(targetx, targety)
 	end
 end
 
+function goHome()
+	navigateTo(0, 0)
+	while (facing > 0) do
+		turnLeftTrack()
+	end
+end
+
 function round(toBeRounded, decimalPlace) --needed for hexagon and octagon
   local multiplier = 10^(decimalPlace or 0)
   return math.floor(toBeRounded * multiplier + 0.5) / multiplier
@@ -503,10 +510,11 @@ function circle(radius)
 	end
 	-- Return to where we started in x,y place and turn to face original direction
 	-- Don't change vertical place though - should be solid under us!
-	navigateTo(0, 0)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
+	-- navigateTo(0, 0)
+	-- while (facing > 0) do
+		-- turnLeftTrack()
+	-- end
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function dome(typus, radius)
@@ -602,11 +610,11 @@ function dome(typus, radius)
 	end
 	-- Return to where we started in x,y place and turn to face original direction
 	-- Don't change vertical place though - should be solid under us!
-	navigateTo(0, 0)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
-
+	-- navigateTo(0, 0)
+	-- while (facing > 0) do
+		-- turnLeftTrack()
+	-- end
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function hexagon(sideLength)
@@ -683,10 +691,11 @@ function hexagon(sideLength)
 		end
 	end
 	
-	navigateTo(0, 0)
-	while facing ~= 0 do
-		turnLeftTrack()
-	end
+	-- navigateTo(0, 0)
+	-- while facing ~= 0 do
+		-- turnLeftTrack()
+	-- end
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function octagon(sideLength)
@@ -739,10 +748,11 @@ function octagon(sideLength)
 		end
 	end
 	
-	navigateTo(0, 0)
-	while facing ~= 0 do
-	turnLeftTrack()
-	end	
+	-- navigateTo(0, 0)
+	-- while facing ~= 0 do
+	-- turnLeftTrack()
+	-- end	
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 -- Previous Progress Resuming, Sim Functions, and File Backend
@@ -1072,6 +1082,7 @@ function Choicefunct()
 		else
 			dome("dome", rad)
 		end
+		goHome()
 		writeOut("Done")
 	end
 	if choice == "circle" then
@@ -1086,6 +1097,7 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		circle(rad)
+		goHome()
 		writeOut("Done")
 	end
 	if choice == "cylinder" then
@@ -1109,6 +1121,7 @@ function Choicefunct()
 			circle(rad)
 			safeUp()
 		end
+		goHome()
 		for i = 1, height do
 			safeDown()
 		end
@@ -1169,6 +1182,7 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		dome("sphere", rad)
+		goHome()
 	end
 	if choice == "hexagon" then
 		local length = 0
@@ -1182,6 +1196,7 @@ function Choicefunct()
 		temp_prog_table.param1 = length
 		prog_table = {param1 = length}
 		hexagon(length)
+		goHome()
 		writeOut("Done")
 	end
 	if choice == "octagon" then
@@ -1196,6 +1211,7 @@ function Choicefunct()
 		temp_prog_table.param1 = length
 		prog_table = {param1 = length}
 		octagon(length)
+		goHome()
 		writeOut("Done")
 	end
 	if choice == "6 prism" then
@@ -1219,6 +1235,7 @@ function Choicefunct()
 			hexagon(length)
 			safeUp()
 		end
+		goHome()
 		for i = 1, height do
 			safeDown()
 		end
@@ -1245,6 +1262,7 @@ function Choicefunct()
 			octagon(length)
 			safeUp()
 		end
+		goHome()
 		for i = 1, height do
 			safeDown()
 		end
