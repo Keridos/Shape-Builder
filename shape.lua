@@ -1,7 +1,9 @@
 -- Variable Setup
 local argTable = ...
 local cmd_line = false
-local chain_next_shape = false -- this tells goHome() where to end, if true it goes to (0, 0, finalz) if false it goes to (0, 0, 0)
+local cmd_line_resume = false
+local chain_next_shape = false -- this tells goHome() where to end, if true it goes to (0, 0, positionz) if false it goes to (0, 0, 0)
+local special_chain = false -- for certain shapes that finish where the next chained shape should start, goHome() will have no affect if true
 local cost_only = false
 local sim_mode = false
 local blocks = 0
@@ -47,30 +49,6 @@ function linktorsstation() --links to rs station
 		io.read()
 		linktorsstation()
 	end
-end
-
-function checkCommandLine()
-	if #argTable > 0 then
-		return true
-	else
-		return false
-	end
-end
-
-function showHelp()
-	
-end
-
-function needHelp()
-	
-end
-
-function setFlagsFromCommandLine()
-	
-end
-
-function setTableFromCommandLineArguments()
-	
 end
 
 function checkResources()
@@ -388,7 +366,9 @@ end
 
 function goHome()
 	if chain_next_shape then
-		navigateTo(0, 0) -- so another program can chain multiple shapes together to create bigger structures
+		if not special_chain then
+			navigateTo(0, 0) -- so another program can chain multiple shapes together to create bigger structures
+		end
 	else
 		navigateTo(0, 0, 0) -- so the user can collect the turtle when it is done
 	end
@@ -835,7 +815,7 @@ function WriteShapeParams(...) -- the ... lets it take any number of arguments a
 	local paramTable = arg
 	local param_name = "param"
 	local param_name2 = param_name
-	for i,v in ipairs(paramTable) do -- iterates through the args passed to the function for paramTable[1] i = 1 so param_name2 should be "param1". I think this should work :)
+	for i,v in ipairs(paramTable) do -- iterates through the args passed to the function, ex. paramTable[1] i = 1 so param_name2 should be "param1". I think this should work :)
 		param_name2 = param_name .. i
 		temp_prog_table[param_name2] = v
 		prog_table[param_name2] = v
@@ -894,17 +874,71 @@ function SimulationCheck()
 end
 
 function ContinueQuery()
-	writeOut("Do you want to continue the last job?")
-	local yes = io.read()
-	if yes == "y" then
+	if cmd_line_resume then
+		return true
+	else
+		writeOut("Do you want to continue the last job?")
+		local yes = io.read()
+		if yes == "y" then
+			return true
+		else
+			return false
+		end
+	end
+end
+
+function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above. -- I want to change this t allow for any number of params
+	prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
+end
+
+ -- Command Line
+function checkCommandLine() --true if arguments were passed
+	if #argTable > 0 then
 		return true
 	else
 		return false
 	end
 end
 
-function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
-	prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
+function showHelp()
+	writeOut("HELP TO BE ADDED SOON!")
+end
+
+function needHelp() -- true if -h is passed
+	for i, v in ipairs(argTable) do
+		if v == "-h" or v == "-help" or v == "--help" then
+			return true
+		else
+			return false
+		end
+	end
+end
+
+function setFlagsFromCommandLine() -- sets count_only, chain_next_shape, and sim_mode
+	for i, v in ipairs(argTable) do
+		if v == "-c" or v == "-cost" or v == "--cost" then
+			cost_only = true
+		end
+		if v == "-z" or v == "-chain" or v == "--chain" then
+			chain_next_shape = true
+		end
+		if v == "-r" or v == "-resume" or v == "--resume" then
+			cmd_line_resume = true
+		end
+	end
+end
+
+function setTableFromCommandLineArguments() -- sets prog_table and temp_prog_table from command line arguments
+	prog_table.shape = argTable[1]
+	temp_prog_table.shape = argTable[1]
+	local param_name = "param"
+	local param_name2 = param_name
+	for i = 2, #argTable do
+		local add_on = tostring(i - 1)
+		param_name2 = param_name .. add_on
+		prog_table[param_name2] = argTable[i]
+		temp_prog_table[param_name2] = argTable[i]
+	end
 end
 
 -- Menu and Mainfunctions
@@ -926,6 +960,8 @@ function Choicefunct()
 		end
 	elseif sim_mode == true then -- if we ARE resuming progress
 		temp_prog_table = ReadProgress()
+		choice = temp_prog_table.shape
+	elseif cmd_line == true then -- if running from command line
 		choice = temp_prog_table.shape
 	end	
 	if not cost_only then
@@ -1033,7 +1069,6 @@ function Choicefunct()
 		temp_prog_table.param2 = y
 		prog_table = {param1 = x, param2 = y}
 		platform(x, y)
-		writeOut("Done")
 	end
 	if choice == "stair" then
 		local x = 0
@@ -1053,7 +1088,6 @@ function Choicefunct()
 		temp_prog_table.param2 = y
 		prog_table = {param1 = x, param2 = y}
 		stair(x, y)
-		writeOut("Done")
 	end
 	if choice == "cuboid" then
 		local cl = 0
@@ -1106,7 +1140,6 @@ function Choicefunct()
 		end
 		safeUp()
 		platform(cl, ch)
-		writeOut("Done")
 	end
 	if choice == "1/2 sphere" then
 		local rad = 0
@@ -1129,8 +1162,6 @@ function Choicefunct()
 		else
 			dome("dome", rad)
 		end
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "circle" then
 		local rad = 0
@@ -1144,8 +1175,6 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		circle(rad)
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "cylinder" then
 		local rad = 0
@@ -1168,8 +1197,6 @@ function Choicefunct()
 			circle(rad)
 			safeUp()
 		end
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "pyramid" then
 		local width = 0
@@ -1212,7 +1239,6 @@ function Choicefunct()
 				width = width - 2
 			end
 		end
-		writeOut("Done")
 	end
 	if choice == "sphere" then
 		local rad = 0
@@ -1226,7 +1252,6 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		dome("sphere", rad)
-		goHome()
 	end
 	if choice == "hexagon" then
 		local length = 0
@@ -1240,8 +1265,6 @@ function Choicefunct()
 		temp_prog_table.param1 = length
 		prog_table = {param1 = length}
 		hexagon(length)
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "octagon" then
 		local length = 0
@@ -1255,8 +1278,6 @@ function Choicefunct()
 		temp_prog_table.param1 = length
 		prog_table = {param1 = length}
 		octagon(length)
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "6 prism" then
 		local length = 0
@@ -1279,8 +1300,6 @@ function Choicefunct()
 			hexagon(length)
 			safeUp()
 		end
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "8 prism" then
 		local length = 0
@@ -1303,9 +1322,9 @@ function Choicefunct()
 			octagon(length)
 			safeUp()
 		end
-		goHome()
-		writeOut("Done")
 	end
+	goHome() -- After all shape building has finished
+	writeOut("Done") -- Saves a few lines when put here rather than in each if statement
 end
 
 function WriteMenu()
