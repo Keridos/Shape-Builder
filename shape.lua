@@ -810,17 +810,16 @@ function ReadShapeParams()
 	-- TODO unneeded for now, can just use the table elements directly
 end
 
-function WriteShapeParams(...) -- the ... lets it take any number of arguments and stores it to a table
-	-- Needs Testing
+function WriteShapeParams(...) -- the ... lets it take any number of arguments and stores it to the table arg{}
 	local paramTable = arg
 	local param_name = "param"
 	local param_name2 = param_name
-	for i,v in ipairs(paramTable) do -- iterates through the args passed to the function, ex. paramTable[1] i = 1 so param_name2 should be "param1". I think this should work :)
+	for i,v in ipairs(paramTable) do -- iterates through the args passed to the function, ex. paramTable[1] i = 1 so param_name2 should be "param1", tested and works!
 		param_name2 = param_name .. i
 		temp_prog_table[param_name2] = v
 		prog_table[param_name2] = v
 	end
-	-- actually can't do anything right now, because all the param-gathering in Choicefunct() uses different variables
+	-- actually can't do anything right now, because all the param-gathering in Choicefunct() uses different variables -- Working on adding this in (since this can take any number of inputs)
 end
 
 -- function to write the progress to the file (x, y, z)
@@ -936,7 +935,7 @@ function setTableFromCommandLineArguments() -- sets prog_table and temp_prog_tab
 	for i = 2, #argTable do
 		local add_on = tostring(i - 1)
 		param_name2 = param_name .. add_on
-		prog_table[param_name2] = argTable[i]
+		prog_table[param_name2] = argTable[i] tableName.slot
 		temp_prog_table[param_name2] = argTable[i]
 	end
 end
@@ -944,7 +943,7 @@ end
 -- Menu and Mainfunctions
 
 function Choicefunct()
-	if sim_mode == false then -- if we are NOT resuming progress
+	if sim_mode == false and cmd_line == false then -- if we are NOT resuming progress
 		choice = io.read()
 		temp_prog_table = {shape = choice}
 		prog_table = {shape = choice}
@@ -984,12 +983,12 @@ function Choicefunct()
 	if choice == "rectangle" then
 		local h = 0
 		local v = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How deep do you want it to be?")
 			h = io.read()
 			writeOut("How wide do you want it to be?")
 			v = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			h = temp_prog_table.param1
 			v = temp_prog_table.param2
 		end
@@ -1002,10 +1001,10 @@ function Choicefunct()
 	end
 	if choice == "square" then
 		local s
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long does it need to be?")
 			s = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			s = temp_prog_table.param1
 		end
 		s = tonumber(s)
@@ -1015,10 +1014,10 @@ function Choicefunct()
 	end
 	if choice == "line" then
 		local ll = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long does the line need to be?")
 			ll = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			ll = temp_prog_table.param1
 		end
 		ll = tonumber(ll)
@@ -1029,12 +1028,12 @@ function Choicefunct()
 	if choice == "wall" then
 	local wl = 0
 	local wh = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long does it need to be?")
 			wl = io.read()
 			writeOut("How high does it need to be?")
 			wh = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			wl = temp_prog_table.param1
 			wh = temp_prog_table.param2
 		end			
@@ -1054,12 +1053,12 @@ function Choicefunct()
 	if choice == "platform" then
 		local x = 0
 		local y = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How wide do you want it to be?")
 			x = io.read()
 			writeOut("How long do you want it to be?")
 			y = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			x = temp_prog_table.param1	
 			y = temp_prog_table.param2		
 		end		
@@ -1073,12 +1072,12 @@ function Choicefunct()
 	if choice == "stair" then
 		local x = 0
 		local y = 0
-		if sim_mode == true then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How wide do you want it to be?")
 			x = io.read()
 			writeOut("How high do you want it to be?")
 			y = io.read()
-		elseif sim_mode == false then
+		elseif sim_mode == true or cmd_line == true then
 			x = temp_prog_table.param1
 			y = temp_prog_table.param2
 		end
@@ -1088,19 +1087,20 @@ function Choicefunct()
 		temp_prog_table.param2 = y
 		prog_table = {param1 = x, param2 = y}
 		stair(x, y)
+		special_chain = true
 	end
 	if choice == "cuboid" then
 		local cl = 0
 		local ch = 0
 		local hi = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How deep does it need to be?")
 			cl = io.read()
 			writeOut("How wide does it need to be?")
 			ch = io.read()
 			writeOut("How high does it need to be?")
 			hi = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			cl = temp_prog_table.param1
 			ch = temp_prog_table.param2
 			hi = temp_prog_table.param3
@@ -1141,15 +1141,15 @@ function Choicefunct()
 		safeUp()
 		platform(cl, ch)
 	end
-	if choice == "1/2 sphere" then
+	if choice == "1/2-sphere" or choice == "1/2 sphere" then
 		local rad = 0
 		local half = ""
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
 			writeOut("What half of the sphere do you want to build?(bottom/top)")
 			half = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 			half = temp_prog_table.param2
 		end	
@@ -1163,12 +1163,38 @@ function Choicefunct()
 			dome("dome", rad)
 		end
 	end
-	if choice == "circle" then
+	if choice == "dome" then
 		local rad = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
-		elseif sim_mode == false then
+		elseif sim_mode == true or cmd_line == true then
+			rad = temp_prog_table.param1
+		end	
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		prog_table = {param1 = rad}
+		dome("dome", rad)
+	end
+	if choice == "bowl" then
+		local rad = 0
+		if sim_mode == false and cmd_line == false then
+			writeOut("What radius do you need it to be?")
+			rad = io.read()
+		elseif sim_mode == true or cmd_line == true then
+			rad = temp_prog_table.param1
+		end	
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		prog_table = {param1 = rad}
+		dome("bowl", rad)
+	end
+	if choice == "circle" then
+		local rad = 0
+		if sim_mode == false and cmd_line == false then
+			writeOut("What radius do you need it to be?")
+			rad = io.read()
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 		end
 		rad = tonumber(rad)
@@ -1179,12 +1205,12 @@ function Choicefunct()
 	if choice == "cylinder" then
 		local rad = 0
 		local height = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
 			writeOut("What height do you need it to be?")
 			height = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 			height = temp_prog_table.param2
 		end
@@ -1201,12 +1227,12 @@ function Choicefunct()
 	if choice == "pyramid" then
 		local width = 0
 		local hollow = ""
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What width/depth do you need it to be?")
 			width = io.read()
 			writeOut("Do you want it to be hollow [y/n]?")
 			hollow = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			width = temp_prog_table.param1
 			hollow = temp_prog_table.param2
 		end
@@ -1242,10 +1268,10 @@ function Choicefunct()
 	end
 	if choice == "sphere" then
 		local rad = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 		end
 		rad = tonumber(rad)
@@ -1255,10 +1281,10 @@ function Choicefunct()
 	end
 	if choice == "hexagon" then
 		local length = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 		end
 		length = tonumber(length)
@@ -1268,10 +1294,10 @@ function Choicefunct()
 	end
 	if choice == "octagon" then
 		local length = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 		end
 		length = tonumber(length)
@@ -1279,15 +1305,15 @@ function Choicefunct()
 		prog_table = {param1 = length}
 		octagon(length)
 	end
-	if choice == "6 prism" then
+	if choice == "6-prism" or choice == "6 prism" then
 		local length = 0
 		local height = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
 			writeOut("What height do you need it to be?")
 			height = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 			height = temp_prog_table.param2
 		end
@@ -1301,15 +1327,15 @@ function Choicefunct()
 			safeUp()
 		end
 	end
-	if choice == "8 prism" then
+	if choice == "8-prism" or choice == "8 prism" then
 		local length = 0
 		local height = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
 			writeOut("What height do you need it to be?")
 			height = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 			height = temp_prog_table.param2
 		end
@@ -1341,7 +1367,7 @@ function WriteMenu()
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("| square  | rectangle | wall  | line  |")
 	writeOut("| cylinder| platform  | stair | cuboid|")
-	writeOut("| pyramid | 1/2 sphere| circle| next  |")
+	writeOut("| pyramid | 1/2-sphere| circle| next  |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
@@ -1349,7 +1375,7 @@ end
 function WriteMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	writeOut("Shape Maker 1.4 also by Happydude1209")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
@@ -1359,7 +1385,7 @@ function WriteMenu2()
 	writeOut("What should be built [page 2/2]?")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("| hexagon | octagon   | sphere|       |")
-	writeOut("| 6 prism | 8 prism   |       |       |")
+	writeOut("| 6-prism | 8-prism   |       |       |")
 	writeOut("|         |           |       |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
