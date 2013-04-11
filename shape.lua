@@ -177,6 +177,15 @@ function safeForward()
 			end
 		end
 	end
+	if facing == 0 then
+		positiony = positiony + 1
+	elseif facing == 1 then
+		positionx = positionx + 1
+	elseif facing == 2 then
+		positiony = positiony - 1
+	elseif facing == 3 then
+		positionx = positionx - 1
+	end
 end
 
 function safeBack()
@@ -205,6 +214,15 @@ function safeBack()
 				io.read()
 			end
 		end
+	end
+	if facing == 0 then
+		positiony = positiony - 1
+	elseif facing == 1 then
+		positionx = positionx - 1
+	elseif facing == 2 then
+		positiony = positiony + 1
+	elseif facing == 3 then
+		positionx = positionx + 1
 	end
 end
 
@@ -269,7 +287,6 @@ function moveY(targety)
 		else
 			safeBack()
 		end
-		positiony = positiony + 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -279,7 +296,6 @@ function moveY(targety)
 		else
 			safeBack()
 		end
-		positiony = positiony - 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -298,7 +314,6 @@ function moveX(targetx)
 		else
 			safeBack()
 		end
-		positionx = positionx + 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -308,7 +323,6 @@ function moveX(targetx)
 		else
 			safeBack()
 		end
-		positionx = positionx - 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -316,22 +330,6 @@ end
 
 --this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happydude11209
 function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
-	if targetz == positionz then
-		return
-	end
-	-- for z = positionz,targetz do -- This is the original code in moveZ() incase you want to revert it - Happydude11209
-		-- if targetz>positionz then
-			-- safeUp()
-			-- positionz = positionz + 1
-			-- ProgressUpdate()
-			-- WriteProgress()
-		-- else
-			-- safeDown()
-			-- positionz = positionz - 1
-			-- ProgressUpdate()
-			-- WriteProgress()
-		-- end
-	-- end
 	if targetz == positionz then
 		return
 	end
@@ -347,7 +345,7 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 	end
 end
 
--- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
+-- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and also makes readability better
 function navigateTo(targetx, targety, targetz, moveZFirst)
 	targetz = targetz or positionz -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
 	moveZFirst = moveZFirst or false -- default to moving z last, if true is passed as last argument, it moves vertically first
