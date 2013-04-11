@@ -912,7 +912,14 @@ function checkCommandLine() --true if arguments were passed
 end
 
 function showHelp()
-	writeOut("HELP TO BE ADDED SOON!")
+	writeOut("Usage: shape [shape-type [param1 param2 param3 ...]] [-c] [-h] [-z] [-r]")
+	writeOut("-c: Activate cost only mode")
+	writeOut("-h: Show this page")
+	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
+	writeOut("-r: Resume the last shape if there are any")
+	io.read() -- pause here
+	writeOut("shape-type can be any of the shapes in the menu")
+	writeOut("After shape-type input any of the paramaters that you know, the rest should be asked for")
 end
 
 function needsHelp() -- true if -h is passed
