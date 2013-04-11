@@ -375,7 +375,7 @@ function goHome()
 			navigateTo(0, 0) -- so another program can chain multiple shapes together to create bigger structures
 		end
 	else
-		navigateTo(0, 0, 0) -- so the user can collect the turtle when it is done
+		navigateTo(-1, -1, 0) -- so the user can collect the turtle when it is done1
 	end
 	turnToFace(0)
 end
