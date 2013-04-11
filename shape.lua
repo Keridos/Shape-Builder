@@ -1,17 +1,22 @@
 -- Variable Setup
-local argTable = ...
+local argTable = {...}
+
 local cmd_line = false
 local cmd_line_resume = false
+local cmd_line_cost_only = false
 local chain_next_shape = false -- this tells goHome() where to end, if true it goes to (0, 0, positionz) if false it goes to (0, 0, 0)
 local special_chain = false -- for certain shapes that finish where the next chained shape should start, goHome() will have no affect if true
 local cost_only = false
 local sim_mode = false
+
 local blocks = 0
 local fuel = 0
+
 local positionx = 0
 local positiony = 0
 local positionz = 0
 local facing = 0
+
 local resupply = 0
 local choice = ""
 
@@ -860,6 +865,9 @@ end
 function SetSimFlags(b)
 	sim_mode = b
 	cost_only = b
+	if cmd_line_cost_only then
+		cost_only = true
+	end
 end
 
 function SimulationCheck()  
@@ -876,12 +884,14 @@ function ContinueQuery()
 	if cmd_line_resume then
 		return true
 	else
-		writeOut("Do you want to continue the last job?")
-		local yes = io.read()
-		if yes == "y" then
-			return true
-		else
-			return false
+		if not cmd_line then
+			writeOut("Do you want to continue the last job?")
+			local yes = io.read()
+			if yes == "y" then
+				return true
+			else
+				return false
+			end
 		end
 	end
 end
@@ -893,8 +903,10 @@ end
  -- Command Line
 function checkCommandLine() --true if arguments were passed
 	if #argTable > 0 then
+		cmd_line = true
 		return true
 	else
+		cmd_line = false
 		return false
 	end
 end
@@ -903,8 +915,8 @@ function showHelp()
 	writeOut("HELP TO BE ADDED SOON!")
 end
 
-function needHelp() -- true if -h is passed
-	for i, v in ipairs(argTable) do
+function needsHelp() -- true if -h is passed
+	for i, v in pairs(argTable) do
 		if v == "-h" or v == "-help" or v == "--help" then
 			return true
 		else
@@ -914,20 +926,24 @@ function needHelp() -- true if -h is passed
 end
 
 function setFlagsFromCommandLine() -- sets count_only, chain_next_shape, and sim_mode
-	for i, v in ipairs(argTable) do
+	for i, v in pairs(argTable) do
 		if v == "-c" or v == "-cost" or v == "--cost" then
 			cost_only = true
+			cmd_line_cost_only = true
+			writeOut("Cost only mode")
 		end
 		if v == "-z" or v == "-chain" or v == "--chain" then
 			chain_next_shape = true
+			writeOut("Chained shape mode")
 		end
 		if v == "-r" or v == "-resume" or v == "--resume" then
 			cmd_line_resume = true
+			writeOut("Resuming")
 		end
 	end
 end
 
-function setTableFromCommandLineArguments() -- sets prog_table and temp_prog_table from command line arguments
+function setTableFromCommandLine() -- sets prog_table and temp_prog_table from command line arguments
 	prog_table.shape = argTable[1]
 	temp_prog_table.shape = argTable[1]
 	local param_name = "param"
@@ -935,7 +951,7 @@ function setTableFromCommandLineArguments() -- sets prog_table and temp_prog_tab
 	for i = 2, #argTable do
 		local add_on = tostring(i - 1)
 		param_name2 = param_name .. add_on
-		prog_table[param_name2] = argTable[i] tableName.slot
+		prog_table[param_name2] = argTable[i]
 		temp_prog_table[param_name2] = argTable[i]
 	end
 end
@@ -951,6 +967,14 @@ function Choicefunct()
 			WriteMenu2()
 			choice = io.read()
 		end
+		if choice == "end" or choice == "exit" then
+			writeOut("Goodbye.")
+			return
+		end
+		if choice == "help" then
+			showHelp()
+			return
+		end
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
 		local yes = io.read()
@@ -962,6 +986,7 @@ function Choicefunct()
 		choice = temp_prog_table.shape
 	elseif cmd_line == true then -- if running from command line
 		choice = temp_prog_table.shape
+		writeOut("Building a "..choice)
 	end	
 	if not cost_only then
 		turtle.select(1)
@@ -1362,20 +1387,22 @@ function WriteMenu()
 	else
 		writeOut("")
 	end
-	writeOut("");
-	writeOut("What should be built? [page 1/2]")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| square  | rectangle | wall  | line  |")
-	writeOut("| cylinder| platform  | stair | cuboid|")
-	writeOut("| pyramid | 1/2-sphere| circle| next  |")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("")
+	if not cmd_line then
+		writeOut("");
+		writeOut("What should be built? [page 1/2]")
+		writeOut("+---------+-----------+-------+-------+")
+		writeOut("| square  | rectangle | wall  | line  |")
+		writeOut("| cylinder| platform  | stair | cuboid|")
+		writeOut("| pyramid | 1/2-sphere| circle| next  |")
+		writeOut("+---------+-----------+-------+-------+")
+		writeOut("")
+	end
 end
 
 function WriteMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.4 also by Happydude1209")
+	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
@@ -1384,9 +1411,9 @@ function WriteMenu2()
 	writeOut("");
 	writeOut("What should be built [page 2/2]?")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| hexagon | octagon   | sphere|       |")
+	writeOut("| hexagon | octagon   | end   |       |")
 	writeOut("| 6-prism | 8-prism   |       |       |")
-	writeOut("|         |           |       |       |")
+	writeOut("| sphere  | help      |       |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
@@ -1395,13 +1422,13 @@ function main()
 	if wraprsmodule() then
 		linktorsstation()
 	end
-	if checkCommandLine()
-		if needHelp() then
+	if checkCommandLine() then
+		if needsHelp() then
 			showHelp()
 			return -- close the program after help info is shown
 		end
 		setFlagsFromCommandLine()
-		setTableFromCommandLineArguments()
+		setTableFromCommandLine()
 	end
 	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
 		if not ContinueQuery() then -- if I don't want to continue
