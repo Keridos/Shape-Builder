@@ -1,4 +1,7 @@
 -- Variable Setup
+local argTable = ...
+local cmd_line = false
+local chain_next_shape = false -- this tells goHome() where to end, if true it goes to (0, 0, finalz) if false it goes to (0, 0, 0)
 local cost_only = false
 local sim_mode = false
 local blocks = 0
@@ -44,6 +47,30 @@ function linktorsstation() --links to rs station
 		io.read()
 		linktorsstation()
 	end
+end
+
+function checkCommandLine()
+	if #argTable > 0 then
+		return true
+	else
+		return false
+	end
+end
+
+function showHelp()
+	
+end
+
+function needHelp()
+	
+end
+
+function setFlagsFromCommandLine()
+	
+end
+
+function setTableFromCommandLineArguments()
+	
 end
 
 function checkResources()
@@ -360,7 +387,11 @@ function navigateTo(targetx, targety, targetz, moveZFirst)
 end
 
 function goHome()
-	navigateTo(0, 0, 0)
+	if chain_next_shape then
+		navigateTo(0, 0) -- so another program can chain multiple shapes together to create bigger structures
+	else
+		navigateTo(0, 0, 0) -- so the user can collect the turtle when it is done
+	end
 	turnToFace(0)
 end
 
@@ -542,13 +573,6 @@ function circle(radius)
 			end
 		end
 	end
-	-- Return to where we started in x,y place and turn to face original direction
-	-- Don't change vertical place though - should be solid under us!
-	-- navigateTo(0, 0)
-	-- while (facing > 0) do
-		-- turnLeftTrack()
-	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function dome(typus, radius)
@@ -642,13 +666,6 @@ function dome(typus, radius)
 			end
 		end
 	end
-	-- Return to where we started in x,y place and turn to face original direction
-	-- Don't change vertical place though - should be solid under us!
-	-- navigateTo(0, 0)
-	-- while (facing > 0) do
-		-- turnLeftTrack()
-	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function hexagon(sideLength)
@@ -724,12 +741,6 @@ function hexagon(sideLength)
 			end
 		end
 	end
-	
-	-- navigateTo(0, 0)
-	-- while facing ~= 0 do
-		-- turnLeftTrack()
-	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function octagon(sideLength)
@@ -781,15 +792,9 @@ function octagon(sideLength)
 			end
 		end
 	end
-	
-	-- navigateTo(0, 0)
-	-- while facing ~= 0 do
-	-- turnLeftTrack()
-	-- end	
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
--- Previous Progress Resuming, Sim Functions, and File Backend
+-- Previous Progress Resuming, Sim Functions, Command Line, and File Backend
 
 -- will check for a "progress" file.
 function CheckForPrevious() 
@@ -825,8 +830,16 @@ function ReadShapeParams()
 	-- TODO unneeded for now, can just use the table elements directly
 end
 
-function WriteShapeParams()
-	--TODO
+function WriteShapeParams(...) -- the ... lets it take any number of arguments and stores it to a table
+	-- Needs Testing
+	local paramTable = arg
+	local param_name = "param"
+	local param_name2 = param_name
+	for i,v in ipairs(paramTable) do -- iterates through the args passed to the function for paramTable[1] i = 1 so param_name2 should be "param1". I think this should work :)
+		param_name2 = param_name .. i
+		temp_prog_table[param_name2] = v
+		prog_table[param_name2] = v
+	end
 	-- actually can't do anything right now, because all the param-gathering in Choicefunct() uses different variables
 end
 
@@ -1336,6 +1349,14 @@ end
 function main()
 	if wraprsmodule() then
 		linktorsstation()
+	end
+	if checkCommandLine()
+		if needHelp() then
+			showHelp()
+			return -- close the program after help info is shown
+		end
+		setFlagsFromCommandLine()
+		setTableFromCommandLineArguments()
 	end
 	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
 		if not ContinueQuery() then -- if I don't want to continue
