@@ -880,19 +880,20 @@ function SimulationCheck()
 end
 
 function ContinueQuery()
-	if cmd_line_resume then
-		return true
-	else
-		if not cmd_line then
-			writeOut("Do you want to continue the last job?")
-			local yes = io.read()
-			if yes == "y" then
-				return true
-			else
-				return false
-			end
-		end
-	end
+	return false -- to disable the resume functionality until it is fixed, allows us to update on pastebin for the new shapes.
+	-- if cmd_line_resume then
+		-- return true
+	-- else
+		-- if not cmd_line then
+			-- writeOut("Do you want to continue the last job?")
+			-- local yes = io.read()
+			-- if yes == "y" then
+				-- return true
+			-- else
+				-- return false
+			-- end
+		-- end
+	-- end
 end
 
 function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above. -- I want to change this t allow for any number of params
@@ -915,8 +916,8 @@ function showHelp()
 	writeOut("-c: Activate cost only mode")
 	writeOut("-h: Show this page")
 	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
-	writeOut("-r: Resume the last shape if there are any")
 	io.read() -- pause here
+	writeOut("-r: Resume the last shape if there are any (Note: This is disabled until we can iron out the kinks")
 	writeOut("shape-type can be any of the shapes in the menu")
 	writeOut("After shape-type input any of the paramaters that you know, the rest should be asked for")
 end
