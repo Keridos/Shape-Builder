@@ -136,6 +136,16 @@ function turnAroundTrack()
 	turnLeftTrack()
 end
 
+function turnToFace(direction)
+	if direction >= 4 or direction < 0 then
+		return false
+	end
+	while facing > direction do
+		turnLeftTrack()
+	end
+	return true
+end
+
 function safeForward()
 	ProgressUpdate()
 	SimulationCheck()
@@ -192,6 +202,7 @@ function safeUp()
 	ProgressUpdate()
 	SimulationCheck()
 	fuel = fuel + 1	
+	positionz = positionz + 1
 	if cost_only then
 		return
 	end
@@ -215,6 +226,7 @@ function safeDown()
 	ProgressUpdate()
 	SimulationCheck()
 	fuel = fuel + 1
+	positionz = positionz - 1
 	if cost_only then
 		return
 	end
@@ -292,28 +304,48 @@ function moveX(targetx)
 	end
 end
 
---this is unused right now.  Ignore.
+--this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happydude11209
 function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
 	if targetz == positionz then
 		return
 	end
-	for z = positionz,targetz do
-		if targetz>positionz then
-			safeUp()
-			positionz = positionz + 1
-			ProgressUpdate()
-			WriteProgress()
-		else
-			safeDown()
-			positionz = positionz - 1
-			ProgressUpdate()
-			WriteProgress()
-		end
+	-- for z = positionz,targetz do -- This is the original code in moveZ() incase you want to revert it - Happydude11209
+		-- if targetz>positionz then
+			-- safeUp()
+			-- positionz = positionz + 1
+			-- ProgressUpdate()
+			-- WriteProgress()
+		-- else
+			-- safeDown()
+			-- positionz = positionz - 1
+			-- ProgressUpdate()
+			-- WriteProgress()
+		-- end
+	-- end
+	if targetz == positionz then
+		return
+	end
+	while targetz < positionz do
+		safeDown()
+		ProgressUpdate()
+		WriteProgress()
+	end
+	while targetz > positionz do
+		safeUp()
+		ProgressUpdate()
+		WriteProgress()
 	end
 end
 
 -- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
-function navigateTo(targetx, targety)  
+function navigateTo(targetx, targety, targetz, moveZFirst)
+	targetz = targetz or positionz -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
+	moveZFirst = moveZFirst or false -- default to moving z last, if true is passed as last argument, it moves vertically first
+	
+	if moveZFirst then
+		moveZ(targetz)
+	end
+	
 	if facing == 0 or facing == 2 then -- Y axis
 		moveY(targety)
 		moveX(targetx)
@@ -321,6 +353,20 @@ function navigateTo(targetx, targety)
 		moveX(targetx)
 		moveY(targety)
 	end
+	
+	if not moveZFirst then
+		moveZ(targetz)
+	end
+end
+
+function goHome()
+	navigateTo(0, 0, 0)
+	turnToFace(0)
+end
+
+function round(toBeRounded, decimalPlace) --needed for hexagon and octagon
+  local multiplier = 10^(decimalPlace or 0)
+  return math.floor(toBeRounded * multiplier + 0.5) / multiplier
 end
 
 -- Shape Building Routines
@@ -498,10 +544,11 @@ function circle(radius)
 	end
 	-- Return to where we started in x,y place and turn to face original direction
 	-- Don't change vertical place though - should be solid under us!
-	navigateTo(0, 0)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
+	-- navigateTo(0, 0)
+	-- while (facing > 0) do
+		-- turnLeftTrack()
+	-- end
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function dome(typus, radius)
@@ -597,11 +644,149 @@ function dome(typus, radius)
 	end
 	-- Return to where we started in x,y place and turn to face original direction
 	-- Don't change vertical place though - should be solid under us!
-	navigateTo(0, 0)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
+	-- navigateTo(0, 0)
+	-- while (facing > 0) do
+		-- turnLeftTrack()
+	-- end
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
+end
 
+function hexagon(sideLength)
+	local changex = sideLength / 2
+	local changey = round(math.sqrt(3) * changex, 0)
+	changex = round(changex, 0)
+	local counter = 0
+	
+	navigateTo(changex, 0)
+	
+	for currentSide = 1, 6 do
+		counter = 0
+		
+		if currentSide == 1 then
+			for placed = 1, sideLength do
+				navigateTo(positionx + 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 2 then
+			navigateTo(positionx, positiony + 1)
+			while positiony <= changey do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx + 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony + 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		elseif currentSide == 3 then
+			while positiony <= (2 * changey) do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx - 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony + 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		elseif currentSide == 4 then
+			for placed = 1, sideLength do
+				navigateTo(positionx - 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 5 then
+		navigateTo(positionx, positiony - 1)
+			while positiony >= changey do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx - 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony - 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		elseif currentSide == 6 then
+			while positiony >= 0 do
+				if counter == 0 or counter == 2 or counter == 4 then
+					navigateTo(positionx + 1, positiony)
+				end
+				placeBlock()
+				navigateTo(positionx, positiony - 1)
+				counter = counter + 1
+				if counter == 5 then
+					counter = 0
+				end
+			end
+		end
+	end
+	
+	-- navigateTo(0, 0)
+	-- while facing ~= 0 do
+		-- turnLeftTrack()
+	-- end
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
+end
+
+function octagon(sideLength)
+	local sideLength2 = sideLength - 1
+	local change = round(sideLength2 / math.sqrt(2), 0)
+	
+	navigateTo(change, 0)
+	
+	for currentSide = 1, 8 do
+		if currentSide == 1 then
+			for placed = 1, sideLength2 do
+				navigateTo(positionx + 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 2 then
+			for placed = 1, change do
+				navigateTo(positionx + 1, positiony + 1)
+				placeBlock()
+			end
+		elseif currentSide == 3 then
+			for placed = 1, sideLength2 do
+				navigateTo(positionx, positiony + 1)
+				placeBlock()
+			end
+		elseif currentSide == 4 then
+			for placed = 1, change do
+				navigateTo(positionx - 1, positiony + 1)
+				placeBlock()
+			end
+		elseif currentSide == 5 then
+			for placed = 1, sideLength2 do
+				navigateTo(positionx - 1, positiony)
+				placeBlock()
+			end
+		elseif currentSide == 6 then
+			for placed = 1, change do
+				navigateTo(positionx - 1, positiony - 1)
+				placeBlock()
+			end
+		elseif currentSide == 7 then
+		for placed = 1, sideLength2 do
+				navigateTo(positionx, positiony - 1)
+				placeBlock()
+			end
+		elseif currentSide == 8 then
+			for placed = 1, change do
+				navigateTo(positionx + 1, positiony - 1)
+				placeBlock()
+			end
+		end
+	end
+	
+	-- navigateTo(0, 0)
+	-- while facing ~= 0 do
+	-- turnLeftTrack()
+	-- end	
+	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 -- Previous Progress Resuming, Sim Functions, and File Backend
@@ -716,6 +901,10 @@ function Choicefunct()
 		choice = io.read()
 		temp_prog_table = {shape = choice}
 		prog_table = {shape = choice}
+		if choice == "next" then
+			WriteMenu2()
+			choice = io.read()
+		end
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
 		local yes = io.read()
@@ -927,20 +1116,8 @@ function Choicefunct()
 		else
 			dome("dome", rad)
 		end
+		goHome()
 		writeOut("Done")
-	end
-	if choice == "sphere" then
-		local rad = 0
-		if sim_mode == false then
-			writeOut("What radius do you need it to be?")
-			rad = io.read()
-		elseif sim_mode == true then
-			rad = temp_prog_table.param1
-		end
-		rad = tonumber(rad)
-		temp_prog_table.param1 = rad
-		prog_table = {param1 = rad}
-		dome("sphere", rad)
 	end
 	if choice == "circle" then
 		local rad = 0
@@ -954,6 +1131,7 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		circle(rad)
+		goHome()
 		writeOut("Done")
 	end
 	if choice == "cylinder" then
@@ -977,9 +1155,7 @@ function Choicefunct()
 			circle(rad)
 			safeUp()
 		end
-		for i = 1, height do
-			safeDown()
-		end
+		goHome()
 		writeOut("Done")
 	end
 	if choice == "pyramid" then
@@ -1025,9 +1201,103 @@ function Choicefunct()
 		end
 		writeOut("Done")
 	end
+	if choice == "sphere" then
+		local rad = 0
+		if sim_mode == false then
+			writeOut("What radius do you need it to be?")
+			rad = io.read()
+		elseif sim_mode == true then
+			rad = temp_prog_table.param1
+		end
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		prog_table = {param1 = rad}
+		dome("sphere", rad)
+		goHome()
+	end
+	if choice == "hexagon" then
+		local length = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+		end
+		length = tonumber(length)
+		temp_prog_table.param1 = length
+		prog_table = {param1 = length}
+		hexagon(length)
+		goHome()
+		writeOut("Done")
+	end
+	if choice == "octagon" then
+		local length = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+		end
+		length = tonumber(length)
+		temp_prog_table.param1 = length
+		prog_table = {param1 = length}
+		octagon(length)
+		goHome()
+		writeOut("Done")
+	end
+	if choice == "6 prism" then
+		local length = 0
+		local height = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+			writeOut("What height do you need it to be?")
+			height = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+			height = temp_prog_table.param2
+		end
+		length = tonumber(length)
+		height = tonumber(height)
+		temp_prog_table.param1 = length
+		temp_prog_table.param2 = height
+		prog_table = {param1 = length, param2 = height}
+		for i = 1, height do
+			hexagon(length)
+			safeUp()
+		end
+		goHome()
+		writeOut("Done")
+	end
+	if choice == "8 prism" then
+		local length = 0
+		local height = 0
+		if sim_mode == false then
+			writeOut("How long do you need each side to be?")
+			length = io.read()
+			writeOut("What height do you need it to be?")
+			height = io.read()
+		elseif sim_mode == true then
+			length = temp_prog_table.param1
+			height = temp_prog_table.param2
+		end
+		length = tonumber(length)
+		height = tonumber(height)
+		temp_prog_table.param1 = length
+		temp_prog_table.param2 = height
+		prog_table = {param1 = length, param2 = height}
+		for i = 1, height do
+			octagon(length)
+			safeUp()
+		end
+		goHome()
+		writeOut("Done")
+	end
 end
 
 function WriteMenu()
+	term.clear()
+	term.setCursorPos(1, 1)
 	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
@@ -1035,11 +1305,30 @@ function WriteMenu()
 		writeOut("")
 	end
 	writeOut("");
-	writeOut("What should be built?")
+	writeOut("What should be built? [page 1/2]")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("| square  | rectangle | wall  | line  |")
 	writeOut("| cylinder| platform  | stair | cuboid|")
-	writeOut("| pyramid | 1/2 sphere| circle| sphere|")
+	writeOut("| pyramid | 1/2 sphere| circle| next  |")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("")
+end
+
+function WriteMenu2()
+	term.clear()
+	term.setCursorPos(1, 1)
+	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	if resupply==1 then
+		writeOut("Resupply Mode Active")
+	else
+		writeOut("")
+	end
+	writeOut("");
+	writeOut("What should be built [page 2/2]?")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("| hexagon | octagon   | sphere|       |")
+	writeOut("| 6 prism | 8 prism   |       |       |")
+	writeOut("|         |           |       |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
