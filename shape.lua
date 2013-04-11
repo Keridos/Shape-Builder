@@ -813,7 +813,7 @@ function ReadShapeParams()
 	-- TODO unneeded for now, can just use the table elements directly
 end
 
-function WriteShapeParams(...) -- the ... lets it take any number of arguments and stores it to the table arg{}
+function WriteShapeParams(...) -- the ... lets it take any number of arguments and stores it to the table arg{} | This is still unused anywhere
 	local paramTable = arg
 	local param_name = "param"
 	local param_name2 = param_name
@@ -828,11 +828,12 @@ end
 -- function to write the progress to the file (x, y, z)
 function WriteProgress()
 	local prog_file
-	local prog_string = textutils.serialize(prog_table) 
+	local prog_string = ""
 	--writeOut(textutils.serialize(prog_table))
 	--ProgressFileCreate()
 	--writeOut(prog_string)
-	if sim_mode == false then
+	if sim_mode == false and cost_only == false then
+		prog_string = textutils.serialize(prog_table) -- put in here to save processing time when in cost_only
 		prog_file = fs.open(prog_file_name,"w")
 		prog_file.write(prog_string)
 		prog_file.close()
