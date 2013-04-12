@@ -968,11 +968,13 @@ end
 function Choicefunct()
 	if sim_mode == false and cmd_line == false then -- if we are NOT resuming progress
 		choice = io.read()
+		choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
 		temp_prog_table = {shape = choice}
 		prog_table = {shape = choice}
 		if choice == "next" then
 			WriteMenu2()
 			choice = io.read()
+			choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
 		end
 		if choice == "end" or choice == "exit" then
 			writeOut("Goodbye.")
@@ -991,8 +993,10 @@ function Choicefunct()
 	elseif sim_mode == true then -- if we ARE resuming progress
 		temp_prog_table = ReadProgress()
 		choice = temp_prog_table.shape
+		choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
 	elseif cmd_line == true then -- if running from command line
 		choice = temp_prog_table.shape
+		choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
 		writeOut("Building a "..choice)
 	end	
 	if not cost_only then
@@ -1189,6 +1193,7 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		temp_prog_table.param2 = half
 		prog_table = {param1 = rad, param2 = half}
+		half = string.lower(half)
 		if half == "bottom" then
 			dome("bowl", rad)
 		else
@@ -1272,7 +1277,7 @@ function Choicefunct()
 		temp_prog_table.param1 = width
 		temp_prog_table.param2 = hollow
 		prog_table = {param1 = width, param2 = hollow}
-		if hollow == 'y' then
+		if hollow == 'y' or hollow == 'yes' or hollow == 'true' then
 			hollow = true
 		else
 			hollow = false
