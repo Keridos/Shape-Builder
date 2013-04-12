@@ -1,12 +1,22 @@
 -- Variable Setup
+local argTable = {...}
+
+local cmd_line = false
+local cmd_line_resume = false
+local cmd_line_cost_only = false
+local chain_next_shape = false -- this tells goHome() where to end, if true it goes to (0, 0, positionz) if false it goes to (0, 0, 0)
+local special_chain = false -- for certain shapes that finish where the next chained shape should start, goHome() will have no affect if true
 local cost_only = false
 local sim_mode = false
+
 local blocks = 0
 local fuel = 0
+
 local positionx = 0
 local positiony = 0
 local positionz = 0
 local facing = 0
+
 local resupply = 0
 local choice = ""
 
@@ -167,6 +177,15 @@ function safeForward()
 			end
 		end
 	end
+	if facing == 0 then
+		positiony = positiony + 1
+	elseif facing == 1 then
+		positionx = positionx + 1
+	elseif facing == 2 then
+		positiony = positiony - 1
+	elseif facing == 3 then
+		positionx = positionx - 1
+	end
 end
 
 function safeBack()
@@ -195,6 +214,15 @@ function safeBack()
 				io.read()
 			end
 		end
+	end
+	if facing == 0 then
+		positiony = positiony - 1
+	elseif facing == 1 then
+		positionx = positionx - 1
+	elseif facing == 2 then
+		positiony = positiony + 1
+	elseif facing == 3 then
+		positionx = positionx + 1
 	end
 end
 
@@ -259,7 +287,6 @@ function moveY(targety)
 		else
 			safeBack()
 		end
-		positiony = positiony + 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -269,7 +296,6 @@ function moveY(targety)
 		else
 			safeBack()
 		end
-		positiony = positiony - 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -288,7 +314,6 @@ function moveX(targetx)
 		else
 			safeBack()
 		end
-		positionx = positionx + 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -298,7 +323,6 @@ function moveX(targetx)
 		else
 			safeBack()
 		end
-		positionx = positionx - 1
 		ProgressUpdate()
 		WriteProgress()
 	end
@@ -306,22 +330,6 @@ end
 
 --this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happydude11209
 function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionz
-	if targetz == positionz then
-		return
-	end
-	-- for z = positionz,targetz do -- This is the original code in moveZ() incase you want to revert it - Happydude11209
-		-- if targetz>positionz then
-			-- safeUp()
-			-- positionz = positionz + 1
-			-- ProgressUpdate()
-			-- WriteProgress()
-		-- else
-			-- safeDown()
-			-- positionz = positionz - 1
-			-- ProgressUpdate()
-			-- WriteProgress()
-		-- end
-	-- end
 	if targetz == positionz then
 		return
 	end
@@ -337,7 +345,7 @@ function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND 
 	end
 end
 
--- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and alos makes readability better
+-- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and also makes readability better
 function navigateTo(targetx, targety, targetz, moveZFirst)
 	targetz = targetz or positionz -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
 	moveZFirst = moveZFirst or false -- default to moving z last, if true is passed as last argument, it moves vertically first
@@ -360,7 +368,13 @@ function navigateTo(targetx, targety, targetz, moveZFirst)
 end
 
 function goHome()
-	navigateTo(0, 0, 0)
+	if chain_next_shape then
+		if not special_chain then
+			navigateTo(0, 0) -- so another program can chain multiple shapes together to create bigger structures
+		end
+	else
+		navigateTo(-1, -1, 0) -- so the user can collect the turtle when it is done1
+	end
 	turnToFace(0)
 end
 
@@ -542,13 +556,6 @@ function circle(radius)
 			end
 		end
 	end
-	-- Return to where we started in x,y place and turn to face original direction
-	-- Don't change vertical place though - should be solid under us!
-	-- navigateTo(0, 0)
-	-- while (facing > 0) do
-		-- turnLeftTrack()
-	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function dome(typus, radius)
@@ -642,13 +649,6 @@ function dome(typus, radius)
 			end
 		end
 	end
-	-- Return to where we started in x,y place and turn to face original direction
-	-- Don't change vertical place though - should be solid under us!
-	-- navigateTo(0, 0)
-	-- while (facing > 0) do
-		-- turnLeftTrack()
-	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function hexagon(sideLength)
@@ -724,12 +724,6 @@ function hexagon(sideLength)
 			end
 		end
 	end
-	
-	-- navigateTo(0, 0)
-	-- while facing ~= 0 do
-		-- turnLeftTrack()
-	-- end
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
 function octagon(sideLength)
@@ -781,15 +775,9 @@ function octagon(sideLength)
 			end
 		end
 	end
-	
-	-- navigateTo(0, 0)
-	-- while facing ~= 0 do
-	-- turnLeftTrack()
-	-- end	
-	--I'm replacing this with a goHome() in the if statement in Choicefunct() - Happydude11209
 end
 
--- Previous Progress Resuming, Sim Functions, and File Backend
+-- Previous Progress Resuming, Sim Functions, Command Line, and File Backend
 
 -- will check for a "progress" file.
 function CheckForPrevious() 
@@ -825,19 +813,27 @@ function ReadShapeParams()
 	-- TODO unneeded for now, can just use the table elements directly
 end
 
-function WriteShapeParams()
-	--TODO
-	-- actually can't do anything right now, because all the param-gathering in Choicefunct() uses different variables
+function WriteShapeParams(...) -- the ... lets it take any number of arguments and stores it to the table arg{} | This is still unused anywhere
+	local paramTable = arg
+	local param_name = "param"
+	local param_name2 = param_name
+	for i,v in ipairs(paramTable) do -- iterates through the args passed to the function, ex. paramTable[1] i = 1 so param_name2 should be "param1", tested and works!
+		param_name2 = param_name .. i
+		temp_prog_table[param_name2] = v
+		prog_table[param_name2] = v
+	end
+	-- actually can't do anything right now, because all the param-gathering in Choicefunct() uses different variables -- Working on adding this in (since this can take any number of inputs)
 end
 
 -- function to write the progress to the file (x, y, z)
 function WriteProgress()
 	local prog_file
-	local prog_string = textutils.serialize(prog_table) 
+	local prog_string = ""
 	--writeOut(textutils.serialize(prog_table))
 	--ProgressFileCreate()
 	--writeOut(prog_string)
-	if sim_mode == false then
+	if sim_mode == false and cost_only == false then
+		prog_string = textutils.serialize(prog_table) -- put in here to save processing time when in cost_only
 		prog_file = fs.open(prog_file_name,"w")
 		prog_file.write(prog_string)
 		prog_file.close()
@@ -868,6 +864,9 @@ end
 function SetSimFlags(b)
 	sim_mode = b
 	cost_only = b
+	if cmd_line_cost_only then
+		cost_only = true
+	end
 end
 
 function SimulationCheck()  
@@ -881,29 +880,109 @@ function SimulationCheck()
 end
 
 function ContinueQuery()
-	writeOut("Do you want to continue the last job?")
-	local yes = io.read()
-	if yes == "y" then
+	return false -- to disable the resume functionality until it is fixed, allows us to update on pastebin for the new shapes.
+	-- if cmd_line_resume then
+		-- return true
+	-- else
+		-- if not cmd_line then
+			-- writeOut("Do you want to continue the last job?")
+			-- local yes = io.read()
+			-- if yes == "y" then
+				-- return true
+			-- else
+				-- return false
+			-- end
+		-- end
+	-- end
+end
+
+function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above. -- I want to change this t allow for any number of params
+	prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
+end
+
+ -- Command Line
+function checkCommandLine() --true if arguments were passed
+	if #argTable > 0 then
+		cmd_line = true
 		return true
 	else
+		cmd_line = false
 		return false
 	end
 end
 
-function ProgressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above.
-	prog_table = {shape = choice, param1 = temp_prog_table.param1, param2 = temp_prog_table.param2, param3 = temp_prog_table.param3, x = positionx, y = positiony, facing = facing, blocks = blocks}
+function showHelp()
+	writeOut("Usage: shape [shape-type [param1 param2 param3 ...]] [-c] [-h] [-z] [-r]")
+	writeOut("-c: Activate cost only mode")
+	writeOut("-h: Show this page")
+	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
+	io.read() -- pause here
+	writeOut("-r: Resume the last shape if there are any (Note: This is disabled until we can iron out the kinks")
+	writeOut("shape-type can be any of the shapes in the menu")
+	writeOut("After shape-type input any of the paramaters that you know, the rest should be asked for")
+end
+
+function needsHelp() -- true if -h is passed
+	for i, v in pairs(argTable) do
+		if v == "-h" or v == "-help" or v == "--help" then
+			return true
+		else
+			return false
+		end
+	end
+end
+
+function setFlagsFromCommandLine() -- sets count_only, chain_next_shape, and sim_mode
+	for i, v in pairs(argTable) do
+		if v == "-c" or v == "-cost" or v == "--cost" then
+			cost_only = true
+			cmd_line_cost_only = true
+			writeOut("Cost only mode")
+		end
+		if v == "-z" or v == "-chain" or v == "--chain" then
+			chain_next_shape = true
+			writeOut("Chained shape mode")
+		end
+		if v == "-r" or v == "-resume" or v == "--resume" then
+			cmd_line_resume = true
+			writeOut("Resuming")
+		end
+	end
+end
+
+function setTableFromCommandLine() -- sets prog_table and temp_prog_table from command line arguments
+	prog_table.shape = argTable[1]
+	temp_prog_table.shape = argTable[1]
+	local param_name = "param"
+	local param_name2 = param_name
+	for i = 2, #argTable do
+		local add_on = tostring(i - 1)
+		param_name2 = param_name .. add_on
+		prog_table[param_name2] = argTable[i]
+		temp_prog_table[param_name2] = argTable[i]
+	end
 end
 
 -- Menu and Mainfunctions
 
 function Choicefunct()
-	if sim_mode == false then -- if we are NOT resuming progress
+	if sim_mode == false and cmd_line == false then -- if we are NOT resuming progress
 		choice = io.read()
+		choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
 		temp_prog_table = {shape = choice}
 		prog_table = {shape = choice}
 		if choice == "next" then
 			WriteMenu2()
 			choice = io.read()
+			choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
+		end
+		if choice == "end" or choice == "exit" then
+			writeOut("Goodbye.")
+			return
+		end
+		if choice == "help" then
+			showHelp()
+			return
 		end
 		writeOut("Building a "..choice)
 		writeOut("Want to just calculate the cost? [y/n]")
@@ -914,6 +993,11 @@ function Choicefunct()
 	elseif sim_mode == true then -- if we ARE resuming progress
 		temp_prog_table = ReadProgress()
 		choice = temp_prog_table.shape
+		choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
+	elseif cmd_line == true then -- if running from command line
+		choice = temp_prog_table.shape
+		choice = string.lower(choice) -- all checks are aginst lower case words so this is to ensure that
+		writeOut("Building a "..choice)
 	end	
 	if not cost_only then
 		turtle.select(1)
@@ -935,12 +1019,12 @@ function Choicefunct()
 	if choice == "rectangle" then
 		local h = 0
 		local v = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How deep do you want it to be?")
 			h = io.read()
 			writeOut("How wide do you want it to be?")
 			v = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			h = temp_prog_table.param1
 			v = temp_prog_table.param2
 		end
@@ -953,10 +1037,10 @@ function Choicefunct()
 	end
 	if choice == "square" then
 		local s
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long does it need to be?")
 			s = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			s = temp_prog_table.param1
 		end
 		s = tonumber(s)
@@ -966,10 +1050,10 @@ function Choicefunct()
 	end
 	if choice == "line" then
 		local ll = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long does the line need to be?")
 			ll = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			ll = temp_prog_table.param1
 		end
 		ll = tonumber(ll)
@@ -980,12 +1064,12 @@ function Choicefunct()
 	if choice == "wall" then
 	local wl = 0
 	local wh = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long does it need to be?")
 			wl = io.read()
 			writeOut("How high does it need to be?")
 			wh = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			wl = temp_prog_table.param1
 			wh = temp_prog_table.param2
 		end			
@@ -1005,12 +1089,12 @@ function Choicefunct()
 	if choice == "platform" then
 		local x = 0
 		local y = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How wide do you want it to be?")
 			x = io.read()
 			writeOut("How long do you want it to be?")
 			y = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			x = temp_prog_table.param1	
 			y = temp_prog_table.param2		
 		end		
@@ -1020,17 +1104,16 @@ function Choicefunct()
 		temp_prog_table.param2 = y
 		prog_table = {param1 = x, param2 = y}
 		platform(x, y)
-		writeOut("Done")
 	end
 	if choice == "stair" then
 		local x = 0
 		local y = 0
-		if sim_mode == true then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How wide do you want it to be?")
 			x = io.read()
 			writeOut("How high do you want it to be?")
 			y = io.read()
-		elseif sim_mode == false then
+		elseif sim_mode == true or cmd_line == true then
 			x = temp_prog_table.param1
 			y = temp_prog_table.param2
 		end
@@ -1040,20 +1123,20 @@ function Choicefunct()
 		temp_prog_table.param2 = y
 		prog_table = {param1 = x, param2 = y}
 		stair(x, y)
-		writeOut("Done")
+		special_chain = true
 	end
 	if choice == "cuboid" then
 		local cl = 0
 		local ch = 0
 		local hi = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How deep does it need to be?")
 			cl = io.read()
 			writeOut("How wide does it need to be?")
 			ch = io.read()
 			writeOut("How high does it need to be?")
 			hi = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			cl = temp_prog_table.param1
 			ch = temp_prog_table.param2
 			hi = temp_prog_table.param3
@@ -1093,17 +1176,16 @@ function Choicefunct()
 		end
 		safeUp()
 		platform(cl, ch)
-		writeOut("Done")
 	end
-	if choice == "1/2 sphere" then
+	if choice == "1/2-sphere" or choice == "1/2 sphere" then
 		local rad = 0
 		local half = ""
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
 			writeOut("What half of the sphere do you want to build?(bottom/top)")
 			half = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 			half = temp_prog_table.param2
 		end	
@@ -1111,38 +1193,61 @@ function Choicefunct()
 		temp_prog_table.param1 = rad
 		temp_prog_table.param2 = half
 		prog_table = {param1 = rad, param2 = half}
+		half = string.lower(half)
 		if half == "bottom" then
 			dome("bowl", rad)
 		else
 			dome("dome", rad)
 		end
-		goHome()
-		writeOut("Done")
+	end
+	if choice == "dome" then
+		local rad = 0
+		if sim_mode == false and cmd_line == false then
+			writeOut("What radius do you need it to be?")
+			rad = io.read()
+		elseif sim_mode == true or cmd_line == true then
+			rad = temp_prog_table.param1
+		end	
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		prog_table = {param1 = rad}
+		dome("dome", rad)
+	end
+	if choice == "bowl" then
+		local rad = 0
+		if sim_mode == false and cmd_line == false then
+			writeOut("What radius do you need it to be?")
+			rad = io.read()
+		elseif sim_mode == true or cmd_line == true then
+			rad = temp_prog_table.param1
+		end	
+		rad = tonumber(rad)
+		temp_prog_table.param1 = rad
+		prog_table = {param1 = rad}
+		dome("bowl", rad)
 	end
 	if choice == "circle" then
 		local rad = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
-		elseif sim_mode == false then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 		end
 		rad = tonumber(rad)
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		circle(rad)
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "cylinder" then
 		local rad = 0
 		local height = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
 			writeOut("What height do you need it to be?")
 			height = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 			height = temp_prog_table.param2
 		end
@@ -1155,18 +1260,16 @@ function Choicefunct()
 			circle(rad)
 			safeUp()
 		end
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "pyramid" then
 		local width = 0
 		local hollow = ""
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What width/depth do you need it to be?")
 			width = io.read()
 			writeOut("Do you want it to be hollow [y/n]?")
 			hollow = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			width = temp_prog_table.param1
 			hollow = temp_prog_table.param2
 		end
@@ -1174,7 +1277,7 @@ function Choicefunct()
 		temp_prog_table.param1 = width
 		temp_prog_table.param2 = hollow
 		prog_table = {param1 = width, param2 = hollow}
-		if hollow == 'y' then
+		if hollow == 'y' or hollow == 'yes' or hollow == 'true' then
 			hollow = true
 		else
 			hollow = false
@@ -1199,61 +1302,55 @@ function Choicefunct()
 				width = width - 2
 			end
 		end
-		writeOut("Done")
 	end
 	if choice == "sphere" then
 		local rad = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("What radius do you need it to be?")
 			rad = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			rad = temp_prog_table.param1
 		end
 		rad = tonumber(rad)
 		temp_prog_table.param1 = rad
 		prog_table = {param1 = rad}
 		dome("sphere", rad)
-		goHome()
 	end
 	if choice == "hexagon" then
 		local length = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 		end
 		length = tonumber(length)
 		temp_prog_table.param1 = length
 		prog_table = {param1 = length}
 		hexagon(length)
-		goHome()
-		writeOut("Done")
 	end
 	if choice == "octagon" then
 		local length = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 		end
 		length = tonumber(length)
 		temp_prog_table.param1 = length
 		prog_table = {param1 = length}
 		octagon(length)
-		goHome()
-		writeOut("Done")
 	end
-	if choice == "6 prism" then
+	if choice == "6-prism" or choice == "6 prism" then
 		local length = 0
 		local height = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
 			writeOut("What height do you need it to be?")
 			height = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 			height = temp_prog_table.param2
 		end
@@ -1266,18 +1363,16 @@ function Choicefunct()
 			hexagon(length)
 			safeUp()
 		end
-		goHome()
-		writeOut("Done")
 	end
-	if choice == "8 prism" then
+	if choice == "8-prism" or choice == "8 prism" then
 		local length = 0
 		local height = 0
-		if sim_mode == false then
+		if sim_mode == false and cmd_line == false then
 			writeOut("How long do you need each side to be?")
 			length = io.read()
 			writeOut("What height do you need it to be?")
 			height = io.read()
-		elseif sim_mode == true then
+		elseif sim_mode == true or cmd_line == true then
 			length = temp_prog_table.param1
 			height = temp_prog_table.param2
 		end
@@ -1290,9 +1385,9 @@ function Choicefunct()
 			octagon(length)
 			safeUp()
 		end
-		goHome()
-		writeOut("Done")
 	end
+	goHome() -- After all shape building has finished
+	writeOut("Done") -- Saves a few lines when put here rather than in each if statement
 end
 
 function WriteMenu()
@@ -1304,14 +1399,16 @@ function WriteMenu()
 	else
 		writeOut("")
 	end
-	writeOut("");
-	writeOut("What should be built? [page 1/2]")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| square  | rectangle | wall  | line  |")
-	writeOut("| cylinder| platform  | stair | cuboid|")
-	writeOut("| pyramid | 1/2 sphere| circle| next  |")
-	writeOut("+---------+-----------+-------+-------+")
-	writeOut("")
+	if not cmd_line then
+		writeOut("");
+		writeOut("What should be built? [page 1/2]")
+		writeOut("+---------+-----------+-------+-------+")
+		writeOut("| square  | rectangle | wall  | line  |")
+		writeOut("| cylinder| platform  | stair | cuboid|")
+		writeOut("| pyramid | 1/2-sphere| circle| next  |")
+		writeOut("+---------+-----------+-------+-------+")
+		writeOut("")
+	end
 end
 
 function WriteMenu2()
@@ -1326,9 +1423,9 @@ function WriteMenu2()
 	writeOut("");
 	writeOut("What should be built [page 2/2]?")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| hexagon | octagon   | sphere|       |")
-	writeOut("| 6 prism | 8 prism   |       |       |")
-	writeOut("|         |           |       |       |")
+	writeOut("| hexagon | octagon   | end   |       |")
+	writeOut("| 6-prism | 8-prism   |       |       |")
+	writeOut("| sphere  | help      |       |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
@@ -1336,6 +1433,14 @@ end
 function main()
 	if wraprsmodule() then
 		linktorsstation()
+	end
+	if checkCommandLine() then
+		if needsHelp() then
+			showHelp()
+			return -- close the program after help info is shown
+		end
+		setFlagsFromCommandLine()
+		setTableFromCommandLine()
 	end
 	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
 		if not ContinueQuery() then -- if I don't want to continue
