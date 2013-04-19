@@ -1386,7 +1386,7 @@ end
 function WriteMenu()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.4 by Keridos/Happydude/pokemane")
+	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
@@ -1407,7 +1407,7 @@ end
 function WriteMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.4 by Keridos/Happydude/pokemane")
+	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
@@ -1432,12 +1432,15 @@ function showHelp()
 	writeOut("-r: Resume the last shape if there are any (Note: This is disabled until we can iron out the kinks")
 	writeOut("shape-type can be any of the shapes in the menu")
 	writeOut("After shape-type input any of the paramaters that you know, the rest should be asked for")
+	io.read() -- pause here, too
 end
 
 function showCredits()
-	writeOut("Based on work by Michiel/Vliekkie/Aeolun")
+	writeOut("Credits for the shape builder:")
+	writeOut("Based on work by Michiel,Vliekkie and Aeolun")
 	writeOut("Sphere/dome code by pruby")
 	writeOut("Additional improvements by Keridos,Happydude and pokemane")
+	io.read() -- pause here, too
 end
 
 function main()
@@ -1467,8 +1470,10 @@ function main()
 		WriteMenu()
 		Choicefunct()
 	end
-	print("Blocks used: " .. blocks)
-	print("Fuel used: " .. fuel)
+	if (blocks~=0) and (fuel~=0) then -- do not show on help or credits page or when selecting end
+		print("Blocks used: " .. blocks)
+		print("Fuel used: " .. fuel)
+	end
 	ProgressFileDelete() -- removes file upon successful completion of a job, or completion of a previous job.
 	prog_table = {}
 	temp_prog_table = {}
