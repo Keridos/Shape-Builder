@@ -911,17 +911,6 @@ function checkCommandLine() --true if arguments were passed
 	end
 end
 
-function showHelp()
-	writeOut("Usage: shape [shape-type [param1 param2 param3 ...]] [-c] [-h] [-z] [-r]")
-	writeOut("-c: Activate cost only mode")
-	writeOut("-h: Show this page")
-	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
-	io.read() -- pause here
-	writeOut("-r: Resume the last shape if there are any (Note: This is disabled until we can iron out the kinks")
-	writeOut("shape-type can be any of the shapes in the menu")
-	writeOut("After shape-type input any of the paramaters that you know, the rest should be asked for")
-end
-
 function needsHelp() -- true if -h is passed
 	for i, v in pairs(argTable) do
 		if v == "-h" or v == "-help" or v == "--help" then
@@ -963,7 +952,7 @@ function setTableFromCommandLine() -- sets prog_table and temp_prog_table from c
 	end
 end
 
--- Menu and Mainfunctions
+-- Menu, drawing and Mainfunctions
 
 function Choicefunct()
 	if sim_mode == false and cmd_line == false then -- if we are NOT resuming progress
@@ -982,6 +971,10 @@ function Choicefunct()
 		end
 		if choice == "help" then
 			showHelp()
+			return
+		end
+		if choice == "credits" then
+			showCredits()
 			return
 		end
 		writeOut("Building a "..choice)
@@ -1393,15 +1386,15 @@ end
 function WriteMenu()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	writeOut("Shape Maker 1.4 by Keridos/Happydude/pokemane")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
 		writeOut("")
 	end
 	if not cmd_line then
-		writeOut("");
-		writeOut("What should be built? [page 1/2]")
+		writeOut("What should be built? [page 1/2]");
+		writeOut("next for page 2")
 		writeOut("+---------+-----------+-------+-------+")
 		writeOut("| square  | rectangle | wall  | line  |")
 		writeOut("| cylinder| platform  | stair | cuboid|")
@@ -1414,20 +1407,37 @@ end
 function WriteMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.4 by Michiel/Vliekkie/Aeolun/pruby/Keridos")
+	writeOut("Shape Maker 1.4 by Keridos/Happydude/pokemane")
 	if resupply==1 then
 		writeOut("Resupply Mode Active")
 	else
 		writeOut("")
 	end
-	writeOut("");
-	writeOut("What should be built [page 2/2]?")
+	writeOut("What should be built [page 2/2]?");
+	writeOut("")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| hexagon | octagon   | end   |       |")
-	writeOut("| 6-prism | 8-prism   |       |       |")
-	writeOut("| sphere  | help      |       |       |")
+	writeOut("| hexagon | octagon   | help  |       |")
+	writeOut("| 6-prism | 8-prism   | end   |       |")
+	writeOut("| sphere  | credits   |       |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
+end
+
+function showHelp()
+	writeOut("Usage: shape [shape-type [param1 param2 param3 ...]] [-c] [-h] [-z] [-r]")
+	writeOut("-c: Activate cost only mode")
+	writeOut("-h: Show this page")
+	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
+	io.read() -- pause here
+	writeOut("-r: Resume the last shape if there are any (Note: This is disabled until we can iron out the kinks")
+	writeOut("shape-type can be any of the shapes in the menu")
+	writeOut("After shape-type input any of the paramaters that you know, the rest should be asked for")
+end
+
+function showCredits()
+	writeOut("Based on work by Michiel/Vliekkie/Aeolun")
+	writeOut("Sphere/dome code by pruby")
+	writeOut("Additional improvements by Keridos,Happydude and pokemane")
 end
 
 function main()
