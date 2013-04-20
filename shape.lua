@@ -56,6 +56,12 @@ function linktorsstation() --links to rs station
 	end
 end
 
+function compareResources()
+	if (turtle.compareTo(1)==false) then
+		turtle.drop()
+	end
+end
+
 function checkResources()
 	if resupply == 1 then
 		if turtle.getItemCount(activeslot) <= 1 then
@@ -64,17 +70,19 @@ function checkResources()
 			end
 		end
 	else
-		while turtle.getItemCount(activeslot) <= 0 do
-			if activeslot == 16 then
+		compareResources()
+		while (turtle.getItemCount(activeslot) <= 1) do
+			if (activeslot == 16) and (turtle.getItemCount(activeslot)<=1) then
 				writeOut("Turtle is empty, please put building block in slots and press enter to continue")
 				io.read()
 				activeslot = 1
 				turtle.select(activeslot)
 			else
 				activeslot = activeslot+1
-				writeOut("Turtle slot empty, trying slot "..activeslot)
+				writeOut("Turtle slot almost empty, trying slot "..activeslot)
 				turtle.select(activeslot)
 			end
+			compareResources()
 			os.sleep(0.2)
 		end
 	end
