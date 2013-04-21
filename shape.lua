@@ -21,14 +21,14 @@ local resupply = 0
 local choice = ""
 
 local tempProgTable = {}
-local progTable = {} --this is the LOCAL table!  used for local stuff only, and is ONLY EVER WRITTEN when sim_mode is FALSE
+local progTable = {} --this is the LOCAL table!	used for local stuff only, and is ONLY EVER WRITTEN when sim_mode is FALSE
 local progFileName = "ShapesProgressFile"
 
 
 -- Utility functions
 
 function writeOut(message)
-  print(message)
+	print(message)
 end
 
 function wrapRsModule() --checks for and wraps rs module
@@ -99,12 +99,11 @@ function checkFuel()
 end
 
 function placeBlock()
-	-- Cost calculation mode - don't move
 	progressUpdate()
 	simulationCheck()
 	blocks = blocks + 1
 	if cost_only then
-		return
+		return -- Cost calculation mode - don't move
 	end
 	if turtle.detectDown() and not turtle.compareDown() then
 		turtle.digDown()
@@ -178,8 +177,8 @@ function safeForward()
 		if not success then
 			while turtle.detect() do
 				if not turtle.dig() then
-					print("Blocked attempting to move forward.")
-					print("Please clear and press enter to continue.")
+					writeOut("Blocked attempting to move forward.")
+					writeOut("Please clear and press enter to continue.")
 					io.read()
 				end
 			end
@@ -217,8 +216,8 @@ function safeBack()
 			turnAroundTrack()
 			success = turtle.back()
 			if not success then
-				print("Blocked attempting to move back.")
-				print("Please clear and press enter to continue.")
+				writeOut("Blocked attempting to move back.")
+				writeOut("Please clear and press enter to continue.")
 				io.read()
 			end
 		end
@@ -249,8 +248,8 @@ function safeUp()
 		if not success then
 			while turtle.detectUp() do
 				if not turtle.digUp() then
-					print("Blocked attempting to move up.")
-					print("Please clear and press enter to continue.")
+					writeOut("Blocked attempting to move up.")
+					writeOut("Please clear and press enter to continue.")
 					io.read()
 				end
 			end
@@ -273,8 +272,8 @@ function safeDown()
 		if not success then
 			while turtle.detectDown() do
 				if not turtle.digDown() then
-					print("Blocked attempting to move down.")
-					print("Please clear and press enter to continue.")
+					writeOut("Blocked attempting to move down.")
+					writeOut("Please clear and press enter to continue.")
 					io.read()
 				end
 			end
@@ -282,14 +281,14 @@ function safeDown()
 	end
 end
 
-function moveY(targety)
-	if targety == positionY then
+function moveY(targetY)
+	if targetY == positionY then
 		return
 	end
 	if (facing ~= 0 and facing ~= 2) then -- check axis
 		turnRightTrack()
 	end
-	while targety > positionY do
+	while targetY > positionY do
 		if facing == 0 then
 			safeForward()
 		else
@@ -298,7 +297,7 @@ function moveY(targety)
 		progressUpdate()
 		writeProgress()
 	end
-	while targety < positionY do
+	while targetY < positionY do
 		if facing == 2 then
 			safeForward()
 		else
@@ -309,14 +308,14 @@ function moveY(targety)
 	end
 end
 
-function moveX(targetx)
-	if targetx == positionX then
+function moveX(targetX)
+	if targetX == positionX then
 		return
 	end
 	if (facing ~= 1 and facing ~= 3) then -- check axis
 		turnRightTrack()
 	end
-	while targetx > positionX do
+	while targetX > positionX do
 		if facing == 1 then
 			safeForward()
 		else
@@ -325,7 +324,7 @@ function moveX(targetx)
 		progressUpdate()
 		writeProgress()
 	end
-	while targetx < positionX do
+	while targetX < positionX do
 		if facing == 3 then
 			safeForward()
 		else
@@ -336,42 +335,42 @@ function moveX(targetx)
 	end
 end
 
---this is unused right now.  Ignore. --I've added it to navigateTo() for the future - Happydude11209
-function moveZ(targetz) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.  It does NOTHING currently because targetz ALWAYS equals positionZ
-	if targetz == positionZ then
+--this is unused right now.	Ignore. --I've added it to navigateTo() for the future - Happydude11209
+function moveZ(targetZ) --this function for now, will ONLY be used to CHECK AND RECORD PROGRESS.	It does NOTHING currently because targetZ ALWAYS equals positionZ
+	if targetZ == positionZ then
 		return
 	end
-	while targetz < positionZ do
+	while targetZ < positionZ do
 		safeDown()
 		progressUpdate()
 		writeProgress()
 	end
-	while targetz > positionZ do
+	while targetZ > positionZ do
 		safeUp()
 		progressUpdate()
 		writeProgress()
 	end
 end
 
--- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;  specifically, navigateTo(x,y,z) placeBlock().  This should ensure proper "data recording" and also makes readability better
-function navigateTo(targetx, targety, targetz, moveZFirst)
-	targetz = targetz or positionZ -- if targetz isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
+-- I *HIGHLY* suggest formatting all shape subroutines to use the format that dome() uses;	specifically, navigateTo(x,y,z) placeBlock().	This should ensure proper "data recording" and also makes readability better
+function navigateTo(targetX, targetY, targetZ, moveZFirst)
+	targetZ = targetZ or positionZ -- if targetZ isn't used in the function call it defaults to its current z position, this should make it compatible with all current implementations of navigateTo()
 	moveZFirst = moveZFirst or false -- default to moving z last, if true is passed as last argument, it moves vertically first
 	
 	if moveZFirst then
-		moveZ(targetz)
+		moveZ(targetZ)
 	end
 	
 	if facing == 0 or facing == 2 then -- Y axis
-		moveY(targety)
-		moveX(targetx)
+		moveY(targetY)
+		moveX(targetX)
 	else
-		moveX(targetx)
-		moveY(targety)
+		moveX(targetX)
+		moveY(targetY)
 	end
 	
 	if not moveZFirst then
-		moveZ(targetz)
+		moveZ(targetZ)
 	end
 end
 
@@ -387,8 +386,8 @@ function goHome()
 end
 
 function round(toBeRounded, decimalPlace) --needed for hexagon and octagon
-  local multiplier = 10^(decimalPlace or 0)
-  return math.floor(toBeRounded * multiplier + 0.5) / multiplier
+	local multiplier = 10^(decimalPlace or 0)
+	return math.floor(toBeRounded * multiplier + 0.5) / multiplier
 end
 
 -- Shape Building Routines
@@ -397,8 +396,8 @@ function line(length)
 	if length <= 0 then
 		error("Error, length can not be 0")
 	end
-	local i
-	for i=1, length do
+	local i -- i think they are local to the for to begin with
+	for i = 1, length do
 		placeBlock()
 		if i ~= length then
 			safeForward()
@@ -816,7 +815,7 @@ function ProgressFileDelete()
 	end
 end
 
--- to read the shape params from the file.  Shape type, and input params (e.g. "dome" and radius)
+-- to read the shape params from the file.	Shape type, and input params (e.g. "dome" and radius)
 function ReadShapeParams()
 	-- TODO unneeded for now, can just use the table elements directly
 end
@@ -857,7 +856,7 @@ function ReadProgress()
 	return read_progTable
 end
 
--- compares the progress read from the file to the current sim progress.  needs all four params 
+-- compares the progress read from the file to the current sim progress.	needs all four params 
 function CompareProgress() -- return boolean
 	local progTable_in = progTable
 	local read_progTable = ReadProgress()
@@ -877,12 +876,12 @@ function SetSimFlags(b)
 	end
 end
 
-function simulationCheck()  
+function simulationCheck()	
 	if sim_mode then
 		if CompareProgress() then
 			SetSimFlags(false) -- if we're caught up, un-set flags
 		else
-			SetSimFlags(true)  -- if not caught up, just re-affirm that the flags are set
+			SetSimFlags(true)	-- if not caught up, just re-affirm that the flags are set
 		end
 	end
 end
@@ -904,7 +903,7 @@ function ContinueQuery()
 	-- end
 end
 
-function progressUpdate()  -- this ONLY updates the local table variable.  Writing is handled above. -- I want to change this t allow for any number of params
+function progressUpdate()	-- this ONLY updates the local table variable.	Writing is handled above. -- I want to change this t allow for any number of params
 	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, x = positionX, y = positionY, facing = facing, blocks = blocks}
 end
 
@@ -1078,7 +1077,7 @@ function choiceFunct()
 		wh = tonumber(wh)
 		tempProgTable.param1 = wl
 		tempProgTable.param2 = wh
-		if  wh <= 0 then
+		if	wh <= 0 then
 			error("Error, the height can not be zero")
 		end
 		if wl <= 0 then
@@ -1404,9 +1403,9 @@ function WriteMenu()
 		writeOut("What should be built? [page 1/2]");
 		writeOut("next for page 2")
 		writeOut("+---------+-----------+-------+-------+")
-		writeOut("| square  | rectangle | wall  | line  |")
-		writeOut("| cylinder| platform  | stair | cuboid|")
-		writeOut("| pyramid | 1/2-sphere| circle| next  |")
+		writeOut("| square	| rectangle | wall	| line	|")
+		writeOut("| cylinder| platform	| stair | cuboid|")
+		writeOut("| pyramid | 1/2-sphere| circle| next	|")
 		writeOut("+---------+-----------+-------+-------+")
 		writeOut("")
 	end
@@ -1424,9 +1423,9 @@ function WriteMenu2()
 	writeOut("What should be built [page 2/2]?");
 	writeOut("")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| hexagon | octagon   | help  |       |")
-	writeOut("| 6-prism | 8-prism   | end   |       |")
-	writeOut("| sphere  | credits   |       |       |")
+	writeOut("| hexagon | octagon	 | help	|			 |")
+	writeOut("| 6-prism | 8-prism	 | end	 |			 |")
+	writeOut("| sphere	| credits	 |			 |			 |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
@@ -1463,7 +1462,7 @@ function main()
 		setFlagsFromCommandLine()
 		setTableFromCommandLine()
 	end
-	if CheckForPrevious() then  -- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
+	if CheckForPrevious() then	-- will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
 		if not ContinueQuery() then -- if I don't want to continue
 			ProgressFileDelete()
 			SetSimFlags(false) -- just to be safe
@@ -1479,8 +1478,8 @@ function main()
 		choiceFunct()
 	end
 	if (blocks~=0) and (fuel~=0) then -- do not show on help or credits page or when selecting end
-		print("Blocks used: " .. blocks)
-		print("Fuel used: " .. fuel)
+		writeOut("Blocks used: " .. blocks)
+		writeOut("Fuel used: " .. fuel)
 	end
 	ProgressFileDelete() -- removes file upon successful completion of a job, or completion of a previous job.
 	progTable = {}
