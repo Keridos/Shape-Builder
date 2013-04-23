@@ -1130,13 +1130,16 @@ function Choicefunct()
 		local cl = 0
 		local ch = 0
 		local hi = 0
+		local hollow = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How deep does it need to be?")
-			cl = io.read()
 			writeOut("How wide does it need to be?")
+			cl = io.read()
+			writeOut("How deep does it need to be?")
 			ch = io.read()
 			writeOut("How high does it need to be?")
 			hi = io.read()
+			writeOut("Do you want it to be hollow? (y/n)")
+			hollow = io.read()
 		elseif sim_mode == true or cmd_line == true then
 			cl = temp_prog_table.param1
 			ch = temp_prog_table.param2
@@ -1167,12 +1170,19 @@ function Choicefunct()
 			-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
 			turnLeftTrack()
 		end
-		for i = 1, hi-2 do
-			safeUp()
-			if ((ch % 2)==0) then -- this aswell
-			rectangle(cl, ch)
-			else
-			rectangle(ch, cl)
+		if not(hollow == "n") then
+			for i = 1, hi-2 do
+				safeUp()
+				if ((ch % 2)==0) then -- this aswell
+				rectangle(cl, ch)
+				else
+				rectangle(ch, cl)
+				end
+			end
+		else
+			for i=1,hi-2 do
+				safeUp()
+				platform(cl,ch)
 			end
 		end
 		safeUp()
