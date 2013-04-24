@@ -1130,7 +1130,7 @@ function Choicefunct()
 		local cl = 0
 		local ch = 0
 		local hi = 0
-		local hollow = 0
+		local hollow = ""
 		if sim_mode == false and cmd_line == false then
 			writeOut("How wide does it need to be?")
 			cl = io.read()
@@ -1144,6 +1144,7 @@ function Choicefunct()
 			cl = temp_prog_table.param1
 			ch = temp_prog_table.param2
 			hi = temp_prog_table.param3
+			hollow = temp_prog_table.param4
 		end
 		cl = tonumber(cl)
 		ch = tonumber(ch)
@@ -1151,6 +1152,7 @@ function Choicefunct()
 		temp_prog_table.param1 = cl
 		temp_prog_table.param2 = ch
 		temp_prog_table.param3 = hi
+		temp_prog_table.param4 = hollow
 		if hi < 3 then
 			hi = 3
 		end
