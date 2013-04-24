@@ -1150,9 +1150,12 @@ function choiceFunct()
 			hi = temp_prog_table.param3
 			hollow = temp_prog_table.param4
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> upstream/master
 =======
 >>>>>>> upstream/master
+=======
+>>>>>>> 77975a503aa3cc2e4237b6999ad4fbcc3d26c773
 		end
 		cl = tonumber(cl)
 		ch = tonumber(ch)
@@ -1167,9 +1170,12 @@ function choiceFunct()
 		temp_prog_table.param3 = hi
 		temp_prog_table.param4 = hollow
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> upstream/master
 =======
 >>>>>>> upstream/master
+=======
+>>>>>>> 77975a503aa3cc2e4237b6999ad4fbcc3d26c773
 		if hi < 3 then
 			hi = 3
 		end
