@@ -1129,7 +1129,7 @@ function choiceFunct()
 		local cl = 0
 		local ch = 0
 		local hi = 0
-		local hollow = 0
+		local hollow = ""
 		if sim_mode == false and cmd_line == false then
 			writeOut("How wide does it need to be?")
 			cl = io.read()
@@ -1140,16 +1140,30 @@ function choiceFunct()
 			writeOut("Do you want it to be hollow? (y/n)")
 			hollow = io.read()
 		elseif sim_mode == true or cmd_line == true then
+<<<<<<< HEAD
 			cl = tempProgTable.param1
 			ch = tempProgTable.param2
 			hi = tempProgTable.param3
+=======
+			cl = temp_prog_table.param1
+			ch = temp_prog_table.param2
+			hi = temp_prog_table.param3
+			hollow = temp_prog_table.param4
+>>>>>>> upstream/master
 		end
 		cl = tonumber(cl)
 		ch = tonumber(ch)
 		hi = tonumber(hi)
+<<<<<<< HEAD
 		tempProgTable.param1 = cl
 		tempProgTable.param2 = ch
 		tempProgTable.param3 = hi
+=======
+		temp_prog_table.param1 = cl
+		temp_prog_table.param2 = ch
+		temp_prog_table.param3 = hi
+		temp_prog_table.param4 = hollow
+>>>>>>> upstream/master
 		if hi < 3 then
 			hi = 3
 		end
