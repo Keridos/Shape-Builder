@@ -1129,24 +1129,53 @@ function choiceFunct()
 		local cl = 0
 		local ch = 0
 		local hi = 0
+		local hollow = ""
 		if sim_mode == false and cmd_line == false then
-			writeOut("How deep does it need to be?")
-			cl = io.read()
 			writeOut("How wide does it need to be?")
+			cl = io.read()
+			writeOut("How deep does it need to be?")
 			ch = io.read()
 			writeOut("How high does it need to be?")
 			hi = io.read()
+			writeOut("Do you want it to be hollow? (y/n)")
+			hollow = io.read()
 		elseif sim_mode == true or cmd_line == true then
+<<<<<<< HEAD
 			cl = tempProgTable.param1
 			ch = tempProgTable.param2
 			hi = tempProgTable.param3
+=======
+			cl = temp_prog_table.param1
+			ch = temp_prog_table.param2
+			hi = temp_prog_table.param3
+			hollow = temp_prog_table.param4
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> upstream/master
+=======
+>>>>>>> upstream/master
+=======
+>>>>>>> 77975a503aa3cc2e4237b6999ad4fbcc3d26c773
 		end
 		cl = tonumber(cl)
 		ch = tonumber(ch)
 		hi = tonumber(hi)
+<<<<<<< HEAD
 		tempProgTable.param1 = cl
 		tempProgTable.param2 = ch
 		tempProgTable.param3 = hi
+=======
+		temp_prog_table.param1 = cl
+		temp_prog_table.param2 = ch
+		temp_prog_table.param3 = hi
+		temp_prog_table.param4 = hollow
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> upstream/master
+=======
+>>>>>>> upstream/master
+=======
+>>>>>>> 77975a503aa3cc2e4237b6999ad4fbcc3d26c773
 		if hi < 3 then
 			hi = 3
 		end
@@ -1166,12 +1195,19 @@ function choiceFunct()
 			-- this is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
 			turnLeftTrack()
 		end
-		for i = 1, hi-2 do
-			safeUp()
-			if ((ch % 2)==0) then -- this aswell
-			rectangle(cl, ch)
-			else
-			rectangle(ch, cl)
+		if not(hollow == "n") then
+			for i = 1, hi-2 do
+				safeUp()
+				if ((ch % 2)==0) then -- this aswell
+				rectangle(cl, ch)
+				else
+				rectangle(ch, cl)
+				end
+			end
+		else
+			for i=1,hi-2 do
+				safeUp()
+				platform(cl,ch)
 			end
 		end
 		safeUp()
