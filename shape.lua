@@ -18,6 +18,7 @@ local positionz = 0
 local facing = 0
 
 local resupply = 0
+local gps = 0
 local choice = ""
 
 local temp_prog_table = {}
@@ -31,17 +32,27 @@ function writeOut(message)
   print(message)
 end
 
-function wraprsmodule() --checks for and wraps rs module
+function wrapmodules() --checks for and wraps turtle modules
 	if peripheral.getType("left")=="resupply" then 
 		rs=peripheral.wrap("left")
 		resupply = 1
-		return true
+		return "resupply"
 	elseif peripheral.getType("right")=="resupply" then
 		rs=peripheral.wrap("right")
 		resupply = 1
+		return "resupply"
+	elseif peripheral.getType("left")="modem" then
+		rs=peripheral.wrap("right")
+		if gps(locate)~=nil then
+			gps = 1
+		end
 		return true
+	elseif peripheral.getType("left")="modem" then
+		rs=peripheral.wrap("right")
+		if gps(locate)~=nil then
+			gps = 1
+		end
 	else
-		resupply = 0
 		return false
 	end
 end
@@ -1464,7 +1475,7 @@ function showCredits()
 end
 
 function main()
-	if wraprsmodule() then
+	if wrapmodules()=="resupply" then
 		linktorsstation()
 	end
 	if checkCommandLine() then
