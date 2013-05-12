@@ -910,7 +910,7 @@ function continueQuery()
 end
 
 function progressUpdate()  -- This ONLY updates the local table variable.  Writing is handled above. -- I want to change this to allow for any number of params
-	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, x = positionX, y = positionY, facing = facing, blocks = blocks}
+	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, facing = facing, blocks = blocks}
 end
 
  -- Command Line
