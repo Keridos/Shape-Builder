@@ -848,7 +848,7 @@ function WriteShapeParams(...) -- The ... lets it take any number of arguments a
 		tempProgTable[paramName2] = v
 		progTable[paramName2] = v
 	end
-	-- Actually can't do anything right now, because all the param-gathering in choceFunct() uses different variables -- Working on adding this in (since this can take any number of inputs)
+	-- Actually can't do anything right now, because all the param-gathering in choiceFunction() uses different variables -- Working on adding this in (since this can take any number of inputs)
 end
 
 -- Function to write the progress to the file (x, y, z)
@@ -980,7 +980,7 @@ end
 
 -- Menu, Drawing and Main functions
 
-function choceFunct()
+function choiceFunction()
 	if sim_mode == false and cmd_line == false then -- If we are NOT resuming progress
 		choice = io.read()
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
@@ -1494,15 +1494,15 @@ function main()
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
 			WriteMenu()
-			choceFunct()
+			choiceFunctio()
 		else	-- If the user wants to continue
 			setSimFlags(true)
-			choceFunct()
+			choiceFunction()
 		end
 	else
 		setSimFlags(false)
 		WriteMenu()
-		choceFunct()
+		choiceFunction()
 	end
 	if (blocks ~= 0) and (fuel ~= 0) then -- Do not show on help or credits page or when selecting end
 		writeOut("Blocks used: " .. blocks)
