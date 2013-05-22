@@ -23,6 +23,7 @@ local facing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
 local resupply = 0 -- Should this be boolean?
+local gps = 0
 local choice = ""
 
 -- Progress Table: These variables are the tables that the turtle's progress is tracked in
@@ -37,17 +38,29 @@ function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so 
   print(...)
 end
 
-function wrapRSModule() -- Checks for and wraps rs module
-	if peripheral.getType("left") == "resupply" then 
+function wrapmodules() --checks for and wraps turtle modules
+	if peripheral.getType("left")=="resupply" then 
 		rs=peripheral.wrap("left")
 		resupply = 1
-		return true
-	elseif peripheral.getType("right") == "resupply" then
+		return "resupply"
+	elseif peripheral.getType("right")=="resupply" then
 		rs=peripheral.wrap("right")
 		resupply = 1
-		return true
+		return "resupply"
+	end
+	if peripheral.getType("left")="modem" then
+		rs=peripheral.wrap("left")
+		if gps(locate)~=nil then
+			gps = 1
+		end
+		return "modem"
+	elseif peripheral.getType("right")="modem" then
+		rs=peripheral.wrap("right")
+		if gps(locate)~=nil then
+			gps = 1
+		end
+		return "modem"
 	else
-		resupply = 0
 		return false
 	end
 end
@@ -1465,8 +1478,8 @@ function showCredits()
 end
 
 function main()
-	if wrapRSModule() then
-		linkToRSStation()
+	if wrapmodules()=="resupply" then
+		linktorsstation()
 	end
 	if checkCommandLine() then
 		if needsHelp() then
@@ -1476,7 +1489,7 @@ function main()
 		setFlagsFromCommandLine()
 		setTableFromCommandLine()
 	end
-	if CheckForPrevious() then  -- Will check to see if there was a previous job, and if so, ask if the user would like to re-initialize to current progress status
+	if (CheckForPrevious() and gps==1) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
 		if not continueQuery() then -- If the user doesn't want to continue
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
