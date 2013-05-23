@@ -22,7 +22,7 @@ local positionZ = 0
 local facing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
-local resupply = false -- Should this be boolean?
+local resupply = false
 local gps = false
 local choice = ""
 
