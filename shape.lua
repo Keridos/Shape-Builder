@@ -22,8 +22,8 @@ local positionZ = 0
 local facing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
-local resupply = 0 -- Should this be boolean?
-local gps = 0
+local resupply = false
+local gps = false
 local choice = ""
 
 -- Progress Table: These variables are the tables that the turtle's progress is tracked in
@@ -41,23 +41,23 @@ end
 function wrapmodules() --checks for and wraps turtle modules
 	if peripheral.getType("left")=="resupply" then 
 		rs=peripheral.wrap("left")
-		resupply = 1
+		resupply = true
 		return "resupply"
 	elseif peripheral.getType("right")=="resupply" then
 		rs=peripheral.wrap("right")
-		resupply = 1
+		resupply = true
 		return "resupply"
 	end
 	if peripheral.getType("left")="modem" then
 		rs=peripheral.wrap("left")
 		if gps(locate)~=nil then
-			gps = 1
+			gps = true
 		end
 		return "modem"
 	elseif peripheral.getType("right")="modem" then
 		rs=peripheral.wrap("right")
 		if gps(locate)~=nil then
-			gps = 1
+			gps = true
 		end
 		return "modem"
 	else
@@ -82,7 +82,7 @@ function compareResources()
 end
 
 function checkResources()
-	if resupply == 1 then
+	if resupply then
 		if turtle.getItemCount(activeslot) <= 1 then
 			while not(rs.resupply(1)) do
 				os.sleep(0.5)
@@ -1421,8 +1421,12 @@ function WriteMenu()
 	term.clear()
 	term.setCursorPos(1, 1)
 	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
-	if resupply==1 then
+	if resupply then					-- Any ideas to make this more compact/betterlooking (in terms of code)?
 		writeOut("Resupply Mode Active")
+	elseif (resupply and gps) then
+		writeOut("Resupply and GPS Mode Active")
+	elseif gps then
+		writeOut("GPS Mode Active")
 	else
 		writeOut("")
 	end
@@ -1442,8 +1446,12 @@ function WriteMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
 	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
-	if resupply==1 then
+	if resupply then					-- Any ideas to make this more compact/betterlooking (in terms of code)?
 		writeOut("Resupply Mode Active")
+	elseif (resupply and gps) then
+		writeOut("Resupply and GPS Mode Active")
+	elseif gps then
+		writeOut("GPS Mode Active")
 	else
 		writeOut("")
 	end
@@ -1489,12 +1497,16 @@ function main()
 		setFlagsFromCommandLine()
 		setTableFromCommandLine()
 	end
-	if (CheckForPrevious() and gps==1) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
+	if (CheckForPrevious() and gps) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
 		if not continueQuery() then -- If the user doesn't want to continue
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
 			WriteMenu()
+<<<<<<< HEAD
 			choiceFunction()
+=======
+			choiceFunctio()
+>>>>>>> upstream/master
 		else	-- If the user wants to continue
 			setSimFlags(true)
 			choiceFunction()
