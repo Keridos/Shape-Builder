@@ -135,8 +135,8 @@ function placeBlock()
 end
 
 function round(toBeRounded, decimalPlace) -- Needed for hexagon and octagon
-	local multiplier = 10^(decimalPlace or 0)
-	return math.floor(toBeRounded * multiplier + 0.5) / multiplier
+  local multiplier = 10^(decimalPlace or 0)
+  return math.floor(toBeRounded * multiplier + 0.5) / multiplier
 end
 
 -- Navigation functions
@@ -1502,11 +1502,7 @@ function main()
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
 			WriteMenu()
-<<<<<<< HEAD
-			choiceFunction()
-=======
 			choiceFunctio()
->>>>>>> upstream/master
 		else	-- If the user wants to continue
 			setSimFlags(true)
 			choiceFunction()
