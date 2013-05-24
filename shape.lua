@@ -39,24 +39,24 @@ function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so 
 end
 
 function wrapmodules() --checks for and wraps turtle modules
-	if peripheral.getType("left")=="resupply" then 
+	if peripheral.getType("left" )== "resupply" then 
 		rs=peripheral.wrap("left")
 		resupply = true
 		return "resupply"
-	elseif peripheral.getType("right")=="resupply" then
+	elseif peripheral.getType("right") == "resupply" then
 		rs=peripheral.wrap("right")
 		resupply = true
 		return "resupply"
 	end
-	if peripheral.getType("left")="modem" then
+	if peripheral.getType("left") == "modem" then
 		rs=peripheral.wrap("left")
-		if gps(locate)~=nil then
+		if gps(locate)~= nil then
 			gps = true
 		end
 		return "modem"
-	elseif peripheral.getType("right")="modem" then
+	elseif peripheral.getType("right") == "modem" then
 		rs=peripheral.wrap("right")
-		if gps(locate)~=nil then
+		if gps(locate)~= nil then
 			gps = true
 		end
 		return "modem"
