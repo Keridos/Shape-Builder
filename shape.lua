@@ -124,8 +124,8 @@ end
 
 function placeBlock()
 	-- Cost calculation mode - don't move
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
 	blocks = blocks + 1
 	if cost_only then
 		return
@@ -140,8 +140,8 @@ function placeBlock()
 end
 
 function round(toBeRounded, decimalPlace) -- Needed for hexagon and octagon
-  local multiplier = 10^(decimalPlace or 0)
-  return math.floor(toBeRounded * multiplier + 0.5) / multiplier
+	local multiplier = 10^(decimalPlace or 0)
+	return math.floor(toBeRounded * multiplier + 0.5) / multiplier
 end
 
 -- Navigation functions
@@ -149,8 +149,8 @@ end
 -- This allows us to just give a destination point and have it go there
 
 function turnRightTrack()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
 	facing = facing + 1
 	if facing >= 4 then
 		facing = 0
@@ -164,8 +164,8 @@ function turnRightTrack()
 end
 
 function turnLeftTrack()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
 	facing = facing - 1
 	if facing < 0 then
 		facing = 3
@@ -194,8 +194,17 @@ function turnToFace(direction)
 end
 
 function safeForward()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
+	if facing == 0 then
+		positionY = positionY + 1
+	elseif facing == 1 then
+		positionX = positionX + 1
+	elseif facing == 2 then
+		positionY = positionY - 1
+	elseif facing == 3 then
+		positionX = positionX - 1
+	end
 	fuel = fuel + 1
 	if cost_only then
 		return
@@ -214,20 +223,20 @@ function safeForward()
 			end
 		end
 	end
-	if facing == 0 then
-		positionY = positionY + 1
-	elseif facing == 1 then
-		positionX = positionX + 1
-	elseif facing == 2 then
-		positionY = positionY - 1
-	elseif facing == 3 then
-		positionX = positionX - 1
-	end
 end
 
 function safeBack()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
+	if facing == 0 then
+		positionY = positionY - 1
+	elseif facing == 1 then
+		positionX = positionX - 1
+	elseif facing == 2 then
+		positionY = positionY + 1
+	elseif facing == 3 then
+		positionX = positionX + 1
+	end
 	fuel = fuel + 1
 	if cost_only then
 		return
@@ -252,22 +261,13 @@ function safeBack()
 			end
 		end
 	end
-	if facing == 0 then
-		positionY = positionY - 1
-	elseif facing == 1 then
-		positionX = positionX - 1
-	elseif facing == 2 then
-		positionY = positionY + 1
-	elseif facing == 3 then
-		positionX = positionX + 1
-	end
 end
 
 function safeUp()
-	progressUpdate()
-	simulationCheck()
-	fuel = fuel + 1	
+	-- progressUpdate()
+	-- simulationCheck()
 	positionZ = positionZ + 1
+	fuel = fuel + 1	
 	if cost_only then
 		return
 	end
@@ -285,13 +285,15 @@ function safeUp()
 			end
 		end
 	end
+	progressUpdate()
+	simulationCheck()
 end
 
 function safeDown()
-	progressUpdate()
-	simulationCheck()
-	fuel = fuel + 1
+	-- progressUpdate()
+	-- simulationCheck()
 	positionZ = positionZ - 1
+	fuel = fuel + 1
 	if cost_only then
 		return
 	end
@@ -309,6 +311,8 @@ function safeDown()
 			end
 		end
 	end
+	progressUpdate()
+	simulationCheck()
 end
 
 function moveY(targetY)
@@ -860,10 +864,7 @@ end
 function writeProgress()
 	local progFile
 	local progString = ""
-	--writeOut(textutils.serialize(progTable))
-	--ProgressFileCreate()
-	--writeOut(progString)
-	if sim_mode == false and cost_only == false then
+	if not (sim_mode or cost_only) then
 		progString = textutils.serialize(progTable) -- Put in here to save processing time when in cost_only
 		progFile = fs.open(progFileName, "w")
 		progFile.write(progString)
