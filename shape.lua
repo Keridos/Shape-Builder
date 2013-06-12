@@ -49,14 +49,16 @@ function wrapmodules() --checks for and wraps turtle modules
 		return "resupply"
 	end
 	if peripheral.getType("left") == "modem" then
-		rs=peripheral.wrap("left")
-		if gps(locate)~= nil then
+		modem=peripheral.wrap("left")
+		test = gps.locate()
+		if test ~= nil then
 			gps = true
 		end
 		return "modem"
 	elseif peripheral.getType("right") == "modem" then
-		rs=peripheral.wrap("right")
-		if gps(locate)~= nil then
+		modem=peripheral.wrap("right")
+		test = gps.locate()
+		if test ~= nil then
 			gps = true
 		end
 		return "modem"
@@ -409,7 +411,7 @@ function goHome()
 	turnToFace(0)
 end
 
--- Shape Building Functions
+-- Shape Building functions
 
 function line(length)
 	if length <= 0 then
@@ -803,7 +805,7 @@ function octagon(sideLength)
 	end
 end
 
--- Previous Progress Resuming, Simulation Functions, Command Line, and File Backend
+-- Previous Progress Resuming, Simulation functions, Command Line, and File Backend
 
 -- Will check for a "progress" file.
 function CheckForPrevious() 
@@ -848,10 +850,10 @@ function WriteShapeParams(...) -- The ... lets it take any number of arguments a
 		tempProgTable[paramName2] = v
 		progTable[paramName2] = v
 	end
-	-- Actually can't do anything right now, because all the param-gathering in choiceFunction() uses different variables -- Working on adding this in (since this can take any number of inputs)
+	-- Actually can't do anything right now, because all the param-gathering in choicefunction() uses different variables -- Working on adding this in (since this can take any number of inputs)
 end
 
--- Function to write the progress to the file (x, y, z)
+-- function to write the progress to the file (x, y, z)
 function writeProgress()
 	local progFile
 	local progString = ""
@@ -980,7 +982,7 @@ end
 
 -- Menu, Drawing and Main functions
 
-function choiceFunction()
+function choicefunction()
 	if sim_mode == false and cmd_line == false then -- If we are NOT resuming progress
 		choice = io.read()
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
@@ -1505,12 +1507,12 @@ function main()
 			choiceFunctio()
 		else	-- If the user wants to continue
 			setSimFlags(true)
-			choiceFunction()
+			choicefunction()
 		end
 	else
 		setSimFlags(false)
 		WriteMenu()
-		choiceFunction()
+		choicefunction()
 	end
 	if (blocks ~= 0) and (fuel ~= 0) then -- Do not show on help or credits page or when selecting end
 		writeOut("Blocks used: " .. blocks)
