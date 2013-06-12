@@ -23,7 +23,7 @@ local facing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
 local resupply = false
-local gps = false
+local can_use_gps = false
 local choice = ""
 
 -- Progress Table: These variables are the tables that the turtle's progress is tracked in
@@ -35,10 +35,13 @@ local progFileName = "ShapesProgressFile"
 -- Utility functions
 
 function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so writeOut(1,2,3) is the same as print(1,2,3). previously writeOut(1,2,3) would have been the same as print(1)
-  print(...)
+	for i, v in ipairs(arg) do
+		print(v)
+	end
 end
 
 function wrapmodules() --checks for and wraps turtle modules
+	local test = 0
 	if peripheral.getType("left" )== "resupply" then 
 		rs=peripheral.wrap("left")
 		resupply = true
@@ -49,15 +52,17 @@ function wrapmodules() --checks for and wraps turtle modules
 		return "resupply"
 	end
 	if peripheral.getType("left") == "modem" then
-		rs=peripheral.wrap("left")
-		if gps(locate)~= nil then
-			gps = true
+		modem=peripheral.wrap("left")
+		test, _, _ = gps.locate(1)
+		if test ~= nil then
+			can_use_gps = true
 		end
 		return "modem"
 	elseif peripheral.getType("right") == "modem" then
-		rs=peripheral.wrap("right")
-		if gps(locate)~= nil then
-			gps = true
+		modem=peripheral.wrap("right")
+		test, _, _ = gps.locate(1)
+		if test ~= nil then
+			can_use_gps = true
 		end
 		return "modem"
 	else
@@ -119,8 +124,8 @@ end
 
 function placeBlock()
 	-- Cost calculation mode - don't move
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
 	blocks = blocks + 1
 	if cost_only then
 		return
@@ -135,8 +140,8 @@ function placeBlock()
 end
 
 function round(toBeRounded, decimalPlace) -- Needed for hexagon and octagon
-  local multiplier = 10^(decimalPlace or 0)
-  return math.floor(toBeRounded * multiplier + 0.5) / multiplier
+	local multiplier = 10^(decimalPlace or 0)
+	return math.floor(toBeRounded * multiplier + 0.5) / multiplier
 end
 
 -- Navigation functions
@@ -144,8 +149,8 @@ end
 -- This allows us to just give a destination point and have it go there
 
 function turnRightTrack()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
 	facing = facing + 1
 	if facing >= 4 then
 		facing = 0
@@ -159,8 +164,8 @@ function turnRightTrack()
 end
 
 function turnLeftTrack()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
 	facing = facing - 1
 	if facing < 0 then
 		facing = 3
@@ -189,8 +194,17 @@ function turnToFace(direction)
 end
 
 function safeForward()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
+	if facing == 0 then
+		positionY = positionY + 1
+	elseif facing == 1 then
+		positionX = positionX + 1
+	elseif facing == 2 then
+		positionY = positionY - 1
+	elseif facing == 3 then
+		positionX = positionX - 1
+	end
 	fuel = fuel + 1
 	if cost_only then
 		return
@@ -209,20 +223,20 @@ function safeForward()
 			end
 		end
 	end
-	if facing == 0 then
-		positionY = positionY + 1
-	elseif facing == 1 then
-		positionX = positionX + 1
-	elseif facing == 2 then
-		positionY = positionY - 1
-	elseif facing == 3 then
-		positionX = positionX - 1
-	end
 end
 
 function safeBack()
-	progressUpdate()
-	simulationCheck()
+	-- progressUpdate()
+	-- simulationCheck()
+	if facing == 0 then
+		positionY = positionY - 1
+	elseif facing == 1 then
+		positionX = positionX - 1
+	elseif facing == 2 then
+		positionY = positionY + 1
+	elseif facing == 3 then
+		positionX = positionX + 1
+	end
 	fuel = fuel + 1
 	if cost_only then
 		return
@@ -247,22 +261,13 @@ function safeBack()
 			end
 		end
 	end
-	if facing == 0 then
-		positionY = positionY - 1
-	elseif facing == 1 then
-		positionX = positionX - 1
-	elseif facing == 2 then
-		positionY = positionY + 1
-	elseif facing == 3 then
-		positionX = positionX + 1
-	end
 end
 
 function safeUp()
-	progressUpdate()
-	simulationCheck()
-	fuel = fuel + 1	
+	-- progressUpdate()
+	-- simulationCheck()
 	positionZ = positionZ + 1
+	fuel = fuel + 1	
 	if cost_only then
 		return
 	end
@@ -280,13 +285,15 @@ function safeUp()
 			end
 		end
 	end
+	progressUpdate()
+	simulationCheck()
 end
 
 function safeDown()
-	progressUpdate()
-	simulationCheck()
-	fuel = fuel + 1
+	-- progressUpdate()
+	-- simulationCheck()
 	positionZ = positionZ - 1
+	fuel = fuel + 1
 	if cost_only then
 		return
 	end
@@ -304,6 +311,8 @@ function safeDown()
 			end
 		end
 	end
+	progressUpdate()
+	simulationCheck()
 end
 
 function moveY(targetY)
@@ -409,7 +418,7 @@ function goHome()
 	turnToFace(0)
 end
 
--- Shape Building Functions
+-- Shape Building functions
 
 function line(length)
 	if length <= 0 then
@@ -803,7 +812,7 @@ function octagon(sideLength)
 	end
 end
 
--- Previous Progress Resuming, Simulation Functions, Command Line, and File Backend
+-- Previous Progress Resuming, Simulation functions, Command Line, and File Backend
 
 -- Will check for a "progress" file.
 function CheckForPrevious() 
@@ -848,17 +857,14 @@ function WriteShapeParams(...) -- The ... lets it take any number of arguments a
 		tempProgTable[paramName2] = v
 		progTable[paramName2] = v
 	end
-	-- Actually can't do anything right now, because all the param-gathering in choiceFunction() uses different variables -- Working on adding this in (since this can take any number of inputs)
+	-- Actually can't do anything right now, because all the param-gathering in choicefunction() uses different variables -- Working on adding this in (since this can take any number of inputs)
 end
 
--- Function to write the progress to the file (x, y, z)
+-- function to write the progress to the file (x, y, z)
 function writeProgress()
 	local progFile
 	local progString = ""
-	--writeOut(textutils.serialize(progTable))
-	--ProgressFileCreate()
-	--writeOut(progString)
-	if sim_mode == false and cost_only == false then
+	if not (sim_mode or cost_only) then
 		progString = textutils.serialize(progTable) -- Put in here to save processing time when in cost_only
 		progFile = fs.open(progFileName, "w")
 		progFile.write(progString)
@@ -980,7 +986,7 @@ end
 
 -- Menu, Drawing and Main functions
 
-function choiceFunction()
+function choicefunction()
 	if sim_mode == false and cmd_line == false then -- If we are NOT resuming progress
 		choice = io.read()
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
@@ -1423,9 +1429,9 @@ function WriteMenu()
 	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
 	if resupply then					-- Any ideas to make this more compact/betterlooking (in terms of code)?
 		writeOut("Resupply Mode Active")
-	elseif (resupply and gps) then
+	elseif (resupply and can_use_gps) then
 		writeOut("Resupply and GPS Mode Active")
-	elseif gps then
+	elseif can_use_gps then
 		writeOut("GPS Mode Active")
 	else
 		writeOut("")
@@ -1448,9 +1454,9 @@ function WriteMenu2()
 	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
 	if resupply then					-- Any ideas to make this more compact/betterlooking (in terms of code)?
 		writeOut("Resupply Mode Active")
-	elseif (resupply and gps) then
+	elseif (resupply and can_use_gps) then
 		writeOut("Resupply and GPS Mode Active")
-	elseif gps then
+	elseif can_use_gps then
 		writeOut("GPS Mode Active")
 	else
 		writeOut("")
@@ -1497,20 +1503,20 @@ function main()
 		setFlagsFromCommandLine()
 		setTableFromCommandLine()
 	end
-	if (CheckForPrevious() and gps) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
+	if (CheckForPrevious() and can_use_gps) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
 		if not continueQuery() then -- If the user doesn't want to continue
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
 			WriteMenu()
-			choiceFunctio()
+			choiceFunction()
 		else	-- If the user wants to continue
 			setSimFlags(true)
-			choiceFunction()
+			choicefunction()
 		end
 	else
 		setSimFlags(false)
 		WriteMenu()
-		choiceFunction()
+		choicefunction()
 	end
 	if (blocks ~= 0) and (fuel ~= 0) then -- Do not show on help or credits page or when selecting end
 		writeOut("Blocks used: " .. blocks)
