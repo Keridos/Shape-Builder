@@ -1507,7 +1507,7 @@ function main()
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
 			WriteMenu()
-			choiceFunctio()
+			choiceFunction()
 		else	-- If the user wants to continue
 			setSimFlags(true)
 			choicefunction()
