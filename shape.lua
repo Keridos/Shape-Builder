@@ -10,6 +10,7 @@ local chain_next_shape = false -- This tells goHome() where to end, if true it g
 local special_chain = false -- For certain shapes that finish where the next chained shape should start, goHome() will  only turn to face 0 if true
 local cost_only = false
 local sim_mode = false
+local returntohome = false -- wether the turtle shall return to start after build
 
 -- Record Keeping Variables: These are for recoding the blocks and fuel used
 local blocks = 0
@@ -611,7 +612,7 @@ function dome(typus, radius)
 	else
 		zend = width - 1
 	end
-	
+
 	-- This loop is for each vertical layer through the sphere or dome.
 	for z = zstart,zend do
 		if not cost_only and z ~= zstart then
@@ -691,12 +692,12 @@ function hexagon(sideLength)
 	local changeY = round(math.sqrt(3) * changeX, 0)
 	changeX = round(changeX, 0)
 	local counter = 0
-	
+
 	navigateTo(changeX, 0)
-	
+
 	for currentSide = 1, 6 do
 		counter = 0
-		
+
 		if currentSide == 1 then
 			for placed = 1, sideLength do
 				navigateTo(positionX + 1, positionY)
@@ -764,9 +765,9 @@ end
 function octagon(sideLength)
 	local sideLength2 = sideLength - 1
 	local change = round(sideLength2 / math.sqrt(2), 0)
-	
+
 	navigateTo(change, 0)
-	
+
 	for currentSide = 1, 8 do
 		if currentSide == 1 then
 			for placed = 1, sideLength2 do
@@ -870,7 +871,7 @@ function writeProgress()
 		progFile.write(progString)
 		progFile.close()
 	end
-	
+
 end
 
 -- Reads progress from file (shape, x, y, z, facing, blocks, param1, param2, param3)
@@ -986,7 +987,7 @@ end
 
 -- Menu, Drawing and Main functions
 
-function choicefunction()
+function choiceFunction()
 	if sim_mode == false and cmd_line == false then -- If we are NOT resuming progress
 		choice = io.read()
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
@@ -1015,6 +1016,12 @@ function choicefunction()
 		yes = string.lower(yes)
 		if yes == 'y' then
 			cost_only = true
+		end
+		writeOut("Want turtle to return to start after build? [y/n]")
+		local yes = io.read()
+		yes = string.lower(yes)
+		if yes == 'y' then
+			returntohome = true
 		end
 	elseif sim_mode == true then -- If we ARE resuming progress
 		tempProgTable = readProgress()
@@ -1419,7 +1426,9 @@ function choicefunction()
 			safeUp()
 		end
 	end
-	goHome() -- After all shape building has finished
+	if returntohome then
+		goHome() -- After all shape building has finished
+	end
 	writeOut("Done") -- Saves a few lines when put here rather than in each if statement
 end
 
@@ -1511,12 +1520,12 @@ function main()
 			choiceFunction()
 		else	-- If the user wants to continue
 			setSimFlags(true)
-			choicefunction()
+			choiceFunction()
 		end
 	else
 		setSimFlags(false)
 		WriteMenu()
-		choicefunction()
+		choiceFunction()
 	end
 	if (blocks ~= 0) and (fuel ~= 0) then -- Do not show on help or credits page or when selecting end
 		writeOut("Blocks used: " .. blocks)
