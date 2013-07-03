@@ -1502,7 +1502,7 @@ end
 
 function main()
 	if wrapmodules()=="resupply" then
-		linktorsstation()
+		linkToRSStation()
 	end
 	if checkCommandLine() then
 		if needsHelp() then
