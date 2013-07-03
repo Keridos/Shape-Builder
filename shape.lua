@@ -21,6 +21,10 @@ local positionX = 0
 local positionY = 0
 local positionZ = 0
 local facing = 0
+local gpsPositionX = 0
+local gpsPositionY = 0
+local gpsPositionZ = 0
+local gpsFacing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
 local resupply = false
@@ -104,7 +108,7 @@ function checkResources()
 				turtle.select(activeslot)
 			else
 				activeslot = activeslot+1
-				writeOut("Turtle slot almost empty, trying slot "..activeslot)
+				-- writeOut("Turtle slot almost empty, trying slot "..activeslot)
 				turtle.select(activeslot)
 			end
 			compareResources()
@@ -124,10 +128,9 @@ function checkFuel()
 end
 
 function placeBlock()
-	-- Cost calculation mode - don't move
-	-- progressUpdate()
-	-- simulationCheck()
 	blocks = blocks + 1
+	progressUpdate()
+	simulationCheck()
 	if cost_only then
 		return
 	end
@@ -136,8 +139,6 @@ function placeBlock()
 	end
 	checkResources()
 	turtle.placeDown()
-	progressUpdate()
-	writeProgress()
 end
 
 function round(toBeRounded, decimalPlace) -- Needed for hexagon and octagon
@@ -150,33 +151,29 @@ end
 -- This allows us to just give a destination point and have it go there
 
 function turnRightTrack()
-	-- progressUpdate()
-	-- simulationCheck()
+	simulationCheck()
 	facing = facing + 1
 	if facing >= 4 then
 		facing = 0
 	end
+	progressUpdate()
 	if cost_only then
 		return
 	end
 	turtle.turnRight()
-	progressUpdate()
-	writeProgress()
 end
 
 function turnLeftTrack()
-	-- progressUpdate()
-	-- simulationCheck()
+	simulationCheck()
 	facing = facing - 1
 	if facing < 0 then
 		facing = 3
 	end
+	progressUpdate()
 	if cost_only then
 		return
 	end
 	turtle.turnLeft()
-	progressUpdate()
-	writeProgress()
 end
 
 function turnAroundTrack()
@@ -195,8 +192,7 @@ function turnToFace(direction)
 end
 
 function safeForward()
-	-- progressUpdate()
-	-- simulationCheck()
+	simulationCheck()
 	if facing == 0 then
 		positionY = positionY + 1
 	elseif facing == 1 then
@@ -207,11 +203,12 @@ function safeForward()
 		positionX = positionX - 1
 	end
 	fuel = fuel + 1
+	progressUpdate()
 	if cost_only then
 		return
 	end
 	checkFuel()
-	success = false
+	local success = false
 	while not success do
 		success = turtle.forward()
 		if not success then
@@ -227,8 +224,7 @@ function safeForward()
 end
 
 function safeBack()
-	-- progressUpdate()
-	-- simulationCheck()
+	simulationCheck()
 	if facing == 0 then
 		positionY = positionY - 1
 	elseif facing == 1 then
@@ -239,11 +235,12 @@ function safeBack()
 		positionX = positionX + 1
 	end
 	fuel = fuel + 1
+	progressUpdate()
 	if cost_only then
 		return
 	end
 	checkFuel()
-	success = false
+	local success = false
 	while not success do
 		success = turtle.back()
 		if not success then
@@ -265,15 +262,15 @@ function safeBack()
 end
 
 function safeUp()
-	-- progressUpdate()
-	-- simulationCheck()
+	simulationCheck()
 	positionZ = positionZ + 1
 	fuel = fuel + 1	
+	progressUpdate()
 	if cost_only then
 		return
 	end
 	checkFuel()
-	success = false
+	local success = false
 	while not success do
 		success = turtle.up()
 		if not success then
@@ -286,20 +283,18 @@ function safeUp()
 			end
 		end
 	end
-	progressUpdate()
-	simulationCheck()
 end
 
 function safeDown()
-	-- progressUpdate()
-	-- simulationCheck()
+	simulationCheck()
 	positionZ = positionZ - 1
 	fuel = fuel + 1
+	progressUpdate()
 	if cost_only then
 		return
 	end
 	checkFuel()
-	success = false
+	local success = false
 	while not success do
 		success = turtle.down()
 		if not success then
@@ -312,8 +307,6 @@ function safeDown()
 			end
 		end
 	end
-	progressUpdate()
-	simulationCheck()
 end
 
 function moveY(targetY)
@@ -329,8 +322,6 @@ function moveY(targetY)
 		else
 			safeBack()
 		end
-		progressUpdate()
-		writeProgress()
 	end
 	while targetY < positionY do
 		if facing == 2 then
@@ -338,8 +329,6 @@ function moveY(targetY)
 		else
 			safeBack()
 		end
-		progressUpdate()
-		writeProgress()
 	end
 end
 
@@ -356,8 +345,6 @@ function moveX(targetX)
 		else
 			safeBack()
 		end
-		progressUpdate()
-		writeProgress()
 	end
 	while targetX < positionX do
 		if facing == 3 then
@@ -365,8 +352,6 @@ function moveX(targetX)
 		else
 			safeBack()
 		end
-		progressUpdate()
-		writeProgress()
 	end
 end
 
@@ -376,13 +361,9 @@ function moveZ(targetZ)
 	end
 	while targetZ < positionZ do
 		safeDown()
-		progressUpdate()
-		writeProgress()
 	end
 	while targetZ > positionZ do
 		safeUp()
-		progressUpdate()
-		writeProgress()
 	end
 end
 
@@ -858,7 +839,6 @@ function WriteShapeParams(...) -- The ... lets it take any number of arguments a
 		tempProgTable[paramName2] = v
 		progTable[paramName2] = v
 	end
-	-- Actually can't do anything right now, because all the param-gathering in choicefunction() uses different variables -- Working on adding this in (since this can take any number of inputs)
 end
 
 -- function to write the progress to the file (x, y, z)
@@ -894,6 +874,14 @@ function compareProgress() -- return boolean
 	end
 end
 
+function getGPSInfo() -- TODO: finish this
+	position = gps.locate()
+	gpsPositionX = position.x
+	gpsPositionZ = position.y
+	gpsPositionY = position.z
+	
+end
+
 function setSimFlags(b)
 	sim_mode = b
 	cost_only = b
@@ -902,7 +890,7 @@ function setSimFlags(b)
 	end
 end
 
-function simulationCheck()  
+function simulationCheck() -- checks state of the simulation
 	if sim_mode then
 		if compareProgress() then
 			setSimFlags(false) -- If we're caught up, un-set flags
@@ -913,24 +901,26 @@ function simulationCheck()
 end
 
 function continueQuery()
-	return false -- To disable the resume functionality until it is fixed, allows us to update on pastebin for the new shapes.
-	-- if cmd_line_resume then
-		-- return true
-	-- else
-		-- if not cmd_line then
-			-- writeOut("Do you want to continue the last job?")
-			-- local yes = io.read()
-			-- if yes == "y" then
-				-- return true
-			-- else
-				-- return false
-			-- end
-		-- end
-	-- end
+	if cmd_line_resume then
+		 return true
+	else
+		 if not cmd_line then
+			 writeOut("Do you want to continue the last job?")
+			 local yes = io.read()
+			 if yes == "y" then
+				 return true
+			 else
+				 return false
+			 end
+		 end
+	end
 end
 
 function progressUpdate()  -- This ONLY updates the local table variable.  Writing is handled above. -- I want to change this to allow for any number of params
 	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, facing = facing, blocks = blocks}
+	if not sim_mode then 
+		writeProgress()
+	end
 end
 
  -- Command Line
@@ -1512,7 +1502,7 @@ function main()
 		setFlagsFromCommandLine()
 		setTableFromCommandLine()
 	end
-	if (CheckForPrevious() and can_use_gps) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
+	if (CheckForPrevious()) then  -- Will check to see if there was a previous job and gps is enabled, and if so, ask if the user would like to re-initialize to current progress status
 		if not continueQuery() then -- If the user doesn't want to continue
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
