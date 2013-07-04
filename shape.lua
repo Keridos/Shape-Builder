@@ -1529,7 +1529,7 @@ function main()
 		writeOut("Blocks used: " .. blocks)
 		writeOut("Fuel used: " .. fuel)
 	end
-	--ProgressFileDelete() -- Removes file upon successful completion of a job, or completion of a previous job.
+	ProgressFileDelete() -- Removes file upon successful completion of a job, or completion of a previous job.
 	progTable = {}
 	tempProgTable = {}
 end
