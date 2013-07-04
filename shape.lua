@@ -129,7 +129,6 @@ end
 
 function placeBlock()
 	blocks = blocks + 1
-	progressUpdate()
 	simulationCheck()
 	if cost_only then
 		return
@@ -139,6 +138,7 @@ function placeBlock()
 	end
 	checkResources()
 	turtle.placeDown()
+	progressUpdate()
 end
 
 function round(toBeRounded, decimalPlace) -- Needed for hexagon and octagon
@@ -925,7 +925,7 @@ function continueQuery()
 end
 
 function progressUpdate()  -- This ONLY updates the local table variable.  Writing is handled above. -- I want to change this to allow for any number of params
-	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, facing = facing, blocks = blocks}
+	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, z = positionZ, facing = facing, blocks = blocks}
 	if not sim_mode then 
 		writeProgress()
 	end
@@ -1529,7 +1529,7 @@ function main()
 		writeOut("Blocks used: " .. blocks)
 		writeOut("Fuel used: " .. fuel)
 	end
-	ProgressFileDelete() -- Removes file upon successful completion of a job, or completion of a previous job.
+	--ProgressFileDelete() -- Removes file upon successful completion of a job, or completion of a previous job.
 	progTable = {}
 	tempProgTable = {}
 end
