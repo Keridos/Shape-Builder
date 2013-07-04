@@ -209,15 +209,20 @@ function safeForward()
 	end
 	checkFuel()
 	local success = false
+	local tries = 0
 	while not success do
 		success = turtle.forward()
 		if not success then
-			while turtle.detect() do
-				if not turtle.dig() then
-					writeOut("Blocked attempting to move forward.")
-					writeOut("Please clear and press enter to continue.")
-					io.read()
-				end
+			while (not success) and tries < 3 do
+				tries = tries + 1
+				turtle.dig() 
+				success = turtle.forward()
+				sleep(0.3)
+			end
+			if not success then
+				writeOut("Blocked attempting to move forward.")
+				writeOut("Please clear and press enter to continue.")
+				io.read()
 			end
 		end
 	end
@@ -241,14 +246,17 @@ function safeBack()
 	end
 	checkFuel()
 	local success = false
+	local tries = 0
 	while not success do
 		success = turtle.back()
 		if not success then
 			turnAroundTrack()
-			while turtle.detect() do
-				if not turtle.dig() then
+			while turtle.detect() and tries < 3 do
+				tries = tries + 1
+				if turtle.dig() then
 					break
 				end
+				sleep(0.3)
 			end
 			turnAroundTrack()
 			success = turtle.back()
