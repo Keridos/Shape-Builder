@@ -538,15 +538,15 @@ function circle(radius)
 			remainder2 = (boundary2 - cz2 - cy2)
 			if remainder2 >= 0 then
 				-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
-				maxOffesetX = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
+				maxOffsetX = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
 					-- Only do either the +x or -x side
 				if (side == 0) then
 					-- +x side
 					xStart = radius
-					xEnd = radius + maxOffesetX
+					xEnd = radius + maxOffsetX
 				else
 					-- -x side
-					xStart = radius - maxOffesetX
+					xStart = radius - maxOffsetX
 					xEnd = radius - 1
 				end
 				-- Reverse direction we traverse xs when in -y side
@@ -629,15 +629,15 @@ function dome(typus, radius)
 				remainder2 = (boundary2 - cz2 - cy2)
 				if remainder2 >= 0 then
 					-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
-					maxOffesetX = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
+					maxOffsetX = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
 					-- Only do either the +x or -x side
 					if (side == 0) then
 						-- +x side
 						xStart = radius
-						xEnd = radius + maxOffesetX
+						xEnd = radius + maxOffsetX
 					else
 						-- -x side
-						xStart = radius - maxOffesetX
+						xStart = radius - maxOffsetX
 						xEnd = radius - 1
 					end
 					-- Reverse direction we traverse xs when in -y side
