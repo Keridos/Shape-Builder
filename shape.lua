@@ -502,6 +502,57 @@ function platform(x, y)
 	end
 end
 
+function cuboid(depth, width, height, hollow)
+	platform(depth, width)
+	while (facing > 0) do
+		turnLeftTrack()
+	end
+	turnAroundTrack()
+	if ((width % 2) == 0) then -- This is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
+		turnLeftTrack()
+	end
+	if not(hollow == "n") then
+		for i = 1, height - 2 do
+			safeUp()
+			if ((width % 2) == 0) then -- This as well
+			rectangle(depth, width)
+			else
+			rectangle(width, depth)
+			end
+		end
+	else
+		for i = 1, height - 2 do
+			safeUp()
+			platform(depth,width)
+		end
+	end
+	safeUp()
+	platform(depth, width)
+end
+
+function pyramid(length, hollow)
+	height = math.ceil(length / 2)
+	for i = 1, height do
+		if hollow then
+			rectangle(length, length)
+		else
+			platform(length, length)
+			navigateTo(0,0)
+			while facing ~= 0 do
+				turnRightTrack()
+			end
+		end
+		if i ~= height then
+			safeUp()
+			safeForward()
+			turnRightTrack()
+			safeForward()
+			turnLeftTrack()
+			length = length - 2
+		end
+	end
+end
+
 function stair(width, height)
 	turnRightTrack()
 	local counterX = 1
@@ -699,6 +750,13 @@ function dome(typus, radius)
 	end
 end
 
+function cylinder(radius, height)
+	for i = 1, height do
+		circle(radius)
+		safeUp()
+	end
+end
+
 function hexagon(sideLength)
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
@@ -825,8 +883,21 @@ function octagon(sideLength)
 	end
 end
 
--- Previous Progress Resuming, Simulation functions, Command Line, and File Backend
+function sixprism(length, height)
+	for i = 1, height do
+		hexagon(length)
+		safeUp()
+	end
+end
 
+function eigthprism(length, height)
+	for i = 1, height do
+		octagon(length)
+		safeUp()
+	end
+end
+
+-- Previous Progress Resuming, Simulation functions, Command Line, and File Backend
 -- Will check for a "progress" file.
 function CheckForPrevious() 
 	if fs.exists(progFileName) then
@@ -1065,8 +1136,7 @@ function choiceFunction()
 	else
 		activeslot = 1
 	end
-	
-	-- Comparisons 
+	-- shape selection if cascade
 	if choice == "rectangle" then
 		local depth = 0
 		local width = 0
@@ -1181,32 +1251,7 @@ function choiceFunction()
 			width = 3
 		end	
 		progTable = {param1 = depth, param2 = width, param3 = height}
-		platform(depth, width)		
-		while (facing > 0) do
-			turnLeftTrack()
-		end
-		turnAroundTrack()
-		if ((width % 2) == 0) then
-			-- This is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
-			turnLeftTrack()
-		end
-		if not(hollow == "n") then
-			for i = 1, height - 2 do
-				safeUp()
-				if ((width % 2) == 0) then -- This as well
-				rectangle(depth, width)
-				else
-				rectangle(width, depth)
-				end
-			end
-		else
-			for i = 1, height - 2 do
-				safeUp()
-				platform(depth,width)
-			end
-		end
-		safeUp()
-		platform(depth, width)
+		cuboid(depth, width, height, hollow)
 	end
 	if choice == "1/2-sphere" or choice == "1/2 sphere" then
 		local radius = 0
@@ -1221,7 +1266,6 @@ function choiceFunction()
 		tempProgTable.param1 = radius
 		tempProgTable.param2 = half
 		progTable = {param1 = radius, param2 = half}
-		half = string.lower(half)
 		if half == "bottom" then
 			dome("bowl", radius)
 		else
@@ -1274,10 +1318,7 @@ function choiceFunction()
 		tempProgTable.param1 = radius
 		tempProgTable.param2 = height
 		progTable = {param1 = radius, param2 = height}
-		for i = 1, height do
-			circle(radius)
-			safeUp()
-		end
+		cylinder(radius, height)
 	end
 	if choice == "pyramid" then
 		local length = 0
@@ -1292,31 +1333,12 @@ function choiceFunction()
 		tempProgTable.param1 = length
 		tempProgTable.param2 = hollow
 		progTable = {param1 = length, param2 = hollow}
-		if hollow == 'y' or hollow == 'yes' or hollow == 'true' then
+		if hollow == 'y' then
 			hollow = true
 		else
 			hollow = false
 		end
-		height = math.ceil(length / 2)
-		for i = 1, height do
-			if hollow then
-				rectangle(length, length)
-			else
-				platform(length, length)
-				navigateTo(0,0)
-				while facing ~= 0 do
-					turnRightTrack()
-				end
-			end
-			if i ~= height then
-				safeUp()
-				safeForward()
-				turnRightTrack()
-				safeForward()
-				turnLeftTrack()
-				length = length - 2
-			end
-		end
+		pyramid(length, hollow)
 	end
 	if choice == "sphere" then
 		local radius = 0
@@ -1364,10 +1386,7 @@ function choiceFunction()
 		tempProgTable.param1 = length
 		tempProgTable.param2 = height
 		progTable = {param1 = length, param2 = height}
-		for i = 1, height do
-			hexagon(length)
-			safeUp()
-		end
+		sixprism(length, height)
 	end
 	if choice == "8-prism" or choice == "8 prism" then
 		local length = 0
@@ -1382,10 +1401,7 @@ function choiceFunction()
 		tempProgTable.param1 = length
 		tempProgTable.param2 = height
 		progTable = {param1 = length, param2 = height}
-		for i = 1, height do
-			octagon(length)
-			safeUp()
-		end
+		eightprism(length, height)
 	end
 	if returntohome then
 		goHome() -- After all shape building has finished
