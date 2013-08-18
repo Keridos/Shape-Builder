@@ -36,7 +36,6 @@ local tempProgTable = {}
 local progTable = {} --This is the LOCAL table!  used for local stuff only, and is ONLY EVER WRITTEN when sim_mode is FALSE
 local progFileName = "ShapesProgressFile"
 
-
 -- Utility functions
 
 function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so writeOut(1,2,3) is the same as print(1,2,3). previously writeOut(1,2,3) would have been the same as print(1)
@@ -75,13 +74,11 @@ end
 function wrapmodules() --checks for and wraps turtle modules
 	local test = 0
 	if peripheral.getType("left" )== "resupply" then 
-		rs=peripheral.wrap("left")
+		resupplymodule=peripheral.wrap("left")
 		resupply = true
-		return "resupply"
 	elseif peripheral.getType("right") == "resupply" then
-		rs=peripheral.wrap("right")
+		resupplymodule=peripheral.wrap("right")
 		resupply = true
-		return "resupply"
 	end
 	if peripheral.getType("left") == "modem" then
 		modem=peripheral.wrap("left")
@@ -89,21 +86,20 @@ function wrapmodules() --checks for and wraps turtle modules
 		if test ~= nil then
 			can_use_gps = true
 		end
-		return "modem"
 	elseif peripheral.getType("right") == "modem" then
 		modem=peripheral.wrap("right")
 		test, _, _ = gps.locate(1)
 		if test ~= nil then
 			can_use_gps = true
 		end
-		return "modem"
-	else
-		return false
+	end
+	if resupply then
+		return "resupply"
 	end
 end
 
 function linkToRSStation() -- Links to rs station
-	if rs.link() then
+	if resupplymodule.link() then
 		return true
 	else
 		writeOut("Please put Resupply Station to the left of the turtle and press Enter to continue")
@@ -121,7 +117,7 @@ end
 function checkResources()
 	if resupply then
 		if turtle.getItemCount(activeslot) <= 1 then
-			while not(rs.resupply(1)) do
+			while not(resupplymodule.resupply(1)) do
 				os.sleep(0.5)
 			end
 		end
