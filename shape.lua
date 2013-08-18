@@ -45,6 +45,33 @@ function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so 
 	end
 end
 
+function getInput(inputtype, message, option1, option2)
+	local input = ""
+	if inputtype == "string" then
+		writeOut(message.. "(" ..option1 .. " or "..option2..")" )
+		while true do
+			input = io.read()
+			input = string.lower(input)
+			if input ~= option1 and input ~= option2 then
+				writeOut("You didn't enter in " ..option1.." or "..option2 .. ". Please try again.")
+			else
+				return input
+			end
+		end
+	end
+	if inputtype == "int" then
+		writeOut(message)
+		while true do
+			input = io.read()
+			if tonumber(input) ~= nil then
+				return tonumber(input)
+			else
+				writeOut("Need a number. Please try again")
+			end
+		end
+	end	
+end
+
 function wrapmodules() --checks for and wraps turtle modules
 	local test = 0
 	if peripheral.getType("left" )== "resupply" then 
@@ -1009,15 +1036,11 @@ function choiceFunction()
 			return
 		end
 		writeOut("Building a "..choice)
-		writeOut("Want to just calculate the cost? [y/n]")
-		local yes = io.read()
-		yes = string.lower(yes)
+		local yes = getInput("string","Want to just calculate the cost?","y","n")
 		if yes == 'y' then
 			cost_only = true
 		end
-		writeOut("Want turtle to return to start after build? [y/n]")
-		local yes = io.read()
-		yes = string.lower(yes)
+		local yes = getInput("string","Want turtle to return to start after build?","y","n")
 		if yes == 'y' then
 			returntohome = true
 		end
@@ -1052,16 +1075,12 @@ function choiceFunction()
 		local depth = 0
 		local width = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How deep does it need to be?")
-			depth = io.read()
-			writeOut("How wide does it need to be?")
-			width = io.read()
+			depth = getInput("int","How deep does it need to be?")
+			width = getInput("int","How wide does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			depth = tempProgTable.param1
 			width = tempProgTable.param2
 		end
-		depth = tonumber(depth)
-		width = tonumber(width)
 		tempProgTable.param1 = depth
 		tempProgTable.param2 = width
 		progTable = {param1 = depth, param2 = width} -- THIS is here because we NEED to update the local table!
@@ -1075,7 +1094,6 @@ function choiceFunction()
 		elseif sim_mode == true or cmd_line == true then
 			sideLength = tempProgTable.param1
 		end
-		sideLength = tonumber(sideLength)
 		tempProgTable.param1 = sideLength
 		progTable = {param1 = sideLength}
 		square(sideLength)
@@ -1083,12 +1101,10 @@ function choiceFunction()
 	if choice == "line" then
 		local lineLength = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How long does it need to be?")
-			lineLength = io.read()
+			lineLength = getInput("int","How long does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			lineLength = tempProgTable.param1
 		end
-		lineLength = tonumber(lineLength)
 		tempProgTable.param1 = lineLength
 		progTable = {param1 = lineLength}
 		line(lineLength)
@@ -1097,16 +1113,12 @@ function choiceFunction()
 	local depth = 0
 	local height = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How deep does it need to be?")
-			depth = io.read()
-			writeOut("How high does it need to be?")
-			height = io.read()
+			depth = getInput("int","How deep does it need to be?")
+			height = getInput("int","How high does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			depth = tempProgTable.param1
 			height = tempProgTable.param2
 		end			
-		depth = tonumber(depth)
-		height = tonumber(height)
 		tempProgTable.param1 = depth
 		tempProgTable.param2 = height
 		progTable = {param1 = depth, param2 = height}
@@ -1116,16 +1128,12 @@ function choiceFunction()
 		local depth = 0
 		local width = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How deep does it need to be?")
-			depth = io.read()
-			writeOut("How wide does it need to be?")
-			width = io.read()
+			depth = getInput("int","How deep does it need to be?")
+			width = getInput("int","How wide does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			depth = tempProgTable.param1	
 			width = tempProgTable.param2		
 		end		
-		depth = tonumber(depth)
-		width = tonumber(width)
 		tempProgTable.param1 = depth
 		tempProgTable.param2 = width
 		progTable = {param1 = depth, param2 = width}
@@ -1135,16 +1143,12 @@ function choiceFunction()
 		local width = 0
 		local height = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How wide does it need to be?")
-			width = io.read()
-			writeOut("How high does it need to be?")
-			height = io.read()
+			width = getInput("int","How wide does it need to be?")
+			height = getInput("int","How high does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			width = tempProgTable.param1
 			height = tempProgTable.param2
 		end
-		width = tonumber(width)
-		height = tonumber(height)
 		tempProgTable.param1 = width
 		tempProgTable.param2 = height
 		progTable = {param1 = width, param2 = height}
@@ -1157,23 +1161,16 @@ function choiceFunction()
 		local height = 0
 		local hollow = ""
 		if sim_mode == false and cmd_line == false then
-			writeOut("How deep does it need to be?")
-			depth = io.read()
-			writeOut("How wide does it need to be?")
-			width = io.read()
-			writeOut("How high does it need to be?")
-			height = io.read()
-			writeOut("Does it need to be hollow? (y/n)")
-			hollow = io.read()
+			depth = getInput("int","How deep does it need to be?")
+			width = getInput("int","How wide does it need to be?")
+			height = getInput("int","How high does it need to be?")
+			hollow = getInput("string","Does it need to be hollow?","y","n")
 		elseif sim_mode == true or cmd_line == true then
 			depth = tempProgTable.param1
 			width = tempProgTable.param2
 			height = tempProgTable.param3
 			hollow = tempProgTable.param4
 		end
-		depth = tonumber(depth)
-		width = tonumber(width)
-		height = tonumber(height)
 		tempProgTable.param1 = depth
 		tempProgTable.param2 = width
 		tempProgTable.param3 = height
@@ -1219,15 +1216,12 @@ function choiceFunction()
 		local radius = 0
 		local half = ""
 		if sim_mode == false and cmd_line == false then
-			writeOut("What radius does it need to be?")
-			radius = io.read()
-			writeOut("What half of the sphere does it need to be?(bottom/top)")
-			half = io.read()
+			radius = getInput("int","What radius does it need to be?")
+			half = getInput("string","What half of the sphere does it need to be?","bottom","top")
 		elseif sim_mode == true or cmd_line == true then
 			radius = tempProgTable.param1
 			half = tempProgTable.param2
 		end	
-		radius = tonumber(radius)
 		tempProgTable.param1 = radius
 		tempProgTable.param2 = half
 		progTable = {param1 = radius, param2 = half}
@@ -1241,12 +1235,10 @@ function choiceFunction()
 	if choice == "dome" then
 		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("What radius does it need to be?")
-			radius = io.read()
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			radius = tempProgTable.param1
 		end	
-		radius = tonumber(radius)
 		tempProgTable.param1 = radius
 		progTable = {param1 = radius}
 		dome("dome", radius)
@@ -1254,12 +1246,10 @@ function choiceFunction()
 	if choice == "bowl" then
 		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("What radius does it need to be?")
-			radius = io.read()
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			radius = tempProgTable.param1
 		end	
-		radius = tonumber(radius)
 		tempProgTable.param1 = radius
 		progTable = {param1 = radius}
 		dome("bowl", radius)
@@ -1267,12 +1257,10 @@ function choiceFunction()
 	if choice == "circle" then
 		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("What radius does it need to be?")
-			radius = io.read()
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			radius = tempProgTable.param1
 		end
-		radius = tonumber(radius)
 		tempProgTable.param1 = radius
 		progTable = {param1 = radius}
 		circle(radius)
@@ -1281,16 +1269,12 @@ function choiceFunction()
 		local radius = 0
 		local height = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("What radius does it need to be?")
-			radius = io.read()
-			writeOut("What height does it need to be?")
-			height = io.read()
+			radius = getInput("int","What radius does it need to be?")
+			height = getInput("int","How high does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			radius = tempProgTable.param1
 			height = tempProgTable.param2
 		end
-		radius = tonumber(radius)
-		height = tonumber(height)
 		tempProgTable.param1 = radius
 		tempProgTable.param2 = height
 		progTable = {param1 = radius, param2 = height}
@@ -1303,15 +1287,12 @@ function choiceFunction()
 		local length = 0
 		local hollow = ""
 		if sim_mode == false and cmd_line == false then
-			writeOut("What depth/width does it need to be?")
-			length = io.read()
-			writeOut("Does it need to be hollow [y/n]?")
-			hollow = io.read()
+			length = getInput("int","What depth/width does it need to be?")
+			hollow = getInput("string","Does it need to be hollow?","y","n")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 			hollow = tempProgTable.param2
 		end
-		length = tonumber(length)
 		tempProgTable.param1 = length
 		tempProgTable.param2 = hollow
 		progTable = {param1 = length, param2 = hollow}
@@ -1344,12 +1325,10 @@ function choiceFunction()
 	if choice == "sphere" then
 		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("What radius does it need to be?")
-			radius = io.read()
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			radius = tempProgTable.param1
 		end
-		radius = tonumber(radius)
 		tempProgTable.param1 = radius
 		progTable = {param1 = radius}
 		dome("sphere", radius)
@@ -1357,12 +1336,10 @@ function choiceFunction()
 	if choice == "hexagon" then
 		local length = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How long do each side need to be?")
-			length = io.read()
+			length = getInput("int","How long does each side need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 		end
-		length = tonumber(length)
 		tempProgTable.param1 = length
 		progTable = {param1 = length}
 		hexagon(length)
@@ -1370,12 +1347,10 @@ function choiceFunction()
 	if choice == "octagon" then
 		local length = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How long do each side need to be?")
-			length = io.read()
+			length = getInput("int","How long does each side need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 		end
-		length = tonumber(length)
 		tempProgTable.param1 = length
 		progTable = {param1 = length}
 		octagon(length)
@@ -1384,16 +1359,12 @@ function choiceFunction()
 		local length = 0
 		local height = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How long do each side need to be?")
-			length = io.read()
-			writeOut("What height does it need to be?")
-			height = io.read()
+			length = getInput("int","How long does each side need to be?")
+			height = getInput("int","What height does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 			height = tempProgTable.param2
 		end
-		length = tonumber(length)
-		height = tonumber(height)
 		tempProgTable.param1 = length
 		tempProgTable.param2 = height
 		progTable = {param1 = length, param2 = height}
@@ -1406,16 +1377,12 @@ function choiceFunction()
 		local length = 0
 		local height = 0
 		if sim_mode == false and cmd_line == false then
-			writeOut("How long do each side need to be?")
-			length = io.read()
-			writeOut("What height does it need to be?")
-			height = io.read()
+			length = getInput("int","How long does each side need to be?")
+			height = getInput("int","What height does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 			height = tempProgTable.param2
 		end
-		length = tonumber(length)
-		height = tonumber(height)
 		tempProgTable.param1 = length
 		tempProgTable.param2 = height
 		progTable = {param1 = length, param2 = height}
