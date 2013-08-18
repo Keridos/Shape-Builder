@@ -533,7 +533,7 @@ end
 function pyramid(length, hollow)
 	height = math.ceil(length / 2)
 	for i = 1, height do
-		if hollow then
+		if hollow=="y" then
 			rectangle(length, length)
 		else
 			platform(length, length)
@@ -1333,11 +1333,6 @@ function choiceFunction()
 		tempProgTable.param1 = length
 		tempProgTable.param2 = hollow
 		progTable = {param1 = length, param2 = hollow}
-		if hollow == 'y' then
-			hollow = true
-		else
-			hollow = false
-		end
 		pyramid(length, hollow)
 	end
 	if choice == "sphere" then
