@@ -71,7 +71,7 @@ function getInput(inputtype, message, option1, option2)
 	end	
 end
 
-function wrapmodules() --checks for and wraps turtle modules
+function wrapmodules() -- checks for and wraps turtle modules
 	local test = 0
 	if peripheral.getType("left" )== "resupply" then 
 		resupplymodule=peripheral.wrap("left")
@@ -98,7 +98,7 @@ function wrapmodules() --checks for and wraps turtle modules
 	end
 end
 
-function linkToRSStation() -- Links to rs station
+function linkToRSStation() -- Links to resupply station
 	if resupplymodule.link() then
 		return true
 	else
