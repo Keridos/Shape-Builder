@@ -52,7 +52,7 @@ function getInput(inputtype, message, option1, option2)
 			input = io.read()
 			input = string.lower(input)
 			if input ~= option1 and input ~= option2 then
-				writeOut("You didn't enter in " ..option1.." or "..option2 .. ". Please try again.")
+				writeOut("You didn't enter a valid option. Please try again.")
 			else
 				return input
 			end
@@ -965,7 +965,7 @@ function readProgress()
 end
 
 -- compares the progress read from the file to the current sim progress.  needs all four params 
-function compareProgress() -- return boolean
+function compareProgress()
 	local progTableIn = progTable
 	local readProgTable = readProgress()
 	if (progTableIn.shape == readProgTable.shape and progTableIn.x == readProgTable.x and progTableIn.y == readProgTable.y and progTableIn.blocks == readProgTable.blocks and progTableIn.facing == readProgTable.facing) then
@@ -1458,7 +1458,7 @@ function showHelp()
 	writeOut("-h: Show this page")
 	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
 	io.read() -- Pause here
-	writeOut("-r: Resume the last shape if there are any (Note: This is disabled until we can iron out the kinks)")
+	writeOut("-r: Resume the last shape if there is a resume file")
 	writeOut("shape-type can be any of the shapes in the menu")
 	writeOut("After shape-type input all of the paramaters for the shape")
 	io.read() -- Pause here, too
