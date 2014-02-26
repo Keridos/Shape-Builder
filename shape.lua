@@ -1236,7 +1236,7 @@ function choiceFunction()
 		tempProgTable.param1 = depth
 		tempProgTable.param2 = width
 		progTable = {param1 = depth, param2 = width}
-		platform(depth, width)
+		platform(width, depth)
 	end
 	if choice == "stair" then
 		local width = 0
