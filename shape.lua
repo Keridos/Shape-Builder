@@ -122,21 +122,25 @@ function checkResources()
 				os.sleep(0.5)
 			end
 		end
-	else if enderchestRefilling then
+	elseif enderchestRefilling then
 		compareResources()
-		while (turtle.getItemCount(activeslot) = 0) do
-			if (activeslot == 15) and (turtle.getItemCount(activeslot)=0) then
+		while (turtle.getItemCount(activeslot) <= 1) do
+			if (activeslot == 15) and (turtle.getItemCount(activeslot)<=1) then
 				turtle.select(16)
 				turtle.digUp()
+				for i = 1, 15 do
+					turtle.select(i)
+					turtle.drop()
+				end
+				turtle.select(16)
 				turtle.placeUp()
-				activeslot = 1
-				turtle.select(1)
-				turtle.drop(1)
+				turtle.select(1)				
 				for i = 1, 15 do
 					turtle.suckUp()
 				end
 				turtle.select(16)
 				turtle.digUp()
+				activeslot = 1
 				turtle.select(activeslot)
 			else
 				activeslot = activeslot+1
