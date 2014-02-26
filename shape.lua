@@ -27,6 +27,7 @@ local gpsFacing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
 local resupply = false
+local enderchestRefilling = false
 local can_use_gps = false
 local returntohome = false -- whether the turtle shall return to start after build
 local choice = ""
@@ -120,6 +121,30 @@ function checkResources()
 			while not(resupplymodule.resupply(1)) do
 				os.sleep(0.5)
 			end
+		end
+	else if enderchestRefilling then
+		compareResources()
+		while (turtle.getItemCount(activeslot) = 0) do
+			if (activeslot == 15) and (turtle.getItemCount(activeslot)=0) then
+				turtle.select(16)
+				turtle.digUp()
+				turtle.placeUp()
+				activeslot = 1
+				turtle.select(1)
+				turtle.drop(1)
+				for i = 1, 15 do
+					turtle.suckUp()
+				end
+				turtle.select(16)
+				turtle.digUp()
+				turtle.select(activeslot)
+			else
+				activeslot = activeslot+1
+				-- writeOut("Turtle slot empty, trying slot "..activeslot)
+				turtle.select(activeslot)
+			end
+			compareResources()
+			os.sleep(0.2)
 		end
 	else
 		compareResources()
@@ -1110,6 +1135,10 @@ function choiceFunction()
 		local yes = getInput("string","Want turtle to return to start after build?","y","n")
 		if yes == 'y' then
 			returntohome = true
+		end
+		local yes = getInput("string","Want the turtle to refill from enderchest (slot 16)?","y","n")
+		if yes == 'y' then
+			enderchestRefilling = true
 		end
 	elseif sim_mode == true then -- If we ARE resuming progress
 		tempProgTable = readProgress()
