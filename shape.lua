@@ -1048,7 +1048,7 @@ function continueQuery()
 end
 
 function progressUpdate()  -- This ONLY updates the local table variable.  Writing is handled above. -- I want to change this to allow for any number of params
-	progTable = {shape = choice, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, z = positionZ, facing = facing, blocks = blocks}
+	progTable = {shape = choice, enderchestRefilling = tempProgTable.enderchestRefilling, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, z = positionZ, facing = facing, blocks = blocks}
 	if not sim_mode then 
 		writeProgress()
 	end
@@ -1143,14 +1143,17 @@ function choiceFunction()
 		local yes = getInput("string","Want the turtle to refill from enderchest (slot 16)?","y","n")
 		if yes == 'y' then
 			enderchestRefilling = true
+			tempProgTable.enderchestRefilling = true;
 		end
 	elseif sim_mode == true then -- If we ARE resuming progress
 		tempProgTable = readProgress()
 		choice = tempProgTable.shape
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
+		enderchestRefilling =  tempProgTable.enderchestRefilling
 	elseif cmd_line == true then -- If running from command line
 		choice = tempProgTable.shape
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
+		enderchestRefilling =  tempProgTable.enderchestRefilling
 		writeOut("Building a "..choice)
 	end	
 	if not cost_only then
