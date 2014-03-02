@@ -1191,8 +1191,7 @@ function choiceFunction()
 	if choice == "square" then
 		local sideLength
 		if sim_mode == false and cmd_line == false then
-			writeOut("What depth/width does it need to be?")
-			sideLength = io.read()
+			sideLength = getInput("int","What depth/width does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			sideLength = tempProgTable.param1
 		end
