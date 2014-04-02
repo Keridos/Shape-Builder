@@ -265,7 +265,7 @@ function safeForward()
 	while not success do
 		success = turtle.forward()
 		if not success then
-			while (not success) and tries < 3 do
+			while (not success) and tries < 6 do
 				tries = tries + 1
 				turtle.dig() 
 				success = turtle.forward()
@@ -303,7 +303,7 @@ function safeBack()
 		success = turtle.back()
 		if not success then
 			turnAroundTrack()
-			while turtle.detect() and tries < 3 do
+			while turtle.detect() and tries < 6 do
 				tries = tries + 1
 				if turtle.dig() then
 					break
@@ -686,55 +686,21 @@ function circle(radius)
 	end
 end
 
-function blockInSphereIsFull(offset, x, y, z, radiusSq)
-	x = x - offset
-	y = y - offset
-	z = z - offset
-	x = x ^ 2
-	y = y ^ 2
-	z = z ^ 2
-	return x + y + z <= radiusSq
-end
-
-function isSphereBorder(offset, x, y, z, radiusSq)
-	spot = blockInSphereIsFull(offset, x, y, z, radiusSq)
-	if spot then
-		spot = not blockInSphereIsFull(offset, x, y - 1, z, radiusSq) or
-			not blockInSphereIsFull(offset, x, y + 1, z, radiusSq) or
-			not blockInSphereIsFull(offset, x - 1, y, z, radiusSq) or
-			not blockInSphereIsFull(offset, x + 1, y, z, radiusSq) or
-			not blockInSphereIsFull(offset, x, y, z - 1, radiusSq) or
-			not blockInSphereIsFull(offset, x, y, z + 1, radiusSq)
-	end
-	return spot
-end
-
-function dome(typus, diameter)
+function dome(typus, radius)
 	-- Main dome and sphere building routine
-	odd = not (math.fmod(diameter, 2) == 0)
-	radius = diameter / 2;
-	if odd then
-		width = (2 * math.ceil(radius)) + 1;
-		offset = math.floor(width/2);
-	else
-		width = (2 * math.ceil(radius)) + 2;
-		offset = math.floor(width/2) - 0.5;		
-	end
-	--diameter --radius * 2 + 1
+	width = radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
 	boundaryRadius = radius + 1.0
 	boundary2 = boundaryRadius ^ 2
-	radius2 = radius ^ 2
-	
 	if typus == "dome" then
-		zstart = math.ceil(radius)
+		zstart = radius
 	elseif typus == "sphere" then
 		zstart = 0
 	elseif typus == "bowl" then
 		zstart = 0
 	end
 	if typus == "bowl" then
-		zend = math.floor(radius)
+		zend = radius
 	else
 		zend = width - 1
 	end
@@ -753,12 +719,12 @@ function dome(typus, diameter)
 			-- On the right we go from small y to large y, on the left reversed
 			-- This makes us travel clockwise (from below) around each layer
 			if (side == 0) then
-				yStart = math.floor(radius) - maxOffestY
-				yEnd = math.floor(radius) + maxOffestY
+				yStart = radius - maxOffestY
+				yEnd = radius + maxOffestY
 				yStep = 1
 			else
-				yStart = math.floor(radius) + maxOffestY
-				yEnd = math.floor(radius) - maxOffestY
+				yStart = radius + maxOffestY
+				yEnd = radius - maxOffestY
 				yStep = -1
 			end
 			for y = yStart,yEnd,yStep do
@@ -770,15 +736,15 @@ function dome(typus, diameter)
 					-- Only do either the +x or -x side
 					if (side == 0) then
 						-- +x side
-						xStart = math.floor(radius)
-						xEnd = math.floor(radius) + maxOffsetX
+						xStart = radius
+						xEnd = radius + maxOffsetX
 					else
 						-- -x side
-						xStart = math.floor(radius) - maxOffsetX
-						xEnd = math.floor(radius) - 1
+						xStart = radius - maxOffsetX
+						xEnd = radius - 1
 					end
 					-- Reverse direction we traverse xs when in -y side
-					if y > math.floor(radius) then
+					if y > radius then
 						temp = xStart
 						xStart = xEnd
 						xEnd = temp
@@ -788,10 +754,23 @@ function dome(typus, diameter)
 					end
 
 					for x = xStart,xEnd,xStep do
+						cx2 = (radius - x) ^ 2
+						distanceToCentre = (cx2 + cy2 + cz2) ^ 0.5
 						-- Only blocks within the radius but still within 1 3d-diagonal block of the edge are eligible
-						if isSphereBorder(offset, x, y, z, radius2) then
-							navigateTo(x, y)
-							placeBlock()
+						if distanceToCentre < boundaryRadius and distanceToCentre + sqrt3 >= boundaryRadius then
+							offsets = {{0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}}
+							for i=1,6 do
+								offset = offsets[i]
+								dx = offset[1]
+								dy = offset[2]
+								dz = offset[3]
+								if ((radius - (x + dx)) ^ 2 + (radius - (y + dy)) ^ 2 + (radius - (z + dz)) ^ 2) ^ 0.5 >= boundaryRadius then
+									-- This is a point to use
+									navigateTo(x, y)
+									placeBlock()
+									break
+								end
+							end
 						end
 					end
 				end
@@ -1310,45 +1289,45 @@ function choiceFunction()
 		cuboid(depth, width, height, hollow)
 	end
 	if choice == "1/2-sphere" or choice == "1/2 sphere" then
-		local diameter = 0
+		local radius = 0
 		local half = ""
 		if sim_mode == false and cmd_line == false then
-			diameter = getInput("int","What diameter does it need to be?")
+			radius = getInput("int","What radius does it need to be?")
 			half = getInput("string","What half of the sphere does it need to be?","bottom","top")
 		elseif sim_mode == true or cmd_line == true then
-			diameter = tempProgTable.param1
+			radius = tempProgTable.param1
 			half = tempProgTable.param2
 		end	
-		tempProgTable.param1 = diameter
+		tempProgTable.param1 = radius
 		tempProgTable.param2 = half
-		progTable = {param1 = diameter, param2 = half}
+		progTable = {param1 = radius, param2 = half}
 		if half == "bottom" then
-			dome("bowl", diameter)
+			dome("bowl", radius)
 		else
-			dome("dome", diameter)
+			dome("dome", radius)
 		end
 	end
 	if choice == "dome" then
-		local diameter = 0
+		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			diameter = getInput("int","What diameter does it need to be?")
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			diameter = tempProgTable.param1
+			radius = tempProgTable.param1
 		end	
-		tempProgTable.param1 = diameter
-		progTable = {param1 = diameter}
-		dome("dome", diameter)
+		tempProgTable.param1 = radius
+		progTable = {param1 = radius}
+		dome("dome", radius)
 	end
 	if choice == "bowl" then
-		local diameter = 0
+		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			diameter = getInput("int","What diameter does it need to be?")
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			diameter = tempProgTable.param1
+			radius = tempProgTable.param1
 		end	
-		tempProgTable.param1 = diameter
-		progTable = {param1 = diameter}
-		dome("bowl", diameter)
+		tempProgTable.param1 = radius
+		progTable = {param1 = radius}
+		dome("bowl", radius)
 	end
 	if choice == "circle" then
 		local radius = 0
@@ -1392,15 +1371,15 @@ function choiceFunction()
 		pyramid(length, hollow)
 	end
 	if choice == "sphere" then
-		local diameter = 0
+		local radius = 0
 		if sim_mode == false and cmd_line == false then
-			diameter = getInput("int","What diameter does it need to be?")
+			radius = getInput("int","What radius does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			diameter = tempProgTable.param1
+			radius = tempProgTable.param1
 		end
-		tempProgTable.param1 = diameter
-		progTable = {param1 = diameter}
-		dome("sphere", diameter)
+		tempProgTable.param1 = radius
+		progTable = {param1 = radius}
+		dome("sphere", radius)
 	end
 	if choice == "hexagon" then
 		local length = 0
