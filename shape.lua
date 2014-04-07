@@ -265,7 +265,7 @@ function safeForward()
 	while not success do
 		success = turtle.forward()
 		if not success then
-			while (not success) and tries < 3 do
+			while (not success) and tries < 6 do
 				tries = tries + 1
 				turtle.dig() 
 				success = turtle.forward()
@@ -303,7 +303,7 @@ function safeBack()
 		success = turtle.back()
 		if not success then
 			turnAroundTrack()
-			while turtle.detect() and tries < 3 do
+			while turtle.detect() and tries < 6 do
 				tries = tries + 1
 				if turtle.dig() then
 					break
