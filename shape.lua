@@ -614,27 +614,36 @@ function stair(width, height)
 	end
 end
 
-function circle(radius)
-	width = radius * 2 + 1
+function circle(diameter)
+	odd = not (math.fmod(diameter, 2) == 0)
+	radius = diameter / 2;
+	if odd then
+		width = (2 * math.ceil(radius)) + 1;
+		offset = math.floor(width/2);
+	else
+		width = (2 * math.ceil(radius)) + 2;
+		offset = math.floor(width/2) - 0.5;		
+	end
+	--diameter --radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
 	boundaryRadius = radius + 1.0
 	boundary2 = boundaryRadius ^ 2
-	z = radius
+	radius2 = radius ^ 2
+	z = math.floor(radius)
 	cz2 = (radius - z) ^ 2
 	limitOffsetY = (boundary2 - cz2) ^ 0.5
-	maxOffestY = math.ceil(limitOffsetY)
-	
+	maxOffsetY = math.ceil(limitOffsetY)
 	-- We do first the +x side, then the -x side to make movement efficient
 	for side = 0,1 do
 			-- On the right we go from small y to large y, on the left reversed
 			-- This makes us travel clockwise (from below) around each layer
 			if (side == 0) then
-				yStart = math.floor(radius) - maxOffestY
-				yEnd = math.floor(radius) + maxOffestY
+				yStart = math.floor(radius) - maxOffsetY
+				yEnd = math.floor(radius) + maxOffsetY
 				yStep = 1
 			else
-				yStart = math.floor(radius) + maxOffestY
-				yEnd = math.floor(radius) - maxOffestY
+				yStart = math.floor(radius) + maxOffsetY
+				yEnd = math.floor(radius) - maxOffsetY
 				yStep = -1
 			end
 			for y = yStart,yEnd,yStep do
@@ -736,18 +745,18 @@ function dome(typus, diameter)
 		--writeOut("Layer " .. z)
 		cz2 = (radius - z) ^ 2
 		limitOffsetY = (boundary2 - cz2) ^ 0.5
-		maxOffestY = math.ceil(limitOffsetY)
+		maxOffsetY = math.ceil(limitOffsetY)
 		-- We do first the +x side, then the -x side to make movement efficient
 		for side = 0,1 do
 			-- On the right we go from small y to large y, on the left reversed
 			-- This makes us travel clockwise (from below) around each layer
 			if (side == 0) then
-				yStart = math.floor(radius) - maxOffestY
-				yEnd = math.floor(radius) + maxOffestY
+				yStart = math.floor(radius) - maxOffsetY
+				yEnd = math.floor(radius) + maxOffsetY
 				yStep = 1
 			else
-				yStart = math.floor(radius) + maxOffestY
-				yEnd = math.floor(radius) - maxOffestY
+				yStart = math.floor(radius) + maxOffsetY
+				yEnd = math.floor(radius) - maxOffsetY
 				yStep = -1
 			end
 			for y = yStart,yEnd,yStep do
@@ -789,9 +798,9 @@ function dome(typus, diameter)
 	end
 end
 
-function cylinder(radius, height)
+function cylinder(diameter, height)
 	for i = 1, height do
-		circle(radius)
+		circle(diameter)
 		safeUp()
 	end
 end
@@ -1340,30 +1349,30 @@ function choiceFunction()
 		dome("bowl", diameter)
 	end
 	if choice == "circle" then
-		local radius = 0
+		local diameter = 0
 		if sim_mode == false and cmd_line == false then
-			radius = getInput("int","What radius does it need to be?")
+			diameter = getInput("int","What diameter does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			radius = tempProgTable.param1
+			diameter = tempProgTable.param1
 		end
-		tempProgTable.param1 = radius
-		progTable = {param1 = radius}
-		circle(radius)
+		tempProgTable.param1 = diameter
+		progTable = {param1 = diameter}
+		circle(diameter)
 	end
 	if choice == "cylinder" then
-		local radius = 0
+		local diameter = 0
 		local height = 0
 		if sim_mode == false and cmd_line == false then
-			radius = getInput("int","What radius does it need to be?")
+			diameter = getInput("int","What diameter does it need to be?")
 			height = getInput("int","How high does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			radius = tempProgTable.param1
+			diameter = tempProgTable.param1
 			height = tempProgTable.param2
 		end
-		tempProgTable.param1 = radius
+		tempProgTable.param1 = diameter
 		tempProgTable.param2 = height
-		progTable = {param1 = radius, param2 = height}
-		cylinder(radius, height)
+		progTable = {param1 = diameter, param2 = height}
+		cylinder(diameter, height)
 	end
 	if choice == "pyramid" then
 		local length = 0
