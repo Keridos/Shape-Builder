@@ -623,67 +623,56 @@ function circle(radius)
 	cz2 = (radius - z) ^ 2
 	limitOffsetY = (boundary2 - cz2) ^ 0.5
 	maxOffestY = math.ceil(limitOffsetY)
+	
 	-- We do first the +x side, then the -x side to make movement efficient
-	for side = 0, 1 do
-		-- On the right we go from small y to large y, on the left reversed
-		-- This makes us travel clockwise (from below) around each layer
-		if (side == 0) then
-			yStart = radius - maxOffestY
-			yEnd = radius + maxOffestY
-			yStep = 1
-		else
-			yStart = radius + maxOffestY
-			yEnd = radius - maxOffestY
-			yStep = -1
-		end
-		for y = yStart, yEnd, yStep do
-			cy2 = (radius - y) ^ 2
-			remainder2 = (boundary2 - cz2 - cy2)
-			if remainder2 >= 0 then
-				-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
-				maxOffsetX = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
+	for side = 0,1 do
+			-- On the right we go from small y to large y, on the left reversed
+			-- This makes us travel clockwise (from below) around each layer
+			if (side == 0) then
+				yStart = math.floor(radius) - maxOffestY
+				yEnd = math.floor(radius) + maxOffestY
+				yStep = 1
+			else
+				yStart = math.floor(radius) + maxOffestY
+				yEnd = math.floor(radius) - maxOffestY
+				yStep = -1
+			end
+			for y = yStart,yEnd,yStep do
+				cy2 = (radius - y) ^ 2
+				remainder2 = (boundary2 - cz2 - cy2)
+				if remainder2 >= 0 then
+					-- This is the maximum difference in x from the centre we can be without definitely being outside the radius
+					maxOffsetX = math.ceil((boundary2 - cz2 - cy2) ^ 0.5)
 					-- Only do either the +x or -x side
-				if (side == 0) then
-					-- +x side
-					xStart = radius
-					xEnd = radius + maxOffsetX
-				else
-					-- -x side
-					xStart = radius - maxOffsetX
-					xEnd = radius - 1
-				end
-				-- Reverse direction we traverse xs when in -y side
-				if y > radius then
-					temp = xStart
-					xStart = xEnd
-					xEnd = temp
-					xStep = -1
-				else
-					xStep = 1
-				end
-					for x = xStart, xEnd, xStep do
-					cx2 = (radius - x) ^ 2
-					distanceToCentre = (cx2 + cy2 + cz2) ^ 0.5
-					-- Only blocks within the radius but still within 1 3d-diagonal block of the edge are eligible
-					if distanceToCentre < boundaryRadius and distanceToCentre + sqrt3 >= boundaryRadius then
-						offsets = {{0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}}
-						for i=1,6 do
-							offset = offsets[i]
-							dx = offset[1]
-							dy = offset[2]
-							dz = offset[3]
-							if ((radius - (x + dx)) ^ 2 + (radius - (y + dy)) ^ 2 + (radius - (z + dz)) ^ 2) ^ 0.5 >= boundaryRadius then
-								-- This is a point to use
-								navigateTo(x, y)
-								placeBlock()
-								break
-							end
+					if (side == 0) then
+						-- +x side
+						xStart = math.floor(radius)
+						xEnd = math.floor(radius) + maxOffsetX
+					else
+						-- -x side
+						xStart = math.floor(radius) - maxOffsetX
+						xEnd = math.floor(radius) - 1
+					end
+					-- Reverse direction we traverse xs when in -y side
+					if y > math.floor(radius) then
+						temp = xStart
+						xStart = xEnd
+						xEnd = temp
+						xStep = -1
+					else
+						xStep = 1
+					end
+
+					for x = xStart,xEnd,xStep do
+						-- Only blocks within the radius but still within 1 3d-diagonal block of the edge are eligible
+						if isSphereBorder(offset, x, y, z, radius2) then
+							navigateTo(x, y)
+							placeBlock()
 						end
 					end
 				end
 			end
 		end
-	end
 end
 
 function blockInSphereIsFull(offset, x, y, z, radiusSq)
@@ -729,9 +718,9 @@ function dome(typus, diameter)
 	if typus == "dome" then
 		zstart = math.ceil(radius)
 	elseif typus == "sphere" then
-		zstart = 0
+		zstart = 1
 	elseif typus == "bowl" then
-		zstart = 0
+		zstart = 1
 	end
 	if typus == "bowl" then
 		zend = math.floor(radius)
