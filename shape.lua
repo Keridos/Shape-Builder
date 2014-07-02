@@ -938,7 +938,7 @@ function sixprism(length, height)
 	end
 end
 
-function eigthprism(length, height)
+function eightprism(length, height)
 	for i = 1, height do
 		octagon(length)
 		safeUp()
