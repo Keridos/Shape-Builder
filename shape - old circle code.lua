@@ -512,22 +512,25 @@ function wall(length, height)
 	turnLeftTrack()
 end
 
-function platform(x, y)
+function platform(depth, width, startX, startY)
+	startX = startX or 0
+	startY = startY or 0
+	x = startX + depth
+	y = startY + width
 	local forward = true
-	for counterY = 0, y - 1 do
-		for counterX = 0, x - 1 do
-			if forward then
-				navigateTo(counterX, counterY)
-			else
-				navigateTo(x - counterX - 1, counterY)
-			end
-			placeBlock()
-		end
+	for counterY = startY, y - 1 do
 		if forward then
-			forward = false
+			for counterX = startX, x - 1 do
+				navigateTo(counterX, counterY)
+				placeBlock()
+			end
 		else
-			forward = true
+			for counterX = x - 1, startX, -1 do
+				navigateTo(counterX, counterY)
+				placeBlock()
+			end
 		end
+		forward = not forward
 	end
 end
 
@@ -560,25 +563,21 @@ function cuboid(depth, width, height, hollow)
 end
 
 function pyramid(length, hollow)
-	height = math.ceil(length / 2)
-	for i = 1, height do
-		if hollow=="y" then
+	height = math.ceil(length / 2) - 1
+	for i = 0, height do
+		if hollow == "y" then
 			rectangle(length, length)
 		else
-			platform(length, length)
-			navigateTo(0,0)
-			while facing ~= 0 do
-				turnRightTrack()
-			end
+			platform(length, length, i, i)
 		end
-		if i ~= height then
-			safeUp()
+		safeUp()
+		if hollow == "y" and i ~= height then
 			safeForward()
 			turnRightTrack()
 			safeForward()
 			turnLeftTrack()
-			length = length - 2
 		end
+		length = length - 2
 	end
 end
 
