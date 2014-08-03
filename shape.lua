@@ -804,78 +804,48 @@ function cylinder(diameter, height)
 	end
 end
 
+polygonCornerList = {} -- Public list of corner coords for n-gons, will be used for hexagons, octagons, and future polygons.
+-- It should be constructed as a nested list eg. {{x0,y0},{x1,y1},{x2,y2}...}
+function polygonConstructor() -- Uses polygonCornerList to draw sides between each point
+	if #polygonCornerList == 0 then
+		return false
+	end
+	print("----------")
+	for i = 1, #polygonCornerList do
+		print(i, ", ", polygonCornerList[i][1], ", ", polygonCornerList[i][2])
+	end
+	for i = 1, #polygonCornerList do
+		startX = polygonCornerList[i][1]
+		startY = polygonCornerList[i][2]
+		if i == #polygonCornerList then
+			j = 1
+		else
+			j = i + 1
+		end
+		endX = polygonCornerlist[j][1]
+		endY = polygonCornerlist[j][2]
+		drawLine(endX, endY, startX, startY)
+	end
+	return true
+end
+
+function arbitraryPolygon(numberOfSides, Radius) -- Future function, this will eventually replace octagon and hexagon functions
+end
+
 function hexagon(sideLength)
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
 	changeX = round(changeX, 0)
-	local counter = 0
-
-	navigateTo(changeX, 0)
-
-	for currentSide = 1, 6 do
-		counter = 0
-
-		if currentSide == 1 then
-			for placed = 1, sideLength do
-				navigateTo(positionX + 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 2 then
-			navigateTo(positionX, positionY + 1)
-			while positionY <= changeY do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX + 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY + 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		elseif currentSide == 3 then
-			while positionY <= (2 * changeY) do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX - 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY + 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		elseif currentSide == 4 then
-			for placed = 1, sideLength do
-				navigateTo(positionX - 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 5 then
-			navigateTo(positionX, positionY - 1)
-			while positionY >= changeY do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX - 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY - 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		elseif currentSide == 6 then
-			while positionY >= 0 do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX + 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY - 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		end
+	
+	polygonCornerList[1] = {changeX, 0}
+	polygonCornerList[2] = {(changeX + sideLength), 0}
+	polygonCornerList[3] = {((2 * changeX) + sideLength), changeY}
+	polygonCornerList[4] = {(changeX + sideLength), (2 * changeY)}
+	polygonCornerList[5] = {changeX, (2 * changeY)}
+	polygonCornerList[6] = {0, changeY}
+	
+	if not polygonConstructor() then
+		error("U Wut M8?")
 	end
 end
 
