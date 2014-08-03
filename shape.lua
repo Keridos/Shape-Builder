@@ -29,7 +29,7 @@ local gpsFacing = 0
 local resupply = false
 local enderchestRefilling = false
 local can_use_gps = false
-local returntohome = false -- whether the turtle shall return to start after build
+local returnToHome = false -- whether the turtle shall return to start after build
 local choice = ""
 
 -- Progress Table: These variables are the tables that the turtle's progress is tracked in
@@ -45,9 +45,9 @@ function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so 
 	end
 end
 
-function getInput(inputtype, message, option1, option2)
+function getInput(inputType, message, option1, option2)
 	local input = ""
-	if inputtype == "string" then
+	if inputType == "string" then
 		writeOut(message.. "(" ..option1 .. " or "..option2..")" )
 		while true do
 			input = io.read()
@@ -59,7 +59,7 @@ function getInput(inputtype, message, option1, option2)
 			end
 		end
 	end
-	if inputtype == "int" then
+	if inputType == "int" then
 		writeOut(message)
 		while true do
 			input = io.read()
@@ -72,7 +72,7 @@ function getInput(inputtype, message, option1, option2)
 	end	
 end
 
-function wrapmodules() -- checks for and wraps turtle modules
+function wrapModules() -- checks for and wraps turtle modules
 	local test = 0
 	if peripheral.getType("left" )== "resupply" then 
 		resupplymodule=peripheral.wrap("left")
@@ -944,6 +944,117 @@ function eightprism(length, height)
 	end
 end
 
+function drawLine(endX, endY, startX, startY)
+	startX = startX or positionX
+	startY = startY or positionY
+	deltaX = math.abs(endX - startX)
+	deltaY = math.abs(endY - startY)
+	errorVar = 0
+	if deltaX >= deltaY then
+		deltaErr = math.abs(deltaY/deltaX)
+		if startX < endX then
+			if startY < endY then
+				counterY = startY
+				for counterX = startX, endX do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterY = startY
+				for counterX = startX, endX do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		else
+			if startY < endY then
+				counterY = startY
+				for counterX = startX, endX, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterY = startY
+				for counterX = startX, endX, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		end
+	else
+		deltaErr = math.abs(deltaX/deltaY)
+		if startY < endY then
+			if startX < endX then
+				counterX = startX
+				for counterY = startY, endY do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterX = startX
+				for counterY = startY, endY do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		else
+			if startX < endX then
+				counterX = startX
+				for counterY = startY, endY, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterX = startX
+				for counterY = startY, endY, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		end
+	end
+end
+
 -- Previous Progress Resuming, Simulation functions, Command Line, and File Backend
 -- Will check for a "progress" file.
 function CheckForPrevious() 
@@ -1156,7 +1267,7 @@ function choiceFunction()
 		end
 		local yes = getInput("string","Want turtle to return to start after build?","y","n")
 		if yes == 'y' then
-			returntohome = true
+			returnToHome = true
 		end
 		local yes = getInput("string","Want the turtle to refill from enderchest (slot 16)?","y","n")
 		if yes == 'y' then
@@ -1451,7 +1562,22 @@ function choiceFunction()
 		progTable = {param1 = length, param2 = height}
 		eightprism(length, height)
 	end
-	if returntohome then
+	if choice == "new-line" then
+		local endX = 0
+		local endY = 0
+		if sim_mode == false and cmd_line == false then
+			endX = getInput("int","Where does the end X need to be?")
+			endY = getInput("int","Where does the end Y need to be?")
+		elseif sim_mode == true or cmd_line == true then
+			endX = tempProgTable.param1
+			endY = tempProgTable.param2
+		end
+		tempProgTable.param1 = endX
+		tempProgTable.param2 = endY
+		progTable = {param1 = endX, param2 = endY}
+		drawLine(endX, endY)
+	end
+	if returnToHome then
 		goHome() -- After all shape building has finished
 	end
 	writeOut("Done") -- Saves a few lines when put here rather than in each if statement
@@ -1526,7 +1652,7 @@ function showCredits()
 end
 
 function main()
-	if wrapmodules()=="resupply" then
+	if wrapModules()=="resupply" then
 		linkToRSStation()
 	end
 	if checkCommandLine() then
