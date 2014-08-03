@@ -810,10 +810,6 @@ function polygonConstructor() -- Uses polygonCornerList to draw sides between ea
 	if #polygonCornerList == 0 then
 		return false
 	end
-	print("----------")
-	for i = 1, #polygonCornerList do
-		print(i, ", ", polygonCornerList[i][1], ", ", polygonCornerList[i][2])
-	end
 	for i = 1, #polygonCornerList do
 		startX = polygonCornerList[i][1]
 		startY = polygonCornerList[i][2]
@@ -822,9 +818,9 @@ function polygonConstructor() -- Uses polygonCornerList to draw sides between ea
 		else
 			j = i + 1
 		end
-		endX = polygonCornerlist[j][1]
-		endY = polygonCornerlist[j][2]
-		drawLine(endX, endY, startX, startY)
+		stopX = polygonCornerList[j][1]
+		stopY = polygonCornerList[j][2]
+		drawLine(stopX, stopY, startX, startY)
 	end
 	return true
 end
