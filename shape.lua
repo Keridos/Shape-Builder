@@ -832,67 +832,29 @@ function hexagon(sideLength)
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
 	changeX = round(changeX, 0)
-	
 	polygonCornerList[1] = {changeX, 0}
 	polygonCornerList[2] = {(changeX + sideLength), 0}
 	polygonCornerList[3] = {((2 * changeX) + sideLength), changeY}
 	polygonCornerList[4] = {(changeX + sideLength), (2 * changeY)}
 	polygonCornerList[5] = {changeX, (2 * changeY)}
 	polygonCornerList[6] = {0, changeY}
-	
 	if not polygonConstructor() then
-		error("U Wut M8?")
+		error("This error should never happen.")
 	end
 end
 
 function octagon(sideLength)
-	local sideLength2 = sideLength - 1
-	local change = round(sideLength2 / math.sqrt(2), 0)
-
-	navigateTo(change, 0)
-
-	for currentSide = 1, 8 do
-		if currentSide == 1 then
-			for placed = 1, sideLength2 do
-				navigateTo(positionX + 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 2 then
-			for placed = 1, change do
-				navigateTo(positionX + 1, positionY + 1)
-				placeBlock()
-			end
-		elseif currentSide == 3 then
-			for placed = 1, sideLength2 do
-				navigateTo(positionX, positionY + 1)
-				placeBlock()
-			end
-		elseif currentSide == 4 then
-			for placed = 1, change do
-				navigateTo(positionX - 1, positionY + 1)
-				placeBlock()
-			end
-		elseif currentSide == 5 then
-			for placed = 1, sideLength2 do
-				navigateTo(positionX - 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 6 then
-			for placed = 1, change do
-				navigateTo(positionX - 1, positionY - 1)
-				placeBlock()
-			end
-		elseif currentSide == 7 then
-		for placed = 1, sideLength2 do
-				navigateTo(positionX, positionY - 1)
-				placeBlock()
-			end
-		elseif currentSide == 8 then
-			for placed = 1, change do
-				navigateTo(positionX + 1, positionY - 1)
-				placeBlock()
-			end
-		end
+	local change = round((sideLength - 1) / math.sqrt(2), 0)
+	polygonCornerList[1] = {change, 0}
+	polygonCornerList[2] = {(change + sideLength), 0}
+	polygonCornerList[3] = {((2 * change) + sideLength), change}
+	polygonCornerList[4] = {((2 * change) + sideLength), (change + sideLength)}
+	polygonCornerList[5] = {(change + sideLength), ((2 * change) + sideLength)}
+	polygonCornerList[6] = {change, ((2 * change) + sideLength)}
+	polygonCornerList[7] = {0, (change + sideLength)}
+	polygonCornerList[8] = {0, change}
+	if not polygonConstructor() then
+		error("This error should never happen.")
 	end
 end
 
@@ -1528,10 +1490,11 @@ function choiceFunction()
 		progTable = {param1 = length, param2 = height}
 		eightprism(length, height)
 	end
-	if choice == "new-line" then
+	if choice == "new-line" or choice == "new line"then
 		local endX = 0
 		local endY = 0
 		if sim_mode == false and cmd_line == false then
+			writeOut("Note that the start position is 0, 0")
 			endX = getInput("int","Where does the end X need to be?")
 			endY = getInput("int","Where does the end Y need to be?")
 		elseif sim_mode == true or cmd_line == true then
@@ -1611,10 +1574,10 @@ end
 
 function showCredits()
 	writeOut("Credits for the shape builder:")
-	writeOut("Based on work by Michiel,Vliekkie, and Aeolun")
-	writeOut("Sphere/dome code by pruby")
-	writeOut("Additional improvements by Keridos,Happydude and pokemane")
-	io.read() -- Pause here, too
+	writeOut("Based on work by Michiel, Vliekkie, and Aeolun")
+	writeOut("Sphere/dome code by IMarvinTPA")
+	writeOut("Additional improvements by Keridos, CupricWolf, and pokemane")
+	io.read() -- Pause here
 end
 
 function main()
