@@ -115,17 +115,34 @@ function compareResources()
 	end
 end
 
+function firstFullSlot()
+	for i = 1, 16 do
+		if (turtle.getItemCount(i) > 1) then
+			return i
+		end
+	end
+end
+
+function turtleEmpty()
+	for i = 1, 16 do
+		if (turtle.getItemCount(i) > 1) then
+			return false
+		end
+	end
+	return true
+end
+
 function checkResources()
 	if resupply then
-		if turtle.getItemCount(activeslot) <= 1 then
+		if turtle.getItemCount(activeSlot) <= 1 then
 			while not(resupplymodule.resupply(1)) do
 				os.sleep(0.5)
 			end
 		end
 	elseif enderchestRefilling then
 		compareResources()
-		while (turtle.getItemCount(activeslot) <= 1) do
-			if (activeslot == 15) and (turtle.getItemCount(activeslot)<=1) then
+		while (turtle.getItemCount(activeSlot) <= 1) do
+			if (activeSlot == 15) and (turtle.getItemCount(activeSlot)<=1) then
 				turtle.select(16)
 				turtle.digUp()
 				for i = 1, 15 do
@@ -140,31 +157,29 @@ function checkResources()
 				end
 				turtle.select(16)
 				turtle.digUp()
-				activeslot = 1
-				turtle.select(activeslot)
+				activeSlot = 1
+				turtle.select(activeSlot)
 			else
-				activeslot = activeslot+1
-				-- writeOut("Turtle slot empty, trying slot "..activeslot)
-				turtle.select(activeslot)
+				activeSlot = activeSlot + 1
+				-- writeOut("Turtle slot empty, trying slot "..activeSlot)
+				turtle.select(activeSlot)
 			end
 			compareResources()
 			os.sleep(0.2)
 		end
 	else
 		compareResources()
-		while (turtle.getItemCount(activeslot) <= 1) do
-			if (activeslot == 16) and (turtle.getItemCount(activeslot)<=1) then
+		while (turtle.getItemCount(activeSlot) <= 1) do 
+			if turtleEmpty() then
 				writeOut("Turtle is empty, please put building block in slots and press enter to continue")
 				io.read()
-				activeslot = 1
-				turtle.select(activeslot)
+				activeSlot = 1
+				turtle.select(activeSlot)
 			else
-				activeslot = activeslot+1
-				-- writeOut("Turtle slot almost empty, trying slot "..activeslot)
-				turtle.select(activeslot)
+				activeSlot = firstFullSlot()
+				turtle.select(activeSlot)
 			end
 			compareResources()
-			os.sleep(0.2)
 		end
 	end
 end
@@ -234,11 +249,12 @@ function turnAroundTrack()
 end
 
 function turnToFace(direction)
-	if direction >= 4 or direction < 0 then
+	if (direction < 0) then
 		return false
 	end
+	direction = direction % 4
 	while facing ~= direction do
-		turnLeftTrack()
+		turnRightTrack()
 	end
 	return true
 end
@@ -455,77 +471,58 @@ function goHome()
 			navigateTo(0, 0) -- So another program can chain multiple shapes together to create bigger structures
 		end
 	else
-		navigateTo(-1, -1, 0) -- So the user can collect the turtle when it is done -- also not 0,0,0 because some shapes use the 0,0 column
+		navigateTo(-1, -1, 0) -- So the user can collect the turtle when it is done -- not 0,0,0 because some shapes use the 0,0 column
 	end
 	turnToFace(0)
 end
 
 -- Shape Building functions
 
-function line(length)
-	if length <= 0 then
-		error("Error, length can not be 0")
-	end
-	local i
-	for i = 1, length do
-		placeBlock()
-		if i ~= length then
-			safeForward()
-		end
-	end
+function rectangle(width, depth, startX, startY)
+	startX = startX or positionX
+	startY = startY or positionY
+	endX = startX + width - 1
+	endY = startY + depth - 1
+	drawLine(startX, endY, startX, startY)
+	drawLine(endX, endY, startX, endY)
+	drawLine(endX, startY, endX, endY)
+	drawLine(startX, startY, endX, startY)
 end
 
-function rectangle(depth, width)
-	if depth <= 0 then
-		error("Error, depth can not be 0")
-	end
-	if width <= 0 then
-		error("Error, width can not be 0")
-	end
-	local lengths = {depth, width, depth, width }
-	local j
-	for j=1,4 do
-		line(lengths[j])
-		turnRightTrack()
-	end
+function square(length, startX, startY)
+	startX = startX or positionX
+	startY = startY or positionY
+	rectangle(length, length, startX, startY)
 end
 
-function square(width)
-	rectangle(width, width)
-end
-
-function wall(length, height)
-	local i
-	local j
-	for i = 1, length do
+function wall(depth, height)
+	for i = 1, depth do
 		for j = 1, height do
 			placeBlock()
 			if j < height then
-				safeUp()
+				navigateTo(positionX, positionY, positionZ + 1)
 			end
 		end
-		safeForward()
-		for j = 1, height - 1 do
-			safeDown()
+		if (i ~= depth) then
+			navigateTo(positionX, positionY + 1, 0)
 		end
 	end
-	turnLeftTrack()
 end
 
-function platform(depth, width, startX, startY)
-	startX = startX or 0
-	startY = startY or 0
-	x = startX + depth
-	y = startY + width
-	local forward = true
-	for counterY = startY, y - 1 do
+function platform(width, depth, startX, startY)
+	startX = startX or positionX
+	startY = startY or positionY
+	endX = startX + width
+	endY = startY + depth
+	forward = true
+	for counterY = startY, endY - 1 do
 		if forward then
-			for counterX = startX, x - 1 do
+			for counterX = startX, endX - 1 do
 				navigateTo(counterX, counterY)
 				placeBlock()
 			end
 		else
-			for counterX = x - 1, startX, -1 do
+			for counterX = endX - 1, startX, -1 do
 				navigateTo(counterX, counterY)
 				placeBlock()
 			end
@@ -534,49 +531,28 @@ function platform(depth, width, startX, startY)
 	end
 end
 
-function cuboid(depth, width, height, hollow)
-	platform(depth, width)
-	while (facing > 0) do
-		turnLeftTrack()
-	end
-	turnAroundTrack()
-	if ((width % 2) == 0) then -- This is for reorienting the turtle to build the walls correct in relation to the floor and ceiling
-		turnLeftTrack()
-	end
-	if not(hollow == "n") then
-		for i = 1, height - 2 do
-			safeUp()
-			if ((width % 2) == 0) then -- This as well
-				rectangle(depth, width)
-			else
-				rectangle(width, depth)
-			end
-		end
-	else
-		for i = 1, height - 2 do
-			safeUp()
-			platform(depth,width)
+function cuboid(width, depth, height, hollow)
+	for i = 0, height do
+		navigateTo(0, 0, i)
+		if (hollow == "n") then
+			platform(width, depth, 0, 0)
+		else
+			rectangle(width, depth, 0, 0)
 		end
 	end
-	safeUp()
-	platform(depth, width)
 end
 
 function pyramid(length, hollow)
-	height = math.ceil(length / 2) - 1
-	for i = 0, height do
-		if hollow == "y" then
-			rectangle(length, length)
+	-- local height = math.ceil(length / 2) - 1
+	i = 0
+	while (length > 0) do
+		navigateTo(i, i, i)
+		if (hollow == "y") then
+			rectangle(length, length, i, i)
 		else
 			platform(length, length, i, i)
 		end
-		safeUp()
-		if hollow == "y" and i ~= height then
-			safeForward()
-			turnRightTrack()
-			safeForward()
-			turnLeftTrack()
-		end
+		i = i + 1
 		length = length - 2
 	end
 end
@@ -806,7 +782,8 @@ end
 
 polygonCornerList = {} -- Public list of corner coords for n-gons, will be used for hexagons, octagons, and future polygons.
 -- It should be constructed as a nested list eg. {{x0,y0},{x1,y1},{x2,y2}...}
-function polygonConstructor() -- Uses polygonCornerList to draw sides between each point
+
+function constructPolygon() -- Uses polygonCornerList to draw sides between each point
 	if #polygonCornerList == 0 then
 		return false
 	end
@@ -828,7 +805,7 @@ end
 function arbitraryPolygon(numberOfSides, Radius) -- Future function, this will eventually replace octagon and hexagon functions
 end
 
-function hexagon(sideLength)
+function hexagon(sideLength) -- Fills out polygonCornerList with the points for a hexagon
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
 	changeX = round(changeX, 0)
@@ -838,12 +815,12 @@ function hexagon(sideLength)
 	polygonCornerList[4] = {(changeX + sideLength), (2 * changeY)}
 	polygonCornerList[5] = {changeX, (2 * changeY)}
 	polygonCornerList[6] = {0, changeY}
-	if not polygonConstructor() then
+	if not constructPolygon() then
 		error("This error should never happen.")
 	end
 end
 
-function octagon(sideLength)
+function octagon(sideLength) -- Fills out polygonCornerList with the points for an octagon
 	local change = round((sideLength - 1) / math.sqrt(2), 0)
 	polygonCornerList[1] = {change, 0}
 	polygonCornerList[2] = {(change + sideLength), 0}
@@ -853,7 +830,7 @@ function octagon(sideLength)
 	polygonCornerList[6] = {change, ((2 * change) + sideLength)}
 	polygonCornerList[7] = {0, (change + sideLength)}
 	polygonCornerList[8] = {0, change}
-	if not polygonConstructor() then
+	if not constructPolygon() then
 		error("This error should never happen.")
 	end
 end
@@ -1003,7 +980,7 @@ function ProgressFileCreate()
 	end
 end
 
--- Deletes the progress file (at the end of the project, also at beginning if user chooses to delete old progress)
+-- Deletes the progress file (at the end of the project, or at beginning if user chooses to delete old progress)
 function ProgressFileDelete() 
 	if fs.exists(progFileName) then
 		fs.delete(progFileName)
@@ -1137,15 +1114,24 @@ function setFlagsFromCommandLine() -- Sets count_only, chain_next_shape, and sim
 		if v == "-c" or v == "-cost" or v == "--cost" then
 			cost_only = true
 			cmd_line_cost_only = true
-			writeOut("Cost only mode")
+			writeOut("Cost Only Mode")
 		end
 		if v == "-z" or v == "-chain" or v == "--chain" then
 			chain_next_shape = true
-			writeOut("Chained shape mode")
+			writeOut("Chained Shape Mode")
 		end
 		if v == "-r" or v == "-resume" or v == "--resume" then
 			cmd_line_resume = true
 			writeOut("Resuming")
+		end
+		if v == "-e" or v == "-ender" or v == "--ender" then
+			enderchestRefilling = true
+			tempProgTable.enderchestRefilling = true
+			writeOut("Enderchest Mode")
+		end
+		if v == "-g" or v == "-home" or v == "--home" then
+			returnToHome = true
+			writeOut("Will return home")
 		end
 	end
 end
@@ -1165,14 +1151,40 @@ end
 
 -- Menu, Drawing and Main functions
 
+function choiceIsValidShape(choice)
+	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "dome", "bowl", "shphere", "circle", "cylinder", "pyramid", "hexagon", "octagon", "6-prism", "6 prism", "8-prism", "8 prism"}
+	for i = 1, #validShapes do
+		if choice == validShapes[i] then
+			return true
+		end
+	end
+	return false
+end
+
 function choiceFunction()
 	if sim_mode == false and cmd_line == false then -- If we are NOT resuming progress
+		local page = 1
 		choice = io.read()
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
-		tempProgTable = {shape = choice}
-		progTable = {shape = choice}
-		if choice == "next" then
-			WriteMenu2()
+		while ((choice == "next") or (choice == "back")) do
+			if (choice == "next") then
+				if page == 1 then
+					writeMenu2()
+					page = 2
+				else
+					writeMenu()
+					page = 1
+				end
+			end
+			if (choice == "back") then
+				if page == 1 then
+					writeMenu2()
+					page = 2
+				else
+					writeMenu()
+					page = 1
+				end
+			end
 			choice = io.read()
 			choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
 		end
@@ -1181,11 +1193,17 @@ function choiceFunction()
 			return
 		end
 		if choice == "help" then
-			showHelp()
+			getHelp()
 			return
 		end
 		if choice == "credits" then
 			showCredits()
+			return
+		end
+		tempProgTable = {shape = choice}
+		progTable = {shape = choice}
+		if not choiceIsValidShape(choice) then
+			writeOut(choice ..  " is not a valid shape choice.")
 			return
 		end
 		writeOut("Building a "..choice)
@@ -1200,7 +1218,7 @@ function choiceFunction()
 		local yes = getInput("string","Want the turtle to refill from enderchest (slot 16)?","y","n")
 		if yes == 'y' then
 			enderchestRefilling = true
-			tempProgTable.enderchestRefilling = true;
+			tempProgTable.enderchestRefilling = true
 		end
 	elseif sim_mode == true then -- If we ARE resuming progress
 		tempProgTable = readProgress()
@@ -1208,6 +1226,10 @@ function choiceFunction()
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
 		enderchestRefilling =  tempProgTable.enderchestRefilling
 	elseif cmd_line == true then -- If running from command line
+		if needsHelp() then
+			showCmdLineHelp()
+			return
+		end
 		choice = tempProgTable.shape
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
 		enderchestRefilling =  tempProgTable.enderchestRefilling
@@ -1215,40 +1237,40 @@ function choiceFunction()
 	end	
 	if not cost_only then
 		turtle.select(1)
-		activeslot = 1
-		if turtle.getItemCount(activeslot) == 0 then
+		activeSlot = 1
+		if turtle.getItemCount(activeSlot) == 0 then
 			if resupply then
 				writeOut("Please put building blocks in the first slot.")
 			else
 				writeOut("Please put building blocks in the first slot (and more if you need them)")
 			end
-			while turtle.getItemCount(activeslot) == 0 do
-				os.sleep(2)
+			while turtle.getItemCount(activeSlot) <= 1 do
+				os.sleep(.1)
 			end
 		end
 	else
-		activeslot = 1
+		activeSlot = 1
 	end
 	-- shape selection if cascade
 	if choice == "rectangle" then
 		local depth = 0
 		local width = 0
 		if sim_mode == false and cmd_line == false then
-			depth = getInput("int","How deep does it need to be?")
 			width = getInput("int","How wide does it need to be?")
+			depth = getInput("int","How deep does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			depth = tempProgTable.param1
-			width = tempProgTable.param2
+			width = tempProgTable.param1
+			depth = tempProgTable.param2
 		end
-		tempProgTable.param1 = depth
-		tempProgTable.param2 = width
-		progTable = {param1 = depth, param2 = width} -- THIS is here because we NEED to update the local table!
-		rectangle(depth, width)
+		tempProgTable.param1 = width
+		tempProgTable.param2 = depth
+		progTable = {param1 = width, param2 = depth} -- THIS is here because we NEED to update the local table!
+		rectangle(width, depth)
 	end
 	if choice == "square" then
 		local sideLength
 		if sim_mode == false and cmd_line == false then
-			sideLength = getInput("int","What depth/width does it need to be?")
+			sideLength = getInput("int","How long does each side need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			sideLength = tempProgTable.param1
 		end
@@ -1257,19 +1279,32 @@ function choiceFunction()
 		square(sideLength)
 	end
 	if choice == "line" then
-		local lineLength = 0
+		local startX = 0
+		local startY = 0
+		local endX = 0
+		local endY = 0
 		if sim_mode == false and cmd_line == false then
-			lineLength = getInput("int","How long does it need to be?")
+			writeOut("Note that the turtle's starting position is 0, 0.")
+			startX = getInput("int","Where does the start X need to be?")
+			startY = getInput("int","Where does the start Y need to be?")
+			endX = getInput("int","Where does the end X need to be?")
+			endY = getInput("int","Where does the end Y need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			lineLength = tempProgTable.param1
+			startX = tempProgTable.param1
+			startY = tempProgTable.param2
+			endX = tempProgTable.param3
+			endY = tempProgTable.param4
 		end
-		tempProgTable.param1 = lineLength
-		progTable = {param1 = lineLength}
-		line(lineLength)
+		tempProgTable.param1 = startX
+		tempProgTable.param2 = startY
+		tempProgTable.param3 = endX
+		tempProgTable.param4 = endY
+		progTable = {param1 = startX, param2 = startY, param3 = endX, param4 = endY}
+		drawLine(endX, endY, startX, startY)
 	end
 	if choice == "wall" then
-	local depth = 0
-	local height = 0
+		local depth = 0
+		local height = 0
 		if sim_mode == false and cmd_line == false then
 			depth = getInput("int","How deep does it need to be?")
 			height = getInput("int","How high does it need to be?")
@@ -1283,21 +1318,21 @@ function choiceFunction()
 		wall(depth, height)
 	end
 	if choice == "platform" then
-		local depth = 0
 		local width = 0
+		local depth = 0
 		if sim_mode == false and cmd_line == false then
-			depth = getInput("int","How deep does it need to be?")
 			width = getInput("int","How wide does it need to be?")
-		elseif sim_mode == true or cmd_line == true then
-			depth = tempProgTable.param1	
-			width = tempProgTable.param2		
+			depth = getInput("int","How deep does it need to be?")
+		elseif sim_mode == true or cmd_line == true then	
+			width = tempProgTable.param1		
+			depth = tempProgTable.param2
 		end		
-		tempProgTable.param1 = depth
-		tempProgTable.param2 = width
-		progTable = {param1 = depth, param2 = width}
+		tempProgTable.param1 = width
+		tempProgTable.param2 = depth
+		progTable = {param1 = width, param2 = depth}
 		platform(width, depth)
 	end
-	if choice == "stair" then
+	if choice == "stair" or choice == "stairs" then
 		local width = 0
 		local height = 0
 		if sim_mode == false and cmd_line == false then
@@ -1314,36 +1349,27 @@ function choiceFunction()
 		special_chain = true
 	end
 	if choice == "cuboid" then
-		local depth = 0
 		local width = 0
+		local depth = 0
 		local height = 0
 		local hollow = ""
 		if sim_mode == false and cmd_line == false then
-			depth = getInput("int","How deep does it need to be?")
 			width = getInput("int","How wide does it need to be?")
+			depth = getInput("int","How deep does it need to be?")
 			height = getInput("int","How high does it need to be?")
 			hollow = getInput("string","Does it need to be hollow?","y","n")
 		elseif sim_mode == true or cmd_line == true then
-			depth = tempProgTable.param1
-			width = tempProgTable.param2
+			width = tempProgTable.param1
+			depth = tempProgTable.param2
 			height = tempProgTable.param3
 			hollow = tempProgTable.param4
 		end
-		tempProgTable.param1 = depth
-		tempProgTable.param2 = width
+		tempProgTable.param1 = width
+		tempProgTable.param2 = depth
 		tempProgTable.param3 = height
-		tempProgTable.param4 = hollow
-		if height < 3 then
-			height = 3
-		end
-		if depth < 3 then
-			depth = 3
-		end
-		if width < 3 then
-			width = 3
-		end	
-		progTable = {param1 = depth, param2 = width, param3 = height}
-		cuboid(depth, width, height, hollow)
+		tempProgTable.param4 = hollow	
+		progTable = {param1 = width, param2 = depth, param3 = height}
+		cuboid(width, depth, height, hollow)
 	end
 	if choice == "1/2-sphere" or choice == "1/2 sphere" then
 		local diameter = 0
@@ -1360,7 +1386,7 @@ function choiceFunction()
 		progTable = {param1 = diameter, param2 = half}
 		if half == "bottom" then
 			dome("bowl", diameter)
-		else
+		elseif half == "top" then
 			dome("dome", diameter)
 		end
 	end
@@ -1385,6 +1411,17 @@ function choiceFunction()
 		tempProgTable.param1 = diameter
 		progTable = {param1 = diameter}
 		dome("bowl", diameter)
+	end
+	if choice == "sphere" then
+		local diameter = 0
+		if sim_mode == false and cmd_line == false then
+			diameter = getInput("int","What diameter does it need to be?")
+		elseif sim_mode == true or cmd_line == true then
+			diameter = tempProgTable.param1
+		end
+		tempProgTable.param1 = diameter
+		progTable = {param1 = diameter}
+		dome("sphere", diameter)
 	end
 	if choice == "circle" then
 		local diameter = 0
@@ -1416,7 +1453,7 @@ function choiceFunction()
 		local length = 0
 		local hollow = ""
 		if sim_mode == false and cmd_line == false then
-			length = getInput("int","What depth/width does it need to be?")
+			length = getInput("int","How long does each side of the base layer need to be?")
 			hollow = getInput("string","Does it need to be hollow?","y","n")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
@@ -1426,17 +1463,6 @@ function choiceFunction()
 		tempProgTable.param2 = hollow
 		progTable = {param1 = length, param2 = hollow}
 		pyramid(length, hollow)
-	end
-	if choice == "sphere" then
-		local diameter = 0
-		if sim_mode == false and cmd_line == false then
-			diameter = getInput("int","What diameter does it need to be?")
-		elseif sim_mode == true or cmd_line == true then
-			diameter = tempProgTable.param1
-		end
-		tempProgTable.param1 = diameter
-		progTable = {param1 = diameter}
-		dome("sphere", diameter)
 	end
 	if choice == "hexagon" then
 		local length = 0
@@ -1465,7 +1491,7 @@ function choiceFunction()
 		local height = 0
 		if sim_mode == false and cmd_line == false then
 			length = getInput("int","How long does each side need to be?")
-			height = getInput("int","What height does it need to be?")
+			height = getInput("int","How high does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 			height = tempProgTable.param2
@@ -1480,7 +1506,7 @@ function choiceFunction()
 		local height = 0
 		if sim_mode == false and cmd_line == false then
 			length = getInput("int","How long does each side need to be?")
-			height = getInput("int","What height does it need to be?")
+			height = getInput("int","How high does it need to be?")
 		elseif sim_mode == true or cmd_line == true then
 			length = tempProgTable.param1
 			height = tempProgTable.param2
@@ -1490,94 +1516,261 @@ function choiceFunction()
 		progTable = {param1 = length, param2 = height}
 		eightprism(length, height)
 	end
-	if choice == "new-line" or choice == "new line"then
-		local endX = 0
-		local endY = 0
-		if sim_mode == false and cmd_line == false then
-			writeOut("Note that the start position is 0, 0")
-			endX = getInput("int","Where does the end X need to be?")
-			endY = getInput("int","Where does the end Y need to be?")
-		elseif sim_mode == true or cmd_line == true then
-			endX = tempProgTable.param1
-			endY = tempProgTable.param2
-		end
-		tempProgTable.param1 = endX
-		tempProgTable.param2 = endY
-		progTable = {param1 = endX, param2 = endY}
-		drawLine(endX, endY)
-	end
 	if returnToHome then
 		goHome() -- After all shape building has finished
 	end
 	writeOut("Done") -- Saves a few lines when put here rather than in each if statement
 end
 
-function WriteMenu()
+function writeMenu()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
-	if resupply then					-- Any ideas to make this more compact/betterlooking (in terms of code)?
+	writeOut("Shape Maker 1.7 by Keridos/CupricWolf/pokemane")
+	if resupply then					-- Any ideas to make this more compact/better looking (in terms of code)?
 		writeOut("Resupply Mode Active")
 	elseif (resupply and can_use_gps) then
 		writeOut("Resupply and GPS Mode Active")
 	elseif can_use_gps then
 		writeOut("GPS Mode Active")
 	else
-		writeOut("")
+		writeOut("Standard Mode Active")
 	end
 	if not cmd_line then
-		writeOut("What should be built? [page 1/2]");
+		writeOut("What shape do you want to build? [page 1/2]");
 		writeOut("next for page 2")
 		writeOut("+---------+-----------+-------+-------+")
 		writeOut("| square  | rectangle | wall  | line  |")
 		writeOut("| cylinder| platform  | stair | cuboid|")
-		writeOut("| pyramid | 1/2-sphere| circle| next  |")
+		writeOut("| pyramid | 1/2-sphere| sphere| circle|")
 		writeOut("+---------+-----------+-------+-------+")
 		writeOut("")
 	end
 end
 
-function WriteMenu2()
+function writeMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.5 by Keridos/Happydude/pokemane")
-	if resupply then					-- Any ideas to make this more compact/betterlooking (in terms of code)?
+	writeOut("Shape Maker 1.7 by Keridos/CupricWolf/pokemane")
+	if resupply then					-- Any ideas to make this more compact/better looking (in terms of code)?
 		writeOut("Resupply Mode Active")
 	elseif (resupply and can_use_gps) then
 		writeOut("Resupply and GPS Mode Active")
 	elseif can_use_gps then
 		writeOut("GPS Mode Active")
 	else
-		writeOut("")
+		writeOut("Standard Mode Active")
 	end
-	writeOut("What should be built [page 2/2]?");
-	writeOut("")
+	writeOut("What shape do you want to build? [page 2/2]");
+	writeOut("back for page 1")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| hexagon | octagon   | help  |       |")
-	writeOut("| 6-prism | 8-prism   | end   |       |")
-	writeOut("| sphere  | credits   |       |       |")
+	writeOut("| hexagon | octagon   | dome  |       |")
+	writeOut("| 6-prism | 8-prism   | bowl  |       |")
+	writeOut("| help    | credits   | end   |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
 end
 
-function showHelp()
-	writeOut("Usage: shape [shape-type [param1 param2 param3 ...]] [-c] [-h] [-z] [-r]")
-	writeOut("-c: Activate cost only mode")
-	writeOut("-h: Show this page")
-	writeOut("-z: Set chain_next_shape to true, lets you chain together multiple shapes")
-	io.read() -- Pause here
-	writeOut("-r: Resume the last shape if there is a resume file")
-	writeOut("shape-type can be any of the shapes in the menu")
-	writeOut("After shape-type input all of the paramaters for the shape")
-	io.read() -- Pause here, too
+function showCmdLineHelp()
+	term.clear()
+	term.setCursorPos(1, 1)
+	writeOut("Command line help")
+	writeOut("Usage: shape [shape-type] [param1] [param2] [param3] [param4] [-c] [-h] [-z] [-r]\n")
+	writeOut("-c or -cost or --cost: Activate cost only mode\n")
+	writeOut("-h or -help or --help: Show this information")
+	io.read()
+	writeOut("-z or -chain or --chain: Lets you chain together multiple shapes\n")
+	writeOut("-g or -home or --home: Make turtle go 'home' after build\n")
+	writeOut("-r or -resume or --resume: Resume the last build if possible")
+	io.read()
+	writeOut("-e or -ender or --ender: Activate enderchest refilling\n")
+	writeOut("shape-type can be any of the shapes in the menu\n")
+	writeOut("After shape-type input all of the paramaters for the shape, varies by shape\n")
+	writeOut("Put any flags (-c, -h, etc.) at the end of your command")
+end
+
+function getHelp()
+	term.clear()
+	term.setCursorPos(1, 1)
+	writeOut("Width is to the right of the turtle. (X-Axis)")
+	writeOut("Depth is to the front of the turtle. (Y-Axis)")
+	writeOut("Height is to the top of the turtle. (Z-Axis)")
+	writeOut("Length is the side length of some shapes. (Squares and Polygons)")
+	io.read()
+	term.clear()
+	term.setCursorPos(1, 1)
+	local page = 1
+	writeOut("What shape do you want help with? [page 1/2]");
+	writeOut("next for page 2")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("| square  | rectangle | wall  | line  |")
+	writeOut("| cylinder| platform  | stair | cuboid|")
+	writeOut("| pyramid | 1/2-sphere| sphere| circle|")
+	writeOut("+---------+-----------+-------+-------+")
+	writeOut("")
+	choice = io.read()
+	choice = string.lower(choice)
+	while ((choice == "next") or (choice == "back")) do
+		if (choice == "next") then
+			if (page == 1) then
+				page = 2
+				term.clear()
+				term.setCursorPos(1, 1)
+				writeOut("What shape do you want help wih? [page 2/2]?");
+				writeOut("back for page 1")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("| hexagon | octagon   | dome  |       |")
+				writeOut("| 6-prism | 8-prism   | bowl  |       |")
+				writeOut("|         |           |       |       |")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("")
+			else
+				page = 1
+				term.clear()
+				term.setCursorPos(1, 1)
+				writeOut("What shape do you want help with? [page 1/2]");
+				writeOut("next for page 2")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("| square  | rectangle | wall  | line  |")
+				writeOut("| cylinder| platform  | stair | cuboid|")
+				writeOut("| pyramid | 1/2-sphere| sphere| circle|")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("")
+			end
+		end
+		if (choice == "back") then
+			if (page == 1) then
+				page = 2
+				term.clear()
+				term.setCursorPos(1, 1)
+				writeOut("What shape do you want help wih? [page 2/2]?");
+				writeOut("back for page 1")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("| hexagon | octagon   | dome  |       |")
+				writeOut("| 6-prism | 8-prism   | bowl  |       |")
+				writeOut("|         |           |       |       |")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("")
+			else
+				page = 1
+				term.clear()
+				term.setCursorPos(1, 1)
+				writeOut("What shape do you want help with? [page 1/2]");
+				writeOut("next for page 2")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("| square  | rectangle | wall  | line  |")
+				writeOut("| cylinder| platform  | stair | cuboid|")
+				writeOut("| pyramid | 1/2-sphere| sphere| circle|")
+				writeOut("+---------+-----------+-------+-------+")
+				writeOut("")
+			end
+		end
+		choice = io.read()
+		choice = string.lower(choice) 
+	end
+	if not choiceIsValidShape(choice) then
+		writeOut(choice ..  " is not a valid shape choice.")
+		return
+	end
+	-- If cascade time!
+	if choice == "rectangle" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The rectangle is a perimiter of width by depth. Use platform if you want a filled in rectangle. The rectangle takes two parameters (two integers) Width then Depth.")
+	end
+	if choice == "square" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The square is a perimiter of length by length. Use platform if you want a filled in square. The square takes one parameter (one integer) Length.")
+	end
+	if choice == "line" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The line is drawn between the start and end points given. The turtle's initial position is 0, 0 so that must by taken into account. The line takes four parameters (four integers) Start X then Start Y then End X then End Y.")
+	end
+	if choice == "wall" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The wall is a vertical plane. The wall takes two parameters (two integers) Depth then Height.")
+	end
+	if choice == "platform" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The platform is a horizontal plane of width by depth. Use rectangle or square if you want just a perimeter. The platform takes two parameters (two integers) Width then Depth.")
+	end
+	if choice == "stair" or choice == "stairs" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The stair or stairs are an incline of width by height. The stair takes two parameters (two integers) Width then Height.")
+	end
+	if choice == "cuboid" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The cuboid is a rectangular prism of width by depth by height. The hollow parameter determines if the shape is solid or like a rectangular tube. The cuboid takes four parameters (three intergers and one y/n) Width then Depth then Height then Hollow(y/n).")
+	end
+	if choice == "1/2-sphere" or choice == "1/2 sphere" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The half sphere is the top or bottom half of a sphere. The half parameter determines of the top or bottom half of the shpere built. The half shpere takes two parameters (one integer and one top/bottom) Diameter then half(top/bottom).")
+	end
+	if choice == "dome" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The dome shape is a shortcut to the top half sphere. The dome takes one parameter (one integer) Diameter.")
+	end
+	if choice == "bowl" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The bowl shape is a shortcut to the bottom half sphere. The bowl takes one parameter (one integer) Diameter.")
+	end
+	if choice == "sphere" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The sphere is just that, a sphere. It is hollow. The sphere takes one parameter (one integer) Diameter.")
+	end
+	if choice == "circle" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The circle is just that, a circle. It is just a perimeter. The circle takes one parameter (one integer) Diameter.")
+	end
+	if choice == "cylinder" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The cylinder is a cylindrical tube of diameter by height. The cylinder takes two parameters (two integers) Diameter then Height.")
+	end
+	if choice == "pyramid" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The pyramid is a four sided pyramid with base length by length. The hollow parameter determines if the inside is filled. The pyramid takes two parameters (one integer and one y/n) Base Length then Hollow(y/n).")
+	end
+	if choice == "hexagon" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The hexagon is a hexagonal perimeter. The hexagon takes one parameter (one integer) Length.")
+	end
+	if choice == "octagon" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The octagon is and octagonal perimeter. The octagon takes one parameter (one integer) Length.")
+	end
+	if choice == "6-prism" or choice == "6 prism" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The 6 prism is a hexagonal prism shaped tube. The 6 prism takes two parameters (two integers) Length then Height.")
+	end
+	if choice == "8-prism" or choice == "8 prism" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The 8 prism is an octagonal prism shaped tube. The 8 prism takes two parameters (two integers) Length then Height.")
+	end
 end
 
 function showCredits()
+	term.clear()
+	term.setCursorPos(1, 1)
 	writeOut("Credits for the shape builder:")
 	writeOut("Based on work by Michiel, Vliekkie, and Aeolun")
 	writeOut("Sphere/dome code by IMarvinTPA")
 	writeOut("Additional improvements by Keridos, CupricWolf, and pokemane")
-	io.read() -- Pause here
 end
 
 function main()
@@ -1586,7 +1779,7 @@ function main()
 	end
 	if checkCommandLine() then
 		if needsHelp() then
-			showHelp()
+			showCmdLineHelp()
 			return -- Close the program after help info is shown
 		end
 		setFlagsFromCommandLine()
@@ -1596,7 +1789,7 @@ function main()
 		if not continueQuery() then -- If the user doesn't want to continue
 			ProgressFileDelete()
 			setSimFlags(false) -- Just to be safe
-			WriteMenu()
+			writeMenu()
 			choiceFunction()
 		else	-- If the user wants to continue
 			setSimFlags(true)
@@ -1604,7 +1797,7 @@ function main()
 		end
 	else
 		setSimFlags(false)
-		WriteMenu()
+		writeMenu()
 		choiceFunction()
 	end
 	if (blocks ~= 0) and (fuel ~= 0) then -- Do not show on help or credits page or when selecting end

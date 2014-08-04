@@ -785,129 +785,57 @@ function cylinder(radius, height)
 	end
 end
 
+polygonCornerList = {} -- Public list of corner coords for n-gons, will be used for hexagons, octagons, and future polygons.
+-- It should be constructed as a nested list eg. {{x0,y0},{x1,y1},{x2,y2}...}
+function polygonConstructor() -- Uses polygonCornerList to draw sides between each point
+	if #polygonCornerList == 0 then
+		return false
+	end
+	for i = 1, #polygonCornerList do
+		startX = polygonCornerList[i][1]
+		startY = polygonCornerList[i][2]
+		if i == #polygonCornerList then
+			j = 1
+		else
+			j = i + 1
+		end
+		stopX = polygonCornerList[j][1]
+		stopY = polygonCornerList[j][2]
+		drawLine(stopX, stopY, startX, startY)
+	end
+	return true
+end
+
+function arbitraryPolygon(numberOfSides, Radius) -- Future function, this will eventually replace octagon and hexagon functions
+end
+
 function hexagon(sideLength)
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
 	changeX = round(changeX, 0)
-	local counter = 0
-
-	navigateTo(changeX, 0)
-
-	for currentSide = 1, 6 do
-		counter = 0
-
-		if currentSide == 1 then
-			for placed = 1, sideLength do
-				navigateTo(positionX + 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 2 then
-			navigateTo(positionX, positionY + 1)
-			while positionY <= changeY do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX + 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY + 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		elseif currentSide == 3 then
-			while positionY <= (2 * changeY) do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX - 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY + 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		elseif currentSide == 4 then
-			for placed = 1, sideLength do
-				navigateTo(positionX - 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 5 then
-			navigateTo(positionX, positionY - 1)
-			while positionY >= changeY do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX - 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY - 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		elseif currentSide == 6 then
-			while positionY >= 0 do
-				if counter == 0 or counter == 2 or counter == 4 then
-					navigateTo(positionX + 1, positionY)
-				end
-				placeBlock()
-				navigateTo(positionX, positionY - 1)
-				counter = counter + 1
-				if counter == 5 then
-					counter = 0
-				end
-			end
-		end
+	polygonCornerList[1] = {changeX, 0}
+	polygonCornerList[2] = {(changeX + sideLength), 0}
+	polygonCornerList[3] = {((2 * changeX) + sideLength), changeY}
+	polygonCornerList[4] = {(changeX + sideLength), (2 * changeY)}
+	polygonCornerList[5] = {changeX, (2 * changeY)}
+	polygonCornerList[6] = {0, changeY}
+	if not polygonConstructor() then
+		error("This error should never happen.")
 	end
 end
 
 function octagon(sideLength)
-	local sideLength2 = sideLength - 1
-	local change = round(sideLength2 / math.sqrt(2), 0)
-
-	navigateTo(change, 0)
-
-	for currentSide = 1, 8 do
-		if currentSide == 1 then
-			for placed = 1, sideLength2 do
-				navigateTo(positionX + 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 2 then
-			for placed = 1, change do
-				navigateTo(positionX + 1, positionY + 1)
-				placeBlock()
-			end
-		elseif currentSide == 3 then
-			for placed = 1, sideLength2 do
-				navigateTo(positionX, positionY + 1)
-				placeBlock()
-			end
-		elseif currentSide == 4 then
-			for placed = 1, change do
-				navigateTo(positionX - 1, positionY + 1)
-				placeBlock()
-			end
-		elseif currentSide == 5 then
-			for placed = 1, sideLength2 do
-				navigateTo(positionX - 1, positionY)
-				placeBlock()
-			end
-		elseif currentSide == 6 then
-			for placed = 1, change do
-				navigateTo(positionX - 1, positionY - 1)
-				placeBlock()
-			end
-		elseif currentSide == 7 then
-		for placed = 1, sideLength2 do
-				navigateTo(positionX, positionY - 1)
-				placeBlock()
-			end
-		elseif currentSide == 8 then
-			for placed = 1, change do
-				navigateTo(positionX + 1, positionY - 1)
-				placeBlock()
-			end
-		end
+	local change = round((sideLength - 1) / math.sqrt(2), 0)
+	polygonCornerList[1] = {change, 0}
+	polygonCornerList[2] = {(change + sideLength), 0}
+	polygonCornerList[3] = {((2 * change) + sideLength), change}
+	polygonCornerList[4] = {((2 * change) + sideLength), (change + sideLength)}
+	polygonCornerList[5] = {(change + sideLength), ((2 * change) + sideLength)}
+	polygonCornerList[6] = {change, ((2 * change) + sideLength)}
+	polygonCornerList[7] = {0, (change + sideLength)}
+	polygonCornerList[8] = {0, change}
+	if not polygonConstructor() then
+		error("This error should never happen.")
 	end
 end
 
@@ -922,6 +850,117 @@ function eightprism(length, height)
 	for i = 1, height do
 		octagon(length)
 		safeUp()
+	end
+end
+
+function drawLine(endX, endY, startX, startY)
+	startX = startX or positionX
+	startY = startY or positionY
+	deltaX = math.abs(endX - startX)
+	deltaY = math.abs(endY - startY)
+	errorVar = 0
+	if deltaX >= deltaY then
+		deltaErr = math.abs(deltaY/deltaX)
+		if startX < endX then
+			if startY < endY then
+				counterY = startY
+				for counterX = startX, endX do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterY = startY
+				for counterX = startX, endX do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		else
+			if startY < endY then
+				counterY = startY
+				for counterX = startX, endX, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterY = startY
+				for counterX = startX, endX, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		end
+	else
+		deltaErr = math.abs(deltaX/deltaY)
+		if startY < endY then
+			if startX < endX then
+				counterX = startX
+				for counterY = startY, endY do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterX = startX
+				for counterY = startY, endY do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		else
+			if startX < endX then
+				counterX = startX
+				for counterY = startY, endY, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterX = startX
+				for counterY = startY, endY, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		end
 	end
 end
 
@@ -1199,15 +1238,28 @@ function choiceFunction()
 		square(sideLength)
 	end
 	if choice == "line" then
-		local lineLength = 0
+		local startX = 0
+		local startY = 0
+		local endX = 0
+		local endY = 0
 		if sim_mode == false and cmd_line == false then
-			lineLength = getInput("int","How long does it need to be?")
+			writeOut("Note that the start position is 0, 0")
+			startX = getInput("int","Where does the start X need to be?")
+			startY = getInput("int","Where does the start Y need to be?")
+			endX = getInput("int","Where does the end X need to be?")
+			endY = getInput("int","Where does the end Y need to be?")
 		elseif sim_mode == true or cmd_line == true then
-			lineLength = tempProgTable.param1
+			startX = tempProgTable.param1
+			startY = tempProgTable.param2
+			endX = tempProgTable.param3
+			endY = tempProgTable.param4
 		end
-		tempProgTable.param1 = lineLength
-		progTable = {param1 = lineLength}
-		line(lineLength)
+		tempProgTable.param1 = startX
+		tempProgTable.param2 = startY
+		tempProgTable.param3 = endX
+		tempProgTable.param4 = endY
+		progTable = {param1 = startX, param2 = startY, param3 = endX, param4 = endY}
+		drawLine(endX, endY, startX, startY)
 	end
 	if choice == "wall" then
 	local depth = 0
