@@ -1152,7 +1152,7 @@ end
 -- Menu, Drawing and Main functions
 
 function choiceIsValidShape(choice)
-	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "dome", "bowl", "shphere", "circle", "cylinder", "pyramid", "hexagon", "octagon", "6-prism", "6 prism", "8-prism", "8 prism"}
+	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "dome", "bowl", "sphere", "circle", "cylinder", "pyramid", "hexagon", "octagon", "6-prism", "6 prism", "8-prism", "8 prism"}
 	for i = 1, #validShapes do
 		if choice == validShapes[i] then
 			return true
@@ -1710,7 +1710,7 @@ function getHelp()
 	if choice == "1/2-sphere" or choice == "1/2 sphere" then
 		term.clear()
 		term.setCursorPos(1, 1)
-		writeOut("The half sphere is the top or bottom half of a sphere. The half parameter determines of the top or bottom half of the shpere built. The half shpere takes two parameters (one integer and one top/bottom) Diameter then half(top/bottom).")
+		writeOut("The half sphere is the top or bottom half of a sphere. The half parameter determines of the top or bottom half of the sphere built. The half sphere takes two parameters (one integer and one top/bottom) Diameter then half(top/bottom).")
 	end
 	if choice == "dome" then
 		term.clear()
