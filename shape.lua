@@ -833,14 +833,18 @@ end
 function sixprism(length, height)
 	for i = 1, height do
 		hexagon(length)
-		navigateTo(positionX, positionY, positionZ + 1)
+		if i ~= height then
+			navigateTo(positionX, positionY, positionZ + 1)
+		end
 	end
 end
 
 function eightprism(length, height)
 	for i = 1, height do
 		octagon(length)
-		navigateTo(positionX, positionY, positionZ + 1)
+		if i ~= height then
+			navigateTo(positionX, positionY, positionZ + 1)
+		end
 	end
 end
 
