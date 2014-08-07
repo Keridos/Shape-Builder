@@ -512,17 +512,17 @@ end
 function platform(width, depth, startX, startY)
 	startX = startX or positionX
 	startY = startY or positionY
-	endX = startX + width
-	endY = startY + depth
+	endX = startX + width - 1
+	endY = startY + depth - 1
 	forward = true
-	for counterY = startY, endY - 1 do
+	for counterY = startY, endY do
 		if forward then
-			for counterX = startX, endX - 1 do
+			for counterX = startX, endX do
 				navigateTo(counterX, counterY)
 				placeBlock()
 			end
 		else
-			for counterX = endX - 1, startX, -1 do
+			for counterX = endX, startX, -1 do
 				navigateTo(counterX, counterY)
 				placeBlock()
 			end
@@ -532,7 +532,7 @@ function platform(width, depth, startX, startY)
 end
 
 function cuboid(width, depth, height, hollow)
-	for i = 0, height do
+	for i = 0, height - 1 do
 		navigateTo(0, 0, i)
 		if (hollow == "n") then
 			platform(width, depth, 0, 0)
@@ -557,34 +557,27 @@ function pyramid(length, hollow)
 	end
 end
 
-function stair(width, height)
-	turnRightTrack()
-	local counterX = 1
-	local counterY = 0
-	local goForward = 0
-	while counterY < height do
-		while counterX < width do
-			placeBlock()
-			safeForward()
-			counterX = counterX + 1
-		end
-		placeBlock()
-		counterX = 1
-		counterY = counterY + 1
-		if counterY < height then
-			if goForward == 1 then
-				turnRightTrack()
-				safeUp()
-				safeForward()
-				turnRightTrack()
-				goForward = 0
-			else
-				turnLeftTrack()
-				safeUp()
-				safeForward()
-				turnLeftTrack()
-				goForward = 1
+function stair(width, height, startX, startY) -- Last two might be able to be used to make a basic home-like shape later?
+	startX = startX or positionX
+	startY = startY or positionY
+	endX = startX + width - 1
+	endY = startY + height - 1
+	forward = true
+	for counterY = startY, endY do
+		if forward then
+			for counterX = startX, endX do
+				navigateTo(counterX, counterY)
+				placeBlock()
 			end
+		else
+			for counterX = endX, startX, -1 do
+				navigateTo(counterX, counterY)
+				placeBlock()
+			end
+		end
+		if counterY ~= endY then
+			navigateTo(positionX, positionY, positionZ + 1)
+			forward = not forward
 		end
 	end
 end
