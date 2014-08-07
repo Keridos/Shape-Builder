@@ -27,9 +27,9 @@ local gpsFacing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
 local resupply = false
-local enderchestRefilling = false
+local enderchest_refilling = false
 local can_use_gps = false
-local returnToHome = false -- whether the turtle shall return to start after build
+local return_to_home = false -- whether the turtle shall return to start after build
 local choice = ""
 
 -- Progress Table: These variables are the tables that the turtle's progress is tracked in
@@ -139,7 +139,7 @@ function checkResources()
 				os.sleep(0.5)
 			end
 		end
-	elseif enderchestRefilling then
+	elseif enderchest_refilling then
 		compareResources()
 		while (turtle.getItemCount(activeSlot) <= 1) do
 			if (activeSlot == 15) and (turtle.getItemCount(activeSlot)<=1) then
@@ -471,12 +471,123 @@ function goHome()
 			navigateTo(0, 0) -- So another program can chain multiple shapes together to create bigger structures
 		end
 	else
-		navigateTo(-1, -1, 0) -- So the user can collect the turtle when it is done -- not 0,0,0 because some shapes use the 0,0 column
+		navigateTo(-1, -1, 0) -- So the user can collect the turtle when it is done, not 0,0,0 because some shapes use the 0,0 column
 	end
 	turnToFace(0)
 end
 
 -- Shape Building functions
+
+function drawLine(endX, endY, startX, startY)
+	startX = startX or positionX
+	startY = startY or positionY
+	deltaX = math.abs(endX - startX)
+	deltaY = math.abs(endY - startY)
+	errorVar = 0
+	if deltaX >= deltaY then
+		deltaErr = math.abs(deltaY/deltaX)
+		if startX < endX then
+			if startY < endY then
+				counterY = startY
+				for counterX = startX, endX do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterY = startY
+				for counterX = startX, endX do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		else
+			if startY < endY then
+				counterY = startY
+				for counterX = startX, endX, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterY = startY
+				for counterX = startX, endX, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterY = counterY - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		end
+	else
+		deltaErr = math.abs(deltaX/deltaY)
+		if startY < endY then
+			if startX < endX then
+				counterX = startX
+				for counterY = startY, endY do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterX = startX
+				for counterY = startY, endY do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		else
+			if startX < endX then
+				counterX = startX
+				for counterY = startY, endY, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX + 1
+						errorVar = errorVar - 1
+					end
+				end
+			else
+				counterX = startX
+				for counterY = startY, endY, -1 do
+					navigateTo(counterX, counterY)
+					placeBlock()
+					errorVar = errorVar + deltaErr
+					if errorVar >= 0.5 then
+						counterX = counterX - 1
+						errorVar = errorVar - 1
+					end
+				end
+			end
+		end
+	end
+end
 
 function rectangle(width, depth, startX, startY)
 	startX = startX or positionX
@@ -848,117 +959,6 @@ function eightprism(length, height)
 	end
 end
 
-function drawLine(endX, endY, startX, startY)
-	startX = startX or positionX
-	startY = startY or positionY
-	deltaX = math.abs(endX - startX)
-	deltaY = math.abs(endY - startY)
-	errorVar = 0
-	if deltaX >= deltaY then
-		deltaErr = math.abs(deltaY/deltaX)
-		if startX < endX then
-			if startY < endY then
-				counterY = startY
-				for counterX = startX, endX do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterY = counterY + 1
-						errorVar = errorVar - 1
-					end
-				end
-			else
-				counterY = startY
-				for counterX = startX, endX do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterY = counterY - 1
-						errorVar = errorVar - 1
-					end
-				end
-			end
-		else
-			if startY < endY then
-				counterY = startY
-				for counterX = startX, endX, -1 do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterY = counterY + 1
-						errorVar = errorVar - 1
-					end
-				end
-			else
-				counterY = startY
-				for counterX = startX, endX, -1 do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterY = counterY - 1
-						errorVar = errorVar - 1
-					end
-				end
-			end
-		end
-	else
-		deltaErr = math.abs(deltaX/deltaY)
-		if startY < endY then
-			if startX < endX then
-				counterX = startX
-				for counterY = startY, endY do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterX = counterX + 1
-						errorVar = errorVar - 1
-					end
-				end
-			else
-				counterX = startX
-				for counterY = startY, endY do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterX = counterX - 1
-						errorVar = errorVar - 1
-					end
-				end
-			end
-		else
-			if startX < endX then
-				counterX = startX
-				for counterY = startY, endY, -1 do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterX = counterX + 1
-						errorVar = errorVar - 1
-					end
-				end
-			else
-				counterX = startX
-				for counterY = startY, endY, -1 do
-					navigateTo(counterX, counterY)
-					placeBlock()
-					errorVar = errorVar + deltaErr
-					if errorVar >= 0.5 then
-						counterX = counterX - 1
-						errorVar = errorVar - 1
-					end
-				end
-			end
-		end
-	end
-end
-
 -- Previous Progress Resuming, Simulation functions, Command Line, and File Backend
 -- Will check for a "progress" file.
 function CheckForPrevious() 
@@ -1081,7 +1081,7 @@ function continueQuery()
 end
 
 function progressUpdate()  -- This ONLY updates the local table variable.  Writing is handled above. -- I want to change this to allow for any number of params
-	progTable = {shape = choice, enderchestRefilling = tempProgTable.enderchestRefilling, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, z = positionZ, facing = facing, blocks = blocks}
+	progTable = {shape = choice, enderchest_refilling = tempProgTable.enderchest_refilling, param1 = tempProgTable.param1, param2 = tempProgTable.param2, param3 = tempProgTable.param3, param4 = tempProgTable.param4, x = positionX, y = positionY, z = positionZ, facing = facing, blocks = blocks}
 	if not sim_mode then 
 		writeProgress()
 	end
@@ -1124,12 +1124,12 @@ function setFlagsFromCommandLine() -- Sets count_only, chain_next_shape, and sim
 			writeOut("Resuming")
 		end
 		if v == "-e" or v == "-ender" or v == "--ender" then
-			enderchestRefilling = true
-			tempProgTable.enderchestRefilling = true
+			enderchest_refilling = true
+			tempProgTable.enderchest_refilling = true
 			writeOut("Enderchest Mode")
 		end
 		if v == "-g" or v == "-home" or v == "--home" then
-			returnToHome = true
+			return_to_home = true
 			writeOut("Will return home")
 		end
 	end
@@ -1212,18 +1212,18 @@ function choiceFunction()
 		end
 		local yes = getInput("string","Want turtle to return to start after build?","y","n")
 		if yes == 'y' then
-			returnToHome = true
+			return_to_home = true
 		end
 		local yes = getInput("string","Want the turtle to refill from enderchest (slot 16)?","y","n")
 		if yes == 'y' then
-			enderchestRefilling = true
-			tempProgTable.enderchestRefilling = true
+			enderchest_refilling = true
+			tempProgTable.enderchest_refilling = true
 		end
 	elseif sim_mode == true then -- If we ARE resuming progress
 		tempProgTable = readProgress()
 		choice = tempProgTable.shape
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
-		enderchestRefilling =  tempProgTable.enderchestRefilling
+		enderchest_refilling =  tempProgTable.enderchest_refilling
 	elseif cmd_line == true then -- If running from command line
 		if needsHelp() then
 			showCmdLineHelp()
@@ -1231,7 +1231,7 @@ function choiceFunction()
 		end
 		choice = tempProgTable.shape
 		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
-		enderchestRefilling =  tempProgTable.enderchestRefilling
+		enderchest_refilling =  tempProgTable.enderchest_refilling
 		writeOut("Building a "..choice)
 	end	
 	if not cost_only then
@@ -1250,7 +1250,8 @@ function choiceFunction()
 	else
 		activeSlot = 1
 	end
-	-- shape selection if cascade
+	-- Shape selection if cascade
+	-- Line based shapes
 	if choice == "rectangle" then
 		local depth = 0
 		local width = 0
@@ -1370,6 +1371,22 @@ function choiceFunction()
 		progTable = {param1 = width, param2 = depth, param3 = height}
 		cuboid(width, depth, height, hollow)
 	end
+	if choice == "pyramid" then
+		local length = 0
+		local hollow = ""
+		if sim_mode == false and cmd_line == false then
+			length = getInput("int","How long does each side of the base layer need to be?")
+			hollow = getInput("string","Does it need to be hollow?","y","n")
+		elseif sim_mode == true or cmd_line == true then
+			length = tempProgTable.param1
+			hollow = tempProgTable.param2
+		end
+		tempProgTable.param1 = length
+		tempProgTable.param2 = hollow
+		progTable = {param1 = length, param2 = hollow}
+		pyramid(length, hollow)
+	end
+	-- Circle based shapes
 	if choice == "1/2-sphere" or choice == "1/2 sphere" then
 		local diameter = 0
 		local half = ""
@@ -1448,21 +1465,7 @@ function choiceFunction()
 		progTable = {param1 = diameter, param2 = height}
 		cylinder(diameter, height)
 	end
-	if choice == "pyramid" then
-		local length = 0
-		local hollow = ""
-		if sim_mode == false and cmd_line == false then
-			length = getInput("int","How long does each side of the base layer need to be?")
-			hollow = getInput("string","Does it need to be hollow?","y","n")
-		elseif sim_mode == true or cmd_line == true then
-			length = tempProgTable.param1
-			hollow = tempProgTable.param2
-		end
-		tempProgTable.param1 = length
-		tempProgTable.param2 = hollow
-		progTable = {param1 = length, param2 = hollow}
-		pyramid(length, hollow)
-	end
+	-- Polygon shapes
 	if choice == "hexagon" then
 		local length = 0
 		if sim_mode == false and cmd_line == false then
@@ -1515,7 +1518,7 @@ function choiceFunction()
 		progTable = {param1 = length, param2 = height}
 		eightprism(length, height)
 	end
-	if returnToHome then
+	if return_to_home then
 		goHome() -- After all shape building has finished
 	end
 	writeOut("Done") -- Saves a few lines when put here rather than in each if statement
