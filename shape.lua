@@ -708,7 +708,7 @@ function dome(typus, diameter)
 	-- This loop is for each vertical layer through the sphere or dome.
 	for z = zstart,zend do
 		if not cost_only and z ~= zstart then
-			safeUp()
+			navigateTo(positionX, positionY, positionZ + 1)
 		end
 		--writeOut("Layer " .. z)
 		cz2 = (radius - z) ^ 2
@@ -769,7 +769,7 @@ end
 function cylinder(diameter, height)
 	for i = 1, height do
 		circle(diameter)
-		safeUp()
+		navigateTo(positionX, positionY, positionZ + 1)
 	end
 end
 
@@ -799,6 +799,7 @@ function arbitraryPolygon(numberOfSides, Radius) -- Future function, this will e
 end
 
 function hexagon(sideLength) -- Fills out polygonCornerList with the points for a hexagon
+	sideLength = sideLength - 1
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
 	changeX = round(changeX, 0)
@@ -814,6 +815,7 @@ function hexagon(sideLength) -- Fills out polygonCornerList with the points for 
 end
 
 function octagon(sideLength) -- Fills out polygonCornerList with the points for an octagon
+	sideLength = sideLength - 1
 	local change = round((sideLength - 1) / math.sqrt(2), 0)
 	polygonCornerList[1] = {change, 0}
 	polygonCornerList[2] = {(change + sideLength), 0}
@@ -831,14 +833,14 @@ end
 function sixprism(length, height)
 	for i = 1, height do
 		hexagon(length)
-		safeUp()
+		navigateTo(positionX, positionY, positionZ + 1)
 	end
 end
 
 function eightprism(length, height)
 	for i = 1, height do
 		octagon(length)
-		safeUp()
+		navigateTo(positionX, positionY, positionZ + 1)
 	end
 end
 
