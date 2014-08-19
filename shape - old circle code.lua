@@ -10,6 +10,10 @@ local chain_next_shape = false -- This tells goHome() where to end, if true it g
 local special_chain = false -- For certain shapes that finish where the next chained shape should start, goHome() will  only turn to face 0 if true
 local cost_only = false
 local sim_mode = false
+local resupply = false
+local enderchest_refilling = false
+local can_use_gps = false
+local return_to_home = false -- whether the turtle shall return to start after build
 
 -- Record Keeping Variables: These are for recoding the blocks and fuel used
 local blocks = 0
@@ -26,10 +30,6 @@ local gpsPositionZ = 0
 local gpsFacing = 0
 
 -- General Variables: Other variables that don't fit in the other categories
-local resupply = false
-local enderchest_refilling = false
-local can_use_gps = false
-local return_to_home = false -- whether the turtle shall return to start after build
 local choice = ""
 
 -- Progress Table: These variables are the tables that the turtle's progress is tracked in
