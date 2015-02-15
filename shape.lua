@@ -208,9 +208,10 @@ function placeBlock()
 	progressUpdate()
 end
 
-function round(toBeRounded, decimalPlace) -- Needed for hexagon and octagon
-	local multiplier = 10^(decimalPlace or 0)
-	return math.floor(toBeRounded * multiplier + 0.5) / multiplier
+function round(toRound, decimalPlace) -- Needed for Polygons
+	local mult = 10 ^ (decimalPlace or 0)
+	local sign = toRound / math.abs(toRound)
+	return sign * math.floor(((math.abs(toRound) * mult) + 0.5)) / mult
 end
 
 -- Navigation functions
@@ -695,13 +696,13 @@ end
 
 function circle(diameter)
 	odd = not (math.fmod(diameter, 2) == 0)
-	radius = diameter / 2;
+	radius = diameter / 2
 	if odd then
-		width = (2 * math.ceil(radius)) + 1;
-		offset = math.floor(width/2);
+		width = (2 * math.ceil(radius)) + 1
+		offset = math.floor(width/2)
 	else
-		width = (2 * math.ceil(radius)) + 2;
-		offset = math.floor(width/2) - 0.5;		
+		width = (2 * math.ceil(radius)) + 2
+		offset = math.floor(width/2) - 0.5		
 	end
 	--diameter --radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
@@ -789,13 +790,13 @@ end
 function dome(typus, diameter)
 	-- Main dome and sphere building routine
 	odd = not (math.fmod(diameter, 2) == 0)
-	radius = diameter / 2;
+	radius = diameter / 2
 	if odd then
-		width = (2 * math.ceil(radius)) + 1;
-		offset = math.floor(width/2);
+		width = (2 * math.ceil(radius)) + 1
+		offset = math.floor(width/2)
 	else
-		width = (2 * math.ceil(radius)) + 2;
-		offset = math.floor(width/2) - 0.5;		
+		width = (2 * math.ceil(radius)) + 2
+		offset = math.floor(width/2) - 0.5		
 	end
 	--diameter --radius * 2 + 1
 	sqrt3 = 3 ^ 0.5
@@ -884,12 +885,28 @@ function cylinder(diameter, height)
 	end
 end
 
+function isINF(value)
+	return (value == math.huge or value == -math.huge)
+end
+
+function isNAN(value)
+	return value ~= value
+end
+
 polygonCornerList = {} -- Public list of corner coords for n-gons, will be used for hexagons, octagons, and future polygons.
--- It should be constructed as a nested list eg. {{x0,y0},{x1,y1},{x2,y2}...}
+-- It should be a nested list eg. {{x0,y0},{x1,y1},{x2,y2}...}
 
 function constructPolygon() -- Uses polygonCornerList to draw sides between each point
 	if #polygonCornerList == 0 then
 		return false
+	end
+	for i = 1, #polygonCornerList do
+		if (isINF(polygonCornerList[i][1]) or isNAN(polygonCornerList[i][1])) then
+			polygonCornerList[i][1] = 0
+		end
+		if (isINF(polygonCornerList[i][2]) or isNAN(polygonCornerList[i][2])) then
+			polygonCornerList[i][2] = 0
+		end
 	end
 	for i = 1, #polygonCornerList do
 		startX = polygonCornerList[i][1]
@@ -906,7 +923,61 @@ function constructPolygon() -- Uses polygonCornerList to draw sides between each
 	return true
 end
 
-function arbitraryPolygon(numberOfSides, Radius) -- Future function, this will eventually replace octagon and hexagon functions
+function circleLikePolygon(numberOfSides, diameter, offsetAngle) -- works like the circle code, allows building a circle with the same diameter from the same start point to inscribe the polygon
+	radius = diameter / 2
+	if (numberOfSides % 2 == 1) then -- if numberOfSides is odd
+		startAngle = math.pi / 2 -- always have a vertex at 90 deg (+y) and at least one grid aligned edge
+	else -- if numberOfSides is even
+		startAngle = (math.pi / 2) + (math.pi / numberOfSides) -- always have at least two grid aligned edges
+	end
+	startAngle = startAngle + ((offsetAngle or 0) * (math.pi / 180)) -- offsetAngle will be a degree measurement
+	
+	for i = 1, numberOfSides do
+		polygonCornerList[i] = {radius * math.cos(startAngle + ((i - 1) * ((math.pi * 2) / numberOfSides))), radius * math.sin(startAngle + ((i - 1) * ((math.pi * 2) / numberOfSides)))}
+	end
+
+	for i = 1, #polygonCornerList do
+		polygonCornerList[i][1] = round(polygonCornerList[i][1] + radius + 1)
+		polygonCornerList[i][2] = round(polygonCornerList[i][2] + radius + 1)
+	end
+	
+	if not constructPolygon() then
+		error("This error should never happen.")
+	end
+end
+
+function polygon(numberOfSides, sideLength, offsetAngle)
+	currentAngle = 0 + ((offsetAngle or 0) * (math.pi / 180)) -- start at 0 or offset angle
+	addAngle = ((math.pi * 2) / numberOfSides)
+	pointerX, pointerY = 0, 0
+	
+	for i = 1, numberOfSides do
+		polygonCornerList[i] = {pointerX, pointerY}
+		pointerX = sideLength * math.cos(currentAngle) + pointerX
+		pointerY = sideLength * math.sin(currentAngle) + pointerY
+		currentAngle = currentAngle + addAngle
+	end
+	
+	minX, minY = 0, 0
+	for i = 1, #polygonCornerList do -- find the smallest x and y
+		if (polygonCornerList[i][1] <= minX) then
+			minX = polygonCornerList[i][1]
+		end
+		if (polygonCornerList[i][2] <= minY) then
+			minY = polygonCornerList[i][2]
+		end
+	end
+	minX = math.abs(minX)
+	minY = math.abs(minY)
+	
+	for i = 1, #polygonCornerList do -- make it bounded to 0, 0
+		polygonCornerList[i][1] = round(polygonCornerList[i][1] + minX)
+		polygonCornerList[i][2] = round(polygonCornerList[i][2] + minY)
+	end
+	
+	if not constructPolygon() then
+		error("This error should never happen.")
+	end
 end
 
 function hexagon(sideLength) -- Fills out polygonCornerList with the points for a hexagon
@@ -1151,7 +1222,7 @@ end
 -- Menu, Drawing and Main functions
 
 function choiceIsValidShape(choice)
-	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "dome", "bowl", "sphere", "circle", "cylinder", "pyramid", "hexagon", "octagon", "6-prism", "6 prism", "8-prism", "8 prism"}
+	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "half-sphere", "half sphere", "dome", "bowl", "sphere", "circle", "cylinder", "pyramid", "polygon", "polyprism", "poly prism", "poly-prism", "polygon prism"}
 	for i = 1, #validShapes do
 		if choice == validShapes[i] then
 			return true
@@ -1164,7 +1235,7 @@ function choiceFunction()
 	if sim_mode == false and cmd_line == false then -- If we are NOT resuming progress
 		local page = 1
 		choice = io.read()
-		choice = string.lower(choice) -- All checks are aginst lower case words so this is to ensure that
+		choice = string.lower(choice) -- All checks are against lower case words so this is to ensure that
 		while ((choice == "next") or (choice == "back")) do
 			if (choice == "next") then
 				if page == 1 then
@@ -1488,6 +1559,40 @@ function choiceFunction()
 		progTable = {param1 = length}
 		octagon(length)
 	end
+	if choice == "polygon" then
+		local numberOfSides = 3
+		local length = 0
+		local circleLike = "n"
+		local offSetAngle = 0
+		if sim_mode == false and cmd_line == false then
+			numberOfSides = getInput("int","How many sides to build?")
+			circleLike = getInput("string","Do you want circle style?","y","n")
+			if (circleLike == "y") then
+				length = getInput("int","What diameter does it need to be?")
+			else
+				length = getInput("int","How long does each side need to be?")
+			end
+			offSetAngle = getInput("int","What offset angle does it need to be? (usually 0)")
+		elseif sim_mode == true or cmd_line == true then
+			numberOfSides = tempProgTable.param1
+			circleLike = tempProgTable.param2
+			length = tempProgTable.param3
+			offSetAngle = tempProgTable.param4
+		end
+		tempProgTable.param1 = numberOfSides
+		progTable = {param1 = numberOfSides}
+		tempProgTable.param2 = circleLike
+		progTable = {param2 = circleLike}
+		tempProgTable.param3 = length
+		progTable = {param3 = length}
+		tempProgTable.param4 = offSetAngle
+		progTable = {param4 = offSetAngle}
+		if (circleLike == "y") then
+			circleLikePolygon(numberOfSides, length, offSetAngle)
+		else
+			polygon(numberOfSides, length, offSetAngle)
+		end
+	end
 	if choice == "6-prism" or choice == "6 prism" then
 		local length = 0
 		local height = 0
@@ -1527,7 +1632,7 @@ end
 function writeMenu()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.7 by Keridos/CupricWolf/pokemane")
+	writeOut("Shape Maker 1.8 by Keridos/CupricWolf/pokemane")
 	if resupply then					-- Any ideas to make this more compact/better looking (in terms of code)?
 		writeOut("Resupply Mode Active")
 	elseif (resupply and can_use_gps) then
@@ -1538,7 +1643,8 @@ function writeMenu()
 		writeOut("Standard Mode Active")
 	end
 	if not cmd_line then
-		writeOut("What shape do you want to build? [page 1/2]");
+		writeOut("What shape do you want to build?")
+		writeOut("[page 1/2]")
 		writeOut("next for page 2")
 		writeOut("+---------+-----------+-------+-------+")
 		writeOut("| square  | rectangle | wall  | line  |")
@@ -1552,7 +1658,7 @@ end
 function writeMenu2()
 	term.clear()
 	term.setCursorPos(1, 1)
-	writeOut("Shape Maker 1.7 by Keridos/CupricWolf/pokemane")
+	writeOut("Shape Maker 1.8 by Keridos/CupricWolf/pokemane")
 	if resupply then					-- Any ideas to make this more compact/better looking (in terms of code)?
 		writeOut("Resupply Mode Active")
 	elseif (resupply and can_use_gps) then
@@ -1562,11 +1668,12 @@ function writeMenu2()
 	else
 		writeOut("Standard Mode Active")
 	end
-	writeOut("What shape do you want to build? [page 2/2]");
+	writeOut("What shape do you want to build?")
+	writeOut("[page 2/2]")
 	writeOut("back for page 1")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| hexagon | octagon   | dome  |       |")
-	writeOut("| 6-prism | 8-prism   | bowl  |       |")
+	writeOut("| polygon | polyprism | dome  | dome  |")
+	writeOut("|         |           |       |       |")
 	writeOut("| help    | credits   | end   |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
@@ -1576,17 +1683,17 @@ function showCmdLineHelp()
 	term.clear()
 	term.setCursorPos(1, 1)
 	writeOut("Command line help")
-	writeOut("Usage: shape [shape-type] [param1] [param2] [param3] [param4] [-c] [-h] [-z] [-r]\n")
-	writeOut("-c or -cost or --cost: Activate cost only mode\n")
+	writeOut("Usage: shape [shape-type] [param1] [param2] [param3] [param4] [-c] [-h] [-z] [-r]")
+	writeOut("-c or -cost or --cost: Activate cost only mode")
 	writeOut("-h or -help or --help: Show this information")
 	io.read()
-	writeOut("-z or -chain or --chain: Lets you chain together multiple shapes\n")
-	writeOut("-g or -home or --home: Make turtle go 'home' after build\n")
+	writeOut("-z or -chain or --chain: Lets you chain together multiple shapes")
+	writeOut("-g or -home or --home: Make turtle go 'home' after build")
 	writeOut("-r or -resume or --resume: Resume the last build if possible")
 	io.read()
-	writeOut("-e or -ender or --ender: Activate enderchest refilling\n")
-	writeOut("shape-type can be any of the shapes in the menu\n")
-	writeOut("After shape-type input all of the paramaters for the shape, varies by shape\n")
+	writeOut("-e or -ender or --ender: Activate enderchest refilling")
+	writeOut("shape-type can be any of the shapes in the menu")
+	writeOut("After shape-type input all of the parameters for the shape, varies by shape")
 	writeOut("Put any flags (-c, -h, etc.) at the end of your command")
 end
 
@@ -1601,7 +1708,8 @@ function getHelp()
 	term.clear()
 	term.setCursorPos(1, 1)
 	local page = 1
-	writeOut("What shape do you want help with? [page 1/2]");
+	writeOut("What shape do you want help with?")
+	writeOut("[page 1/2]")
 	writeOut("next for page 2")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("| square  | rectangle | wall  | line  |")
@@ -1617,7 +1725,8 @@ function getHelp()
 				page = 2
 				term.clear()
 				term.setCursorPos(1, 1)
-				writeOut("What shape do you want help wih? [page 2/2]?");
+				writeOut("What shape do you want help with?")
+				writeOut("[page 2/2]")
 				writeOut("back for page 1")
 				writeOut("+---------+-----------+-------+-------+")
 				writeOut("| hexagon | octagon   | dome  |       |")
@@ -1629,7 +1738,8 @@ function getHelp()
 				page = 1
 				term.clear()
 				term.setCursorPos(1, 1)
-				writeOut("What shape do you want help with? [page 1/2]");
+				writeOut("What shape do you want help with?")
+				writeOut("[page 1/2]")
 				writeOut("next for page 2")
 				writeOut("+---------+-----------+-------+-------+")
 				writeOut("| square  | rectangle | wall  | line  |")
@@ -1644,7 +1754,8 @@ function getHelp()
 				page = 2
 				term.clear()
 				term.setCursorPos(1, 1)
-				writeOut("What shape do you want help wih? [page 2/2]?");
+				writeOut("What shape do you want help with?")
+				writeOut("[page 2/2]")
 				writeOut("back for page 1")
 				writeOut("+---------+-----------+-------+-------+")
 				writeOut("| hexagon | octagon   | dome  |       |")
@@ -1656,7 +1767,8 @@ function getHelp()
 				page = 1
 				term.clear()
 				term.setCursorPos(1, 1)
-				writeOut("What shape do you want help with? [page 1/2]");
+				writeOut("What shape do you want help with?")
+				writeOut("[page 2/2]")
 				writeOut("next for page 2")
 				writeOut("+---------+-----------+-------+-------+")
 				writeOut("| square  | rectangle | wall  | line  |")
@@ -1677,12 +1789,12 @@ function getHelp()
 	if choice == "rectangle" then
 		term.clear()
 		term.setCursorPos(1, 1)
-		writeOut("The rectangle is a perimiter of width by depth. Use platform if you want a filled in rectangle. The rectangle takes two parameters (two integers) Width then Depth.")
+		writeOut("The rectangle is a perimeter of width by depth. Use platform if you want a filled in rectangle. The rectangle takes two parameters (two integers) Width then Depth.")
 	end
 	if choice == "square" then
 		term.clear()
 		term.setCursorPos(1, 1)
-		writeOut("The square is a perimiter of length by length. Use platform if you want a filled in square. The square takes one parameter (one integer) Length.")
+		writeOut("The square is a perimeter of length by length. Use platform if you want a filled in square. The square takes one parameter (one integer) Length.")
 	end
 	if choice == "line" then
 		term.clear()
@@ -1717,12 +1829,12 @@ function getHelp()
 	if choice == "dome" then
 		term.clear()
 		term.setCursorPos(1, 1)
-		writeOut("The dome shape is a shortcut to the top half sphere. The dome takes one parameter (one integer) Diameter.")
+		writeOut("The dome shape is a short-cut to the top half sphere. The dome takes one parameter (one integer) Diameter.")
 	end
 	if choice == "bowl" then
 		term.clear()
 		term.setCursorPos(1, 1)
-		writeOut("The bowl shape is a shortcut to the bottom half sphere. The bowl takes one parameter (one integer) Diameter.")
+		writeOut("The bowl shape is a short-cut to the bottom half sphere. The bowl takes one parameter (one integer) Diameter.")
 	end
 	if choice == "sphere" then
 		term.clear()
