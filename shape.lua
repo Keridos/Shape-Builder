@@ -40,9 +40,10 @@ local progFileName = "ShapesProgressFile"
 -- Utility functions
 
 function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so writeOut(1,2,3) is the same as print(1,2,3). previously writeOut(1,2,3) would have been the same as print(1)
-	for i, v in ipairs(arg) do
-		print(v)
-	end
+	-- for i, v in ipairs(arg) do
+		-- print(v)
+	-- end
+	print(arg)
 end
 
 function getInput(inputType, message, option1, option2)
@@ -881,7 +882,9 @@ end
 function cylinder(diameter, height)
 	for i = 1, height do
 		circle(diameter)
-		navigateTo(positionX, positionY, positionZ + 1)
+		if i ~= height then
+			navigateTo(positionX, positionY, positionZ + 1)
+		end
 	end
 end
 
@@ -896,7 +899,7 @@ end
 polygonCornerList = {} -- Public list of corner coords for n-gons, will be used for hexagons, octagons, and future polygons.
 -- It should be a nested list eg. {{x0,y0},{x1,y1},{x2,y2}...}
 
-function constructPolygon() -- Uses polygonCornerList to draw sides between each point
+function constructPolygonFromList() -- Uses polygonCornerList to draw sides between each point
 	if #polygonCornerList == 0 then
 		return false
 	end
@@ -923,17 +926,17 @@ function constructPolygon() -- Uses polygonCornerList to draw sides between each
 	return true
 end
 
-function circleLikePolygon(numberOfSides, diameter, offsetAngle) -- works like the circle code, allows building a circle with the same diameter from the same start point to inscribe the polygon
+function circleLikePolygon(numSides, diameter, offsetAngle) -- works like the circle code, allows building a circle with the same diameter from the same start point to inscribe the polygon. offSetAngle is optional, defaults to 0.
 	radius = diameter / 2
-	if (numberOfSides % 2 == 1) then -- if numberOfSides is odd
-		startAngle = math.pi / 2 -- always have a vertex at 90 deg (+y) and at least one grid aligned edge
-	else -- if numberOfSides is even
-		startAngle = (math.pi / 2) + (math.pi / numberOfSides) -- always have at least two grid aligned edges
+	if (numSides % 2 == 1) then -- if numSides is odd
+		startAngle = math.pi / 2 -- always have a vertex at 90 deg (+y) and at least one grid aligned edge. Before offSetAngle
+	else -- if numSides is even
+		startAngle = (math.pi / 2) + (math.pi / numSides) -- always have at least two grid aligned edges. Before offSetAngle
 	end
 	startAngle = startAngle + ((offsetAngle or 0) * (math.pi / 180)) -- offsetAngle will be a degree measurement
 	
-	for i = 1, numberOfSides do
-		polygonCornerList[i] = {radius * math.cos(startAngle + ((i - 1) * ((math.pi * 2) / numberOfSides))), radius * math.sin(startAngle + ((i - 1) * ((math.pi * 2) / numberOfSides)))}
+	for i = 1, numSides do
+		polygonCornerList[i] = {radius * math.cos(startAngle + ((i - 1) * ((math.pi * 2) / numSides))), radius * math.sin(startAngle + ((i - 1) * ((math.pi * 2) / numSides)))}
 	end
 
 	for i = 1, #polygonCornerList do
@@ -941,17 +944,18 @@ function circleLikePolygon(numberOfSides, diameter, offsetAngle) -- works like t
 		polygonCornerList[i][2] = round(polygonCornerList[i][2] + radius + 1)
 	end
 	
-	if not constructPolygon() then
+	if not constructPolygonFromList() then
 		error("This error should never happen.")
 	end
 end
 
-function polygon(numberOfSides, sideLength, offsetAngle)
-	currentAngle = 0 + ((offsetAngle or 0) * (math.pi / 180)) -- start at 0 or offset angle
-	addAngle = ((math.pi * 2) / numberOfSides)
+function polygon(numSides, sideLength, offsetAngle) -- offSetAngle is optional, defaults to 0.
+	currentAngle = 0 + ((offsetAngle or 0) * (math.pi / 180)) -- start at 0 or offset angle. offsetAngle will be a degree measurement
+	addAngle = ((math.pi * 2) / numSides)
 	pointerX, pointerY = 0, 0
+	sideLength = sideLength - 1
 	
-	for i = 1, numberOfSides do
+	for i = 1, numSides do
 		polygonCornerList[i] = {pointerX, pointerY}
 		pointerX = sideLength * math.cos(currentAngle) + pointerX
 		pointerY = sideLength * math.sin(currentAngle) + pointerY
@@ -975,12 +979,32 @@ function polygon(numberOfSides, sideLength, offsetAngle)
 		polygonCornerList[i][2] = round(polygonCornerList[i][2] + minY)
 	end
 	
-	if not constructPolygon() then
+	if not constructPolygonFromList() then
 		error("This error should never happen.")
 	end
 end
 
-function hexagon(sideLength) -- Fills out polygonCornerList with the points for a hexagon
+function circleLikePolygonPrism(numSides, diameter, height, offSetAngle)
+	offSetAngle = offSetAngle or 0
+	for i = 1, height do
+		circleLikePolygon(numSides, diameter, offsetAngle)
+		if i ~= height then
+			navigateTo(positionX, positionY, positionZ + 1)
+		end
+	end
+end
+
+function polygonPrism(numSides, sideLength, height, offSetAngle)
+	offSetAngle = offSetAngle or 0
+	for i = 1, height do
+		polygon(numSides, sideLength, offSetAngle)
+		if i ~= height then
+			navigateTo(positionX, positionY, positionZ + 1)
+		end
+	end
+end
+
+function hexagon(sideLength) -- Deprecated, please use polygon(6, sideLength, 0). Fills out polygonCornerList with the points for a hexagon.
 	sideLength = sideLength - 1
 	local changeX = sideLength / 2
 	local changeY = round(math.sqrt(3) * changeX, 0)
@@ -991,12 +1015,12 @@ function hexagon(sideLength) -- Fills out polygonCornerList with the points for 
 	polygonCornerList[4] = {(changeX + sideLength), (2 * changeY)}
 	polygonCornerList[5] = {changeX, (2 * changeY)}
 	polygonCornerList[6] = {0, changeY}
-	if not constructPolygon() then
+	if not constructPolygonFromList() then
 		error("This error should never happen.")
 	end
 end
 
-function octagon(sideLength) -- Fills out polygonCornerList with the points for an octagon
+function octagon(sideLength) -- Deprecated, please use polygon(8, sideLength, 0). Fills out polygonCornerList with the points for an octagon
 	sideLength = sideLength - 1
 	local change = round((sideLength - 1) / math.sqrt(2), 0)
 	polygonCornerList[1] = {change, 0}
@@ -1007,12 +1031,12 @@ function octagon(sideLength) -- Fills out polygonCornerList with the points for 
 	polygonCornerList[6] = {change, ((2 * change) + sideLength)}
 	polygonCornerList[7] = {0, (change + sideLength)}
 	polygonCornerList[8] = {0, change}
-	if not constructPolygon() then
+	if not constructPolygonFromList() then
 		error("This error should never happen.")
 	end
 end
 
-function sixprism(length, height)
+function hexagonPrism(length, height) -- Deprecated, please use polygonPrism(6, sideLength, height, 0).
 	for i = 1, height do
 		hexagon(length)
 		if i ~= height then
@@ -1021,7 +1045,7 @@ function sixprism(length, height)
 	end
 end
 
-function eightprism(length, height)
+function octagonPrism(length, height) -- Deprecated, please use polygonPrism(8, sideLength, height, 0).
 	for i = 1, height do
 		octagon(length)
 		if i ~= height then
@@ -1222,7 +1246,7 @@ end
 -- Menu, Drawing and Main functions
 
 function choiceIsValidShape(choice)
-	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "half-sphere", "half sphere", "dome", "bowl", "sphere", "circle", "cylinder", "pyramid", "polygon", "polyprism", "poly prism", "poly-prism", "polygon prism"}
+	local validShapes = {"rectangle", "square", "line", "wall", "platform", "stair", "stairs", "cuboid", "1/2-sphere", "1/2 sphere", "half-sphere", "half sphere", "dome", "bowl", "sphere", "circle", "cylinder", "pyramid", "polygon", "polyprism", "polygonc", "polyprismc"}
 	for i = 1, #validShapes do
 		if choice == validShapes[i] then
 			return true
@@ -1560,38 +1584,98 @@ function choiceFunction()
 		octagon(length)
 	end
 	if choice == "polygon" then
-		local numberOfSides = 3
+		local numSides = 3
 		local length = 0
-		local circleLike = "n"
 		local offSetAngle = 0
 		if sim_mode == false and cmd_line == false then
-			numberOfSides = getInput("int","How many sides to build?")
-			circleLike = getInput("string","Do you want circle style?","y","n")
-			if (circleLike == "y") then
-				length = getInput("int","What diameter does it need to be?")
-			else
-				length = getInput("int","How long does each side need to be?")
-			end
-			offSetAngle = getInput("int","What offset angle does it need to be? (usually 0)")
+			numSides = getInput("int","How many sides to build?")
+			length = getInput("int","How long does each side need to be?")
+			offSetAngle = getInput("int","What offset angle does it need to be, in degrees? (usually 0)")
 		elseif sim_mode == true or cmd_line == true then
-			numberOfSides = tempProgTable.param1
-			circleLike = tempProgTable.param2
-			length = tempProgTable.param3
+			numSides = tempProgTable.param1
+			length = tempProgTable.param2
+			offSetAngle = tempProgTable.param3
+		end
+		tempProgTable.param1 = numSides
+		progTable = {param1 = numSides}
+		tempProgTable.param2 = length
+		progTable = {param2 = length}
+		tempProgTable.param3 = offSetAngle
+		progTable = {param3 = offSetAngle}
+		polygon(numSides, length, offSetAngle)
+	end
+	if choice == "polygonc" then
+		local numSides = 3
+		local diameter = 0
+		local offSetAngle = 0
+		if sim_mode == false and cmd_line == false then
+			numSides = getInput("int","How many sides to build?")
+			diameter = getInput("int","What diameter does it need to be?")
+			offSetAngle = getInput("int","What offset angle does it need to be, in degrees? (usually 0)")
+		elseif sim_mode == true or cmd_line == true then
+			numSides = tempProgTable.param1
+			diameter = tempProgTable.param2
+			offSetAngle = tempProgTable.param3
+		end
+		tempProgTable.param1 = numSides
+		progTable = {param1 = numSides}
+		tempProgTable.param2 = diameter
+		progTable = {param2 = diameter}
+		tempProgTable.param3 = offSetAngle
+		progTable = {param3 = offSetAngle}
+		circleLikePolygon(numSides, diameter, offSetAngle)
+	end
+	if choice == "polyprism" then
+		local numSides = 3
+		local length = 0
+		local height = 0
+		local offSetAngle = 0
+		if sim_mode == false and cmd_line == false then
+			numSides = getInput("int","How many sides to build?")
+			length = getInput("int","How long does each side need to be?")
+			height = getInput("int","How high does it need to be?")
+			offSetAngle = getInput("int","What offset angle does it need to be, in degrees? (usually 0)")
+		elseif sim_mode == true or cmd_line == true then
+			numSides = tempProgTable.param1
+			length = tempProgTable.param2
+			height = tempProgTable.param3
 			offSetAngle = tempProgTable.param4
 		end
-		tempProgTable.param1 = numberOfSides
-		progTable = {param1 = numberOfSides}
-		tempProgTable.param2 = circleLike
-		progTable = {param2 = circleLike}
-		tempProgTable.param3 = length
-		progTable = {param3 = length}
+		tempProgTable.param1 = numSides
+		progTable = {param1 = numSides}
+		tempProgTable.param2 = length
+		progTable = {param2 = length}
+		tempProgTable.param3 = height
+		progTable = {param3 = height}
 		tempProgTable.param4 = offSetAngle
 		progTable = {param4 = offSetAngle}
-		if (circleLike == "y") then
-			circleLikePolygon(numberOfSides, length, offSetAngle)
-		else
-			polygon(numberOfSides, length, offSetAngle)
+		polygonPrism(numSides, length, height, offSetAngle)
+	end
+	if choice == "polyprismc" then
+		local numSides = 3
+		local diameter = 0
+		local height = 0
+		local offSetAngle = 0
+		if sim_mode == false and cmd_line == false then
+			numSides = getInput("int","How many sides to build?")
+			diameter = getInput("int","What diameter does it need to be?")
+			height = getInput("int","How high does it need to be?")
+			offSetAngle = getInput("int","What offset angle does it need to be, in degrees? (usually 0)")
+		elseif sim_mode == true or cmd_line == true then
+			numSides = tempProgTable.param1
+			diameter = tempProgTable.param2
+			height = tempProgTable.param3
+			offSetAngle = tempProgTable.param4
 		end
+		tempProgTable.param1 = numSides
+		progTable = {param1 = numSides}
+		tempProgTable.param2 = diameter
+		progTable = {param2 = diameter}
+		tempProgTable.param3 = height
+		progTable = {param3 = height}
+		tempProgTable.param4 = offSetAngle
+		progTable = {param4 = offSetAngle}
+		circleLikePolygonPrism(numSides, diameter, height, offSetAngle)
 	end
 	if choice == "6-prism" or choice == "6 prism" then
 		local length = 0
@@ -1606,7 +1690,7 @@ function choiceFunction()
 		tempProgTable.param1 = length
 		tempProgTable.param2 = height
 		progTable = {param1 = length, param2 = height}
-		sixprism(length, height)
+		hexagonPrism(length, height)
 	end
 	if choice == "8-prism" or choice == "8 prism" then
 		local length = 0
@@ -1621,7 +1705,7 @@ function choiceFunction()
 		tempProgTable.param1 = length
 		tempProgTable.param2 = height
 		progTable = {param1 = length, param2 = height}
-		eightprism(length, height)
+		octagonPrism(length, height)
 	end
 	if return_to_home then
 		goHome() -- After all shape building has finished
@@ -1672,8 +1756,8 @@ function writeMenu2()
 	writeOut("[page 2/2]")
 	writeOut("back for page 1")
 	writeOut("+---------+-----------+-------+-------+")
-	writeOut("| polygon | polyprism | dome  | dome  |")
-	writeOut("|         |           |       |       |")
+	writeOut("| polygon | polyprism | dome  |       |")
+	writeOut("| polygonC| polyprismC|       |       |")
 	writeOut("| help    | credits   | end   |       |")
 	writeOut("+---------+-----------+-------+-------+")
 	writeOut("")
@@ -1729,9 +1813,9 @@ function getHelp()
 				writeOut("[page 2/2]")
 				writeOut("back for page 1")
 				writeOut("+---------+-----------+-------+-------+")
-				writeOut("| hexagon | octagon   | dome  |       |")
-				writeOut("| 6-prism | 8-prism   | bowl  |       |")
-				writeOut("|         |           |       |       |")
+				writeOut("| polygon | polyprism | dome  |       |")
+				writeOut("| polygonC| polyprismC|       |       |")
+				writeOut("| help    | credits   | end   |       |")
 				writeOut("+---------+-----------+-------+-------+")
 				writeOut("")
 			else
@@ -1758,9 +1842,9 @@ function getHelp()
 				writeOut("[page 2/2]")
 				writeOut("back for page 1")
 				writeOut("+---------+-----------+-------+-------+")
-				writeOut("| hexagon | octagon   | dome  |       |")
-				writeOut("| 6-prism | 8-prism   | bowl  |       |")
-				writeOut("|         |           |       |       |")
+				writeOut("| polygon | polyprism | dome  |       |")
+				writeOut("| polygonC| polyprismC|       |       |")
+				writeOut("| help    | credits   | end   |       |")
 				writeOut("+---------+-----------+-------+-------+")
 				writeOut("")
 			else
@@ -1855,6 +1939,26 @@ function getHelp()
 		term.clear()
 		term.setCursorPos(1, 1)
 		writeOut("The pyramid is a four sided pyramid with base length by length. The hollow parameter determines if the inside is filled. The pyramid takes two parameters (one integer and one y/n) Base Length then Hollow(y/n).")
+	end
+	if choice == "polygon" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The polygon is a polygonal perimeter. The polygon takes three parameters (three integers) Number of Sides then Side Length then Offset Angle.")
+	end
+	if choice == "polygonC" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The polygonC is a polygonal perimeter that inscribes inside a circle with the same diameter. The polygonC takes three parameters (three integers) Number of Sides then Diameter then Offset Angle.")
+	end
+	if choice == "polyprism" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The polyprism is a polygonal prism shaped tube. The polyprism takes four parameters (four integers) Number of Sides then Side Length then Height then Offset Angle.")
+	end
+	if choice == "polyprismC" then
+		term.clear()
+		term.setCursorPos(1, 1)
+		writeOut("The polyprismC is a polygonal prism shaped tube that inscribes inside a cylinder with the same diameter. The polyprismC takes four parameters (four integers) Number of Sides then Diameter then Height then Offset Angle.")
 	end
 	if choice == "hexagon" then
 		term.clear()
