@@ -40,10 +40,9 @@ local progFileName = "ShapesProgressFile"
 -- Utility functions
 
 function writeOut(...) -- ... lets writeOut() pass any arguments to print(). so writeOut(1,2,3) is the same as print(1,2,3). previously writeOut(1,2,3) would have been the same as print(1)
-	-- for i, v in ipairs(arg) do
-		-- print(v)
-	-- end
-	print(arg)
+	for i, v in ipairs(arg) do
+		print(v)
+	end
 end
 
 function getInput(inputType, message, option1, option2)
@@ -933,7 +932,7 @@ function circleLikePolygon(numSides, diameter, offsetAngle) -- works like the ci
 	else -- if numSides is even
 		startAngle = (math.pi / 2) + (math.pi / numSides) -- always have at least two grid aligned edges. Before offSetAngle
 	end
-	startAngle = startAngle + ((offsetAngle or 0) * (math.pi / 180)) -- offsetAngle will be a degree measurement
+	startAngle = startAngle + (math.rad(offsetAngle or 0)) -- offsetAngle will be in degrees
 	
 	for i = 1, numSides do
 		polygonCornerList[i] = {radius * math.cos(startAngle + ((i - 1) * ((math.pi * 2) / numSides))), radius * math.sin(startAngle + ((i - 1) * ((math.pi * 2) / numSides)))}
@@ -950,7 +949,7 @@ function circleLikePolygon(numSides, diameter, offsetAngle) -- works like the ci
 end
 
 function polygon(numSides, sideLength, offsetAngle) -- offSetAngle is optional, defaults to 0.
-	currentAngle = 0 + ((offsetAngle or 0) * (math.pi / 180)) -- start at 0 or offset angle. offsetAngle will be a degree measurement
+	currentAngle = 0 + (math.rad(offsetAngle or 0)) -- start at 0 or offset angle. offsetAngle will be in degrees
 	addAngle = ((math.pi * 2) / numSides)
 	pointerX, pointerY = 0, 0
 	sideLength = sideLength - 1
@@ -971,8 +970,8 @@ function polygon(numSides, sideLength, offsetAngle) -- offSetAngle is optional, 
 			minY = polygonCornerList[i][2]
 		end
 	end
-	minX = math.abs(minX)
-	minY = math.abs(minY)
+	minX = math.abs(minX) -- should eventually calculate the difference between minX and 0
+	minY = math.abs(minY) -- should eventually calculate the difference between minY and 0
 	
 	for i = 1, #polygonCornerList do -- make it bounded to 0, 0
 		polygonCornerList[i][1] = round(polygonCornerList[i][1] + minX)
